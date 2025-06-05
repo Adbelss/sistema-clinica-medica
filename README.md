@@ -116,7 +116,7 @@ python manage.py createsuperuser
 
 ## 🤝 Contribuciones
 
-Este proyecto es parte de una **tesis universitaria**. Si deseas colaborar, contacta a Juan Carlos Montufar Pinto.
+Este proyecto es parte de una **tesis universitaria**. Si deseas colaborar, contacta a Adbel Avila
 
 ---
 
