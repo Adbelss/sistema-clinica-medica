@@ -90,5 +90,5 @@ AUTH_USER_MODEL = 'usuarios.CustomUser'
 
 # Redirecciones de login y logout
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/login/'
+LOGOUT_REDIRECT_URL = 'login'  # O cualquier otra vista
 LOGIN_URL = '/login/'

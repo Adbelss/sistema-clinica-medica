@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Dashboard</h2>
+
+    <div class="alert alert-info">
+        Bienvenido, <strong>{{ usuario.first_name }} {{ usuario.last_name }}</strong>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Consultas registradas</h5>
+                    <p class="display-4">{{ total_consultas }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- En el futuro puedes agregar más tarjetas aquí -->
+    </div>
+</div>
+{% endblock %}
