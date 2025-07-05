@@ -3,10 +3,22 @@
 {% block title %}Registrar Consulta{% endblock %}
 
 {% block content %}
-    <h2>Registrar Consulta</h2>
+    <h2>Registrar Nueva Consulta</h2>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+
+        <label for="id_paciente_nombre">Nombre del paciente</label>
+        {{ form.paciente_nombre }}
+
+        <label for="id_motivo">Motivo de la consulta</label>
+        {{ form.motivo }}
+
+        <label for="id_diagnostico">Diagnóstico</label>
+        {{ form.diagnostico }}
+
+        <label for="id_tratamiento">Tratamiento</label>
+        {{ form.tratamiento }}
+
         <button type="submit" class="btn">Guardar Consulta</button>
     </form>
 {% endblock %}
