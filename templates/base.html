@@ -2,10 +2,84 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>HealthLife</title>
+    <title>{% block title %}Sistema de Consultas{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #2c3e50;
+            padding: 15px;
+            color: white;
+            text-align: center;
+        }
+
+        main {
+            padding: 30px;
+            max-width: 800px;
+            margin: auto;
+            background-color: white;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+
+        footer {
+            margin-top: 30px;
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9em;
+        }
+
+        .btn {
+            background-color: #3498db;
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+    </style>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
-    {% block content %}
-    {% endblock %}
+    <header>
+        <h1>HealthLife - Sistema de Consultas</h1>
+    </header>
+
+    <main>
+        {% block content %}
+        <!-- Aquí irá el contenido específico de cada vista -->
+        {% endblock %}
+    </main>
+
+    <footer>
+        &copy; 2025 HealthLife. Todos los derechos reservados.
+    </footer>
 </body>
 </html>
