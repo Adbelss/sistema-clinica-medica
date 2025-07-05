@@ -3,22 +3,32 @@
 {% block title %}Registrar Consulta{% endblock %}
 
 {% block content %}
-    <h2>Registrar Nueva Consulta</h2>
+<div class="container mt-5">
+    <h2 class="mb-4">Registrar Nueva Consulta</h2>
     <form method="post">
         {% csrf_token %}
 
-        <label for="id_paciente_nombre">Nombre del paciente</label>
-        {{ form.paciente_nombre }}
+        <div class="mb-3">
+            <label for="id_paciente_nombre" class="form-label">Nombre del paciente</label>
+            {{ form.paciente_nombre }}
+        </div>
 
-        <label for="id_motivo">Motivo de la consulta</label>
-        {{ form.motivo }}
+        <div class="mb-3">
+            <label for="id_motivo" class="form-label">Motivo de la consulta</label>
+            {{ form.motivo }}
+        </div>
 
-        <label for="id_diagnostico">Diagnóstico</label>
-        {{ form.diagnostico }}
+        <div class="mb-3">
+            <label for="id_diagnostico" class="form-label">Diagnóstico</label>
+            {{ form.diagnostico }}
+        </div>
 
-        <label for="id_tratamiento">Tratamiento</label>
-        {{ form.tratamiento }}
+        <div class="mb-3">
+            <label for="id_tratamiento" class="form-label">Tratamiento</label>
+            {{ form.tratamiento }}
+        </div>
 
-        <button type="submit" class="btn">Guardar Consulta</button>
+        <button type="submit" class="btn btn-primary">Guardar Consulta</button>
     </form>
+</div>
 {% endblock %}
