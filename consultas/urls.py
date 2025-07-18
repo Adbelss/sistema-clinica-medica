@@ -1,9 +1,14 @@
+
 from django.urls import path
 from . import views
-from .views import registrar_consulta, dashboard
 
 urlpatterns = [
     path('registrar/', views.registrar_consulta, name='registrar_consulta'),
-    path('dashboard/', dashboard, name='dashboard'),  
+    path('dashboard/', views.dashboard, name='dashboard'),  
+    path('todas/', views.listar_consultas, name='listar_consultas'),
+    path('editar/<int:consulta_id>/', views.editar_consulta, name='editar_consulta'),
+    path('eliminar/<int:consulta_id>/', views.eliminar_consulta, name='eliminar_consulta'),
+    path('consultas/<int:consulta_id>/', views.detalle_consulta, name='detalle_consulta'),
+    path('exportar/pdf/', views.exportar_consultas_pdf, name='exportar_consultas_pdf'),
+    path('exportar/excel/', views.exportar_consultas_excel, name='exportar_consultas_excel'),
 ]
-

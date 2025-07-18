@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de Consultas</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 4px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h2>Listado de Consultas</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Paciente</th>
+                <th>Motivo</th>
+                <th>Diagnóstico</th>
+                <th>Tratamiento</th>
+                <th>Fecha</th>
+                <th>Doctor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for consulta in consultas %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ consulta.paciente_nombre }}</td>
+                <td>{{ consulta.motivo }}</td>
+                <td>{{ consulta.diagnostico }}</td>
+                <td>{{ consulta.tratamiento }}</td>
+                <td>{{ consulta.fecha|date:"d/m/Y H:i" }}</td>
+                <td>{{ consulta.doctor.get_full_name|default:consulta.doctor.username }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

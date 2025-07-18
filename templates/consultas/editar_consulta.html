@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Editar Consulta | HealthLife{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Editar Consulta</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Guardar cambios</button>
+        <a href="{% url 'listar_consultas' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

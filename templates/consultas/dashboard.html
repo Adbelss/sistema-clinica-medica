@@ -1,26 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard | HealthLife{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">Dashboard</h2>
+    <h2 class="mb-4">Bienvenido, {{ usuario }}</h2>
 
-    <div class="alert alert-info">
-        Bienvenido, <strong>{{ usuario.first_name }} {{ usuario.last_name }}</strong>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card border-primary">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Consultas registradas</h5>
-                    <p class="display-4">{{ total_consultas }}</p>
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <a href="{% url 'listar_consultas' %}" class="text-decoration-none">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-header">Total de Consultas</div>
+                    <div class="card-body">
+                        <h5 class="card-title display-4 text-center text-white">{{ total_consultas }}</h5>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
-
-        <!-- En el futuro puedes agregar más tarjetas aquí -->
     </div>
 </div>
 {% endblock %}

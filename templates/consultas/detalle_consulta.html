@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Detalle de Consulta</h2>
+    <ul class="list-unstyled fs-5">
+        <li><strong>Paciente:</strong> {{ consulta.paciente_nombre|default:"(No indicado)" }}</li>
+        <li><strong>Fecha:</strong> {{ consulta.fecha|date:"F j, Y, g:i a" }}</li>
+        <li><strong>Motivo:</strong> {{ consulta.motivo }}</li>
+        <li><strong>Diagnóstico:</strong> {{ consulta.diagnostico }}</li>
+        <li><strong>Tratamiento:</strong> {{ consulta.tratamiento }}</li>
+        <li><strong>Doctor:</strong> {{ consulta.doctor.get_full_name|default:consulta.doctor.username }}</li>
+    </ul>
+    <a href="{% url 'listar_consultas' %}" class="btn btn-secondary mt-3">Volver</a>
+</div>
+{% endblock %}

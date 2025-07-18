@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar Consulta | HealthLife{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-danger">¿Deseas eliminar esta consulta?</h2>
+    <p><strong>Paciente:</strong> {{ consulta.paciente_nombre }}</p>
+    <p><strong>Motivo:</strong> {{ consulta.motivo }}</p>
+    <p><strong>Fecha:</strong> {{ consulta.fecha|date:"d/m/Y H:i" }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+        <a href="{% url 'listar_consultas' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
