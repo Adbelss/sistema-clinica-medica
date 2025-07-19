@@ -1,11 +1,15 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<div style="max-width:400px;margin:auto;margin-top:80px;">
+<div style="max-width:400px; margin:auto; margin-top:80px;">
     <h2>Iniciar sesión en HealthLife</h2>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Ingresar</button>
     </form>
+    <p style="margin-top: 10px; text-align: right;">
+        <a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a>
+    </p>
 </div>
 {% endblock %}

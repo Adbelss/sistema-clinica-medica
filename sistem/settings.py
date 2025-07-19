@@ -1,11 +1,12 @@
 from pathlib import Path
+from decouple import config  # Agregado para manejar variables de entorno
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
-SECRET_KEY = 'django-insecure--guqrkq$ml1od6iiedk(ro_nrh*x7l=)2x=sbz!ge59w=n&lqf'
-DEBUG = True
+SECRET_KEY = config('SECRET_KEY', default='django-insecure--guqrkq$ml1od6iiedk(ro_nrh*x7l=)2x=sbz!ge59w=n&lqf')
+DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = []
 
 # Application definition
@@ -90,5 +91,14 @@ AUTH_USER_MODEL = 'usuarios.CustomUser'
 
 # Redirecciones de login y logout
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = 'login'  # O cualquier otra vista
+LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = '/login/'
+
+# Configuración de correo usando .env
+EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
