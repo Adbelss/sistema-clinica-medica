@@ -19,5 +19,17 @@
             </a>
         </div>
     </div>
+
+    <!-- Sección de Respaldo de Base de Datos -->
+    {% if request.user.is_superuser %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h4 class="mb-3">Gestión de Base de Datos</h4>
+            <a href="{% url 'exportar_base_datos' %}" class="btn btn-outline-primary">
+                <i class="bi bi-download"></i> Descargar respaldo (.sqlite3)
+            </a>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
