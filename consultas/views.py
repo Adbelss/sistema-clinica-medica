@@ -89,6 +89,10 @@ def listar_consultas(request):
 @login_required
 def editar_consulta(request, consulta_id):
     consulta = get_object_or_404(Consulta, id=consulta_id)
+    if consulta.doctor != request.user:
+        messages.error(request, "No tienes permiso para editar esta consulta.")
+        return redirect('dashboard')
+
     if request.method == 'POST':
         form = ConsultaForm(request.POST, instance=consulta)
         if form.is_valid():
@@ -106,6 +110,10 @@ def editar_consulta(request, consulta_id):
 @login_required
 def eliminar_consulta(request, consulta_id):
     consulta = get_object_or_404(Consulta, id=consulta_id)
+    if consulta.doctor != request.user:
+        messages.error(request, "No tienes permiso para eliminar esta consulta.")
+        return redirect('dashboard')
+
     if request.method == 'POST':
         consulta.delete()
         messages.success(request, 'Consulta eliminada correctamente.')
@@ -119,6 +127,10 @@ def eliminar_consulta(request, consulta_id):
 @login_required
 def detalle_consulta(request, consulta_id):
     consulta = get_object_or_404(Consulta, id=consulta_id)
+    if consulta.doctor != request.user:
+        messages.error(request, "No tienes permiso para ver esta consulta.")
+        return redirect('dashboard')
+
     return render(request, 'consultas/detalle_consulta.html', {'consulta': consulta})
 
 
@@ -168,3 +180,10 @@ def exportar_consultas_excel(request):
     response['Content-Disposition'] = 'attachment; filename=consultas.xlsx'
     wb.save(response)
     return response
+
+
+# ----------------------------
+# Manejador personalizado de error 403
+# ----------------------------
+def error_403(request, exception=None):
+    return render(request, '403.html', status=403)

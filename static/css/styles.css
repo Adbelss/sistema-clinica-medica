@@ -1,0 +1,70 @@
+/* Fondo general */
+body {
+    background: linear-gradient(135deg, #8e9eab, #eef2f3);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Tarjeta estilo vidrio líquido */
+.glass-card {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 40px 60px;
+    width: 100%;
+    max-width: 450px;
+    color: white;
+}
+
+/* Título dentro de la tarjeta */
+.glass-card h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+/* Campos de entrada */
+.glass-card input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 10px;
+    outline: none;
+    background-color: rgba(255,255,255,0.25);
+    color: white;
+}
+
+/* Botón */
+.glass-card button {
+    width: 100%;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.glass-card button:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Enlaces */
+.glass-card a {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    color: #d0d0ff;
+    text-decoration: none;
+}

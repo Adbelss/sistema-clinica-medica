@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="glass-card">
+    <h2>Iniciar sesión en HealthLife</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+        </div>
+        
+        <div class="mb-3">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+        </div>
+
+        <button type="submit">Ingresar</button>
+    </form>
+    <a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a>
+</div>
+{% endblock %}

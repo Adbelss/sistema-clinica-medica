@@ -71,18 +71,22 @@
                         <td>{{ consulta.diagnostico|truncatechars:50 }}</td>
                         <td>{{ consulta.tratamiento|truncatechars:50 }}</td>
                         <td>{{ consulta.fecha|date:"d/m/Y H:i" }}</td>
-                        <td>{{ consulta.doctor.username }}</td>
+                        <td>{{ consulta.doctor.get_full_name|default:consulta.doctor.username }}</td>
                         <td>
-                            <a href="{% url 'detalle_consulta' consulta.id %}" class="btn btn-sm btn-info" title="Ver Detalle">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <a href="{% url 'editar_consulta' consulta.id %}" class="btn btn-sm btn-warning" title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <a href="{% url 'eliminar_consulta' consulta.id %}" class="btn btn-sm btn-danger"
-                               onclick="return confirm('¿Estás seguro de eliminar esta consulta?');" title="Eliminar">
-                                <i class="bi bi-trash"></i>
-                            </a>
+                            {% if consulta.doctor == user %}
+                                <a href="{% url 'detalle_consulta' consulta.id %}" class="btn btn-sm btn-info" title="Ver Detalle">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'editar_consulta' consulta.id %}" class="btn btn-sm btn-warning" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'eliminar_consulta' consulta.id %}" class="btn btn-sm btn-danger"
+                                   onclick="return confirm('¿Estás seguro de eliminar esta consulta?');" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            {% else %}
+                                <span class="text-muted">Acceso restringido</span>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
