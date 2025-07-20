@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">Listado de Todas las Consultas</h2>
+    <h2 class="mb-4"><i class="bi bi-journal-text"></i> Listado de Todas las Consultas</h2>
 
     <!-- Formulario de búsqueda -->
     <form method="get" class="row g-3 mb-4">
@@ -32,7 +32,7 @@
         </div>
         <div class="col-md-2">
             <a href="{% url 'listar_consultas' %}" class="btn btn-secondary w-100">
-                Limpiar
+                <i class="bi bi-eraser-fill"></i> Limpiar
             </a>
         </div>
     </form>
@@ -40,10 +40,10 @@
     <!-- Botones de exportación -->
     <div class="mb-3">
         <a href="{% url 'exportar_consultas_pdf' %}" class="btn btn-danger me-2">
-            <i class="bi bi-file-earmark-pdf"></i> Exportar a PDF
+            <i class="bi bi-file-earmark-pdf-fill"></i> Exportar a PDF
         </a>
         <a href="{% url 'exportar_consultas_excel' %}" class="btn btn-success">
-            <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+            <i class="bi bi-file-earmark-excel-fill"></i> Exportar a Excel
         </a>
     </div>
 
@@ -74,16 +74,18 @@
                         <td>{{ consulta.doctor.get_full_name|default:consulta.doctor.username }}</td>
                         <td>
                             {% if consulta.doctor == user %}
-                                <a href="{% url 'detalle_consulta' consulta.id %}" class="btn btn-sm btn-info" title="Ver Detalle">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{% url 'editar_consulta' consulta.id %}" class="btn btn-sm btn-warning" title="Editar">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="{% url 'eliminar_consulta' consulta.id %}" class="btn btn-sm btn-danger"
-                                   onclick="return confirm('¿Estás seguro de eliminar esta consulta?');" title="Eliminar">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                                <div class="d-flex gap-1">
+                                    <a href="{% url 'detalle_consulta' consulta.id %}" class="btn btn-sm btn-info" title="Ver Detalle">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </a>
+                                    <a href="{% url 'editar_consulta' consulta.id %}" class="btn btn-sm btn-warning" title="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a href="{% url 'eliminar_consulta' consulta.id %}" class="btn btn-sm btn-danger"
+                                       onclick="return confirm('¿Estás seguro de eliminar esta consulta?');" title="Eliminar">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </a>
+                                </div>
                             {% else %}
                                 <span class="text-muted">Acceso restringido</span>
                             {% endif %}
@@ -129,7 +131,7 @@
     {% endif %}
 
     <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-4">
-        <i class="bi bi-arrow-left"></i> Volver al Dashboard
+        <i class="bi bi-arrow-left-circle-fill"></i> Volver al Dashboard
     </a>
 </div>
 {% endblock %}

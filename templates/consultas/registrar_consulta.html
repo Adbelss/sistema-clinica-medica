@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">Registrar Nueva Consulta</h2>
+    <h2 class="mb-4"><i class="bi bi-plus-circle-fill"></i> Registrar Nueva Consulta</h2>
     <form method="post">
         {% csrf_token %}
 
@@ -28,7 +28,9 @@
             {{ form.tratamiento }}
         </div>
 
-        <button type="submit" class="btn btn-primary">Guardar Consulta</button>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save2-fill"></i> Guardar Consulta
+        </button>
     </form>
 </div>
 {% endblock %}

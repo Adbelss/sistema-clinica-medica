@@ -24,7 +24,10 @@ def registrar_consulta(request):
             consulta = form.save(commit=False)
             consulta.doctor = request.user
             consulta.save()
-            return redirect('dashboard')
+            messages.success(request, "✅ Consulta registrada con éxito.")
+            return redirect('listar_consultas')
+        else:
+            messages.error(request, "❌ Hubo un error al registrar la consulta.")
     else:
         form = ConsultaForm()
     return render(request, 'consultas/registrar_consulta.html', {'form': form})
@@ -90,15 +93,17 @@ def listar_consultas(request):
 def editar_consulta(request, consulta_id):
     consulta = get_object_or_404(Consulta, id=consulta_id)
     if consulta.doctor != request.user:
-        messages.error(request, "No tienes permiso para editar esta consulta.")
+        messages.error(request, "🚫 No tienes permiso para editar esta consulta.")
         return redirect('dashboard')
 
     if request.method == 'POST':
         form = ConsultaForm(request.POST, instance=consulta)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Consulta actualizada correctamente.')
+            messages.success(request, '✏️ Consulta actualizada correctamente.')
             return redirect('listar_consultas')
+        else:
+            messages.error(request, "❌ Error al actualizar la consulta.")
     else:
         form = ConsultaForm(instance=consulta)
     return render(request, 'consultas/editar_consulta.html', {'form': form})
@@ -111,12 +116,12 @@ def editar_consulta(request, consulta_id):
 def eliminar_consulta(request, consulta_id):
     consulta = get_object_or_404(Consulta, id=consulta_id)
     if consulta.doctor != request.user:
-        messages.error(request, "No tienes permiso para eliminar esta consulta.")
+        messages.error(request, "🚫 No tienes permiso para eliminar esta consulta.")
         return redirect('dashboard')
 
     if request.method == 'POST':
         consulta.delete()
-        messages.success(request, 'Consulta eliminada correctamente.')
+        messages.success(request, '🗑️ Consulta eliminada correctamente.')
         return redirect('listar_consultas')
     return render(request, 'consultas/eliminar_confirmar.html', {'consulta': consulta})
 
@@ -128,7 +133,7 @@ def eliminar_consulta(request, consulta_id):
 def detalle_consulta(request, consulta_id):
     consulta = get_object_or_404(Consulta, id=consulta_id)
     if consulta.doctor != request.user:
-        messages.error(request, "No tienes permiso para ver esta consulta.")
+        messages.error(request, "🚫 No tienes permiso para ver esta consulta.")
         return redirect('dashboard')
 
     return render(request, 'consultas/detalle_consulta.html', {'consulta': consulta})
