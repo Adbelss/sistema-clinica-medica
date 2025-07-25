@@ -119,6 +119,12 @@
                     </a>
                     {% endif %}
 
+                    {% if user.is_superuser %}
+                    <a class="nav-link" href="{% url 'gestion_usuarios' %}">
+                        <i class="bi bi-people-fill"></i> Gestión de Usuarios
+                    </a>
+                    {% endif %}
+
                     <form method="post" action="{% url 'logout' %}" class="d-inline">
                         {% csrf_token %}
                         <button type="submit" class="logout-btn nav-link">

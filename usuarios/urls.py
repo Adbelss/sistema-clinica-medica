@@ -1,10 +1,12 @@
-# usuarios/urls.py
-
+from django.contrib import admin
 from django.urls import path
-from .views import configuraciones, respaldo_base_datos, restaurar_base_datos
+from . import views
 
 urlpatterns = [
-    path('', configuraciones, name='configuraciones'),  # /configuraciones/
-    path('respaldar/', respaldo_base_datos, name='respaldar_bd'),  # /configuraciones/respaldar/
-    path('restaurar/', restaurar_base_datos, name='restaurar_bd'),  # /configuraciones/restaurar/
+    path('admin/', admin.site.urls),
+    path('configuraciones/', views.configuraciones, name='configuraciones'),
+    path('respaldar/', views.respaldo_base_datos, name='respaldar_bd'),
+    path('restaurar/', views.restaurar_base_datos, name='restaurar_bd'),
+    path('gestion_usuarios/', views.gestion_usuarios, name='gestion_usuarios'),
+    path('gestion_usuarios/nuevo/', views.crear_usuario, name='crear_usuario'),
 ]
