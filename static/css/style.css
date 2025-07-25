@@ -1,0 +1,41 @@
+/* Fondo columna izquierda del login */
+.bg-login-left {
+    background: linear-gradient(135deg, #4bd08b, #009688);
+    color: white;
+}
+
+/* Imagen médica dentro del login */
+.bg-login-left img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Estilo para botón de login */
+.btn-success {
+    background-color: var(--color-consultas);
+    border: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #3ac47d;
+    transform: scale(1.02);
+}
+
+/* Campo de formulario enfocado */
+.form-control:focus {
+    border-color: var(--color-citas);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Enlace de "olvidaste tu contraseña" */
+a.text-decoration-none {
+    color: var(--color-citas);
+    transition: color 0.3s ease;
+}
+
+a.text-decoration-none:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}

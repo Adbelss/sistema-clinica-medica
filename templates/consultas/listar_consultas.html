@@ -4,13 +4,11 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4"><i class="bi bi-journal-text"></i> Listado de Todas las Consultas</h2>
+    <h2 class="mb-4 text-success"><i class="bi bi-journal-text me-2"></i>Listado de Todas las Consultas</h2>
 
-    <!-- Formulario de búsqueda -->
     <form method="get" class="row g-3 mb-4">
         <div class="col-md-3">
-            <input type="text" name="paciente" class="form-control" placeholder="Buscar por paciente"
-                   value="{{ paciente_query }}">
+            <input type="text" name="paciente" class="form-control" placeholder="Buscar por paciente" value="{{ paciente_query }}">
         </div>
         <div class="col-md-3">
             <input type="date" name="fecha" class="form-control" value="{{ fecha_query }}">
@@ -26,31 +24,31 @@
             </select>
         </div>
         <div class="col-md-1">
-            <button type="submit" class="btn btn-primary w-100">
+            <button type="submit" class="btn btn-success w-100">
                 <i class="bi bi-search"></i>
             </button>
         </div>
         <div class="col-md-2">
-            <a href="{% url 'listar_consultas' %}" class="btn btn-secondary w-100">
+            <a href="{% url 'listar_consultas' %}" class="btn btn-outline-secondary w-100">
                 <i class="bi bi-eraser-fill"></i> Limpiar
             </a>
         </div>
     </form>
 
-    <!-- Botones de exportación -->
-    <div class="mb-3">
-        <a href="{% url 'exportar_consultas_pdf' %}" class="btn btn-danger me-2">
-            <i class="bi bi-file-earmark-pdf-fill"></i> Exportar a PDF
+    <!-- Exportar -->
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        <a href="{% url 'exportar_consultas_pdf' %}" class="btn btn-danger">
+            <i class="bi bi-file-earmark-pdf-fill"></i> Exportar PDF
         </a>
         <a href="{% url 'exportar_consultas_excel' %}" class="btn btn-success">
-            <i class="bi bi-file-earmark-excel-fill"></i> Exportar a Excel
+            <i class="bi bi-file-earmark-excel-fill"></i> Exportar Excel
         </a>
     </div>
 
     {% if consultas %}
         <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-dark">
+            <table class="table table-bordered table-hover align-middle shadow-sm">
+                <thead class="table-success text-dark">
                     <tr>
                         <th>#</th>
                         <th>Paciente</th>
@@ -74,20 +72,20 @@
                         <td>{{ consulta.doctor.get_full_name|default:consulta.doctor.username }}</td>
                         <td>
                             {% if consulta.doctor == user %}
-                                <div class="d-flex gap-1">
-                                    <a href="{% url 'detalle_consulta' consulta.id %}" class="btn btn-sm btn-info" title="Ver Detalle">
-                                        <i class="bi bi-eye-fill"></i>
-                                    </a>
-                                    <a href="{% url 'editar_consulta' consulta.id %}" class="btn btn-sm btn-warning" title="Editar">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                    <a href="{% url 'eliminar_consulta' consulta.id %}" class="btn btn-sm btn-danger"
-                                       onclick="return confirm('¿Estás seguro de eliminar esta consulta?');" title="Eliminar">
-                                        <i class="bi bi-trash3-fill"></i>
-                                    </a>
-                                </div>
+                            <div class="d-flex gap-1">
+                                <a href="{% url 'detalle_consulta' consulta.id %}" class="btn btn-sm btn-outline-info" title="Ver Detalle">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                                <a href="{% url 'editar_consulta' consulta.id %}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a href="{% url 'eliminar_consulta' consulta.id %}" class="btn btn-sm btn-outline-danger" title="Eliminar"
+                                   onclick="return confirm('¿Estás seguro de eliminar esta consulta?');">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </a>
+                            </div>
                             {% else %}
-                                <span class="text-muted">Acceso restringido</span>
+                            <span class="text-muted">Acceso restringido</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -97,12 +95,11 @@
         </div>
 
         <!-- Paginación -->
-        <nav aria-label="Paginación de consultas" class="mt-4">
+        <nav class="mt-4" aria-label="Paginación de consultas">
             <ul class="pagination justify-content-center">
                 {% if consultas.has_previous %}
                 <li class="page-item">
-                    <a class="page-link"
-                       href="?{% if paciente_query %}paciente={{ paciente_query }}&{% endif %}{% if fecha_query %}fecha={{ fecha_query }}&{% endif %}{% if doctor_query %}doctor={{ doctor_query }}&{% endif %}page={{ consultas.previous_page_number }}">
+                    <a class="page-link" href="?{% if paciente_query %}paciente={{ paciente_query }}&{% endif %}{% if fecha_query %}fecha={{ fecha_query }}&{% endif %}{% if doctor_query %}doctor={{ doctor_query }}&{% endif %}page={{ consultas.previous_page_number }}">
                         &laquo; Anterior
                     </a>
                 </li>
@@ -116,8 +113,7 @@
 
                 {% if consultas.has_next %}
                 <li class="page-item">
-                    <a class="page-link"
-                       href="?{% if paciente_query %}paciente={{ paciente_query }}&{% endif %}{% if fecha_query %}fecha={{ fecha_query }}&{% endif %}{% if doctor_query %}doctor={{ doctor_query }}&{% endif %}page={{ consultas.next_page_number }}">
+                    <a class="page-link" href="?{% if paciente_query %}paciente={{ paciente_query }}&{% endif %}{% if fecha_query %}fecha={{ fecha_query }}&{% endif %}{% if doctor_query %}doctor={{ doctor_query }}&{% endif %}page={{ consultas.next_page_number }}">
                         Siguiente &raquo;
                     </a>
                 </li>
@@ -130,7 +126,7 @@
         <p class="text-muted">Aún no hay consultas registradas.</p>
     {% endif %}
 
-    <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-4">
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary mt-4">
         <i class="bi bi-arrow-left-circle-fill"></i> Volver al Dashboard
     </a>
 </div>

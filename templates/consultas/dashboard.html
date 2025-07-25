@@ -4,26 +4,25 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">Bienvenido, {{ usuario }}</h2>
+    <h2 class="mb-4 text-primary-emphasis"><i class="bi bi-speedometer2 me-2"></i>Bienvenido, {{ usuario }}</h2>
 
-    <!-- Mensajes -->
     {% if messages %}
-    <div class="mt-3">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
-                <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    </div>
+        <div class="mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 
     <!-- Estadísticas -->
     <div class="row mb-4">
         <div class="col-md-4">
             <a href="{% url 'listar_consultas' %}" class="text-decoration-none">
-                <div class="card text-white bg-success mb-3">
-                    <div class="card-header">Total de Consultas</div>
+                <div class="card shadow border-0" style="background: linear-gradient(135deg, #28a745, #4caf50);">
+                    <div class="card-header text-white fw-bold">Total de Consultas</div>
                     <div class="card-body">
                         <h5 class="card-title display-4 text-center text-white">{{ total_consultas }}</h5>
                     </div>
@@ -32,22 +31,20 @@
         </div>
     </div>
 
-    <!-- Sección de Respaldo de Base de Datos -->
+    <!-- Gestión de base de datos -->
     {% if request.user.is_superuser %}
     <div class="row mb-5">
         <div class="col-md-12">
-            <h4 class="mb-3">Gestión de Base de Datos</h4>
+            <h4 class="mb-3 text-success"><i class="bi bi-database-fill-gear me-2"></i>Gestión de Base de Datos</h4>
 
             <div class="d-flex flex-wrap gap-3 align-items-center">
-                <!-- Botón de exportar -->
-                <a href="{% url 'exportar_base_datos' %}" class="btn btn-outline-primary">
+                <a href="{% url 'exportar_base_datos' %}" class="btn btn-outline-success">
                     <i class="bi bi-download"></i> Descargar respaldo (.sqlite3)
                 </a>
 
-                <!-- Formulario de importación con confirmación -->
                 <form method="post" action="{% url 'importar_base_datos' %}" enctype="multipart/form-data"
-                      onsubmit="return confirm('¿Estás completamente seguro de restaurar esta base de datos? Esta acción no se puede deshacer.')"
-                      class="d-flex flex-wrap gap-2 align-items-center">
+                    onsubmit="return confirm('¿Estás completamente seguro de restaurar esta base de datos? Esta acción no se puede deshacer.')"
+                    class="d-flex flex-wrap gap-2 align-items-center">
                     {% csrf_token %}
                     <input type="file" name="respaldo" accept=".sqlite3" class="form-control w-auto" required>
                     <button type="submit" class="btn btn-outline-danger">

@@ -3,34 +3,50 @@
 {% block title %}Registrar Consulta{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4"><i class="bi bi-plus-circle-fill"></i> Registrar Nueva Consulta</h2>
-    <form method="post">
-        {% csrf_token %}
+<div class="container mt-5 mb-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header text-white fw-bold text-center"
+                     style="background: linear-gradient(to right, var(--verde-claro), var(--verde-oscuro));">
+                    <i class="bi bi-plus-circle-fill me-2"></i> Registrar Nueva Consulta
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
 
-        <div class="mb-3">
-            <label for="id_paciente_nombre" class="form-label">Nombre del paciente</label>
-            {{ form.paciente_nombre }}
+                        <div class="mb-3">
+                            <label for="id_paciente_nombre" class="form-label fw-semibold">Nombre del paciente</label>
+                            {{ form.paciente_nombre }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_motivo" class="form-label fw-semibold">Motivo de la consulta</label>
+                            {{ form.motivo }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_diagnostico" class="form-label fw-semibold">Diagnóstico</label>
+                            {{ form.diagnostico }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_tratamiento" class="form-label fw-semibold">Tratamiento</label>
+                            {{ form.tratamiento }}
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="bi bi-save2-fill me-1"></i> Guardar Consulta
+                            </button>
+                            <a href="{% url 'listar_consultas' %}" class="btn btn-secondary px-4 ms-2">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <div class="mb-3">
-            <label for="id_motivo" class="form-label">Motivo de la consulta</label>
-            {{ form.motivo }}
-        </div>
-
-        <div class="mb-3">
-            <label for="id_diagnostico" class="form-label">Diagnóstico</label>
-            {{ form.diagnostico }}
-        </div>
-
-        <div class="mb-3">
-            <label for="id_tratamiento" class="form-label">Tratamiento</label>
-            {{ form.tratamiento }}
-        </div>
-
-        <button type="submit" class="btn btn-primary">
-            <i class="bi bi-save2-fill"></i> Guardar Consulta
-        </button>
-    </form>
+    </div>
 </div>
 {% endblock %}
