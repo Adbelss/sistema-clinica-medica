@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LogoutView
+from django.urls import path, include
+
 
 from consultas.views import dashboard
 
@@ -32,4 +34,7 @@ urlpatterns = [
 
     # (solo si tienes una app respaldo)
     path('respaldo/', include('respaldo.urls')),
+
+    #pacientes 
+    path('pacientes/', include('pacientes.urls')), 
 ]

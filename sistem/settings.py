@@ -19,6 +19,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'usuarios',  # nuestra app personalizada
     'consultas',
+    'pacientes',
+    
 ]
 
 MIDDLEWARE = [
