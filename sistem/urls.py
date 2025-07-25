@@ -37,4 +37,5 @@ urlpatterns = [
 
     #pacientes 
     path('pacientes/', include('pacientes.urls')), 
+    
 ]
