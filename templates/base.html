@@ -112,6 +112,13 @@
                     <a class="nav-link" href="{% url 'listar_consultas' %}">
                         <i class="bi bi-journal-text"></i> Consultas
                     </a>
+
+                    {% if user.is_superuser or user.is_staff %}
+                    <a class="nav-link" href="{% url 'configuraciones' %}">
+                        <i class="bi bi-gear-fill"></i> Configuraciones
+                    </a>
+                    {% endif %}
+
                     <form method="post" action="{% url 'logout' %}" class="d-inline">
                         {% csrf_token %}
                         <button type="submit" class="logout-btn nav-link">

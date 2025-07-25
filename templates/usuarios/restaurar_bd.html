@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Restaurar Base de Datos{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Restaurar Base de Datos</h2>
+    <p class="text-danger">⚠️ Esta acción reemplazará la base de datos actual. Solo para administradores.</p>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-danger">Restaurar</button>
+    </form>
+</div>
+
+{% endblock %}

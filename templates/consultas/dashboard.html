@@ -30,30 +30,5 @@
             </a>
         </div>
     </div>
-
-    <!-- Gestión de base de datos -->
-    {% if request.user.is_superuser %}
-    <div class="row mb-5">
-        <div class="col-md-12">
-            <h4 class="mb-3 text-success"><i class="bi bi-database-fill-gear me-2"></i>Gestión de Base de Datos</h4>
-
-            <div class="d-flex flex-wrap gap-3 align-items-center">
-                <a href="{% url 'exportar_base_datos' %}" class="btn btn-outline-success">
-                    <i class="bi bi-download"></i> Descargar respaldo (.sqlite3)
-                </a>
-
-                <form method="post" action="{% url 'importar_base_datos' %}" enctype="multipart/form-data"
-                    onsubmit="return confirm('¿Estás completamente seguro de restaurar esta base de datos? Esta acción no se puede deshacer.')"
-                    class="d-flex flex-wrap gap-2 align-items-center">
-                    {% csrf_token %}
-                    <input type="file" name="respaldo" accept=".sqlite3" class="form-control w-auto" required>
-                    <button type="submit" class="btn btn-outline-danger">
-                        <i class="bi bi-upload"></i> Restaurar base de datos
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
