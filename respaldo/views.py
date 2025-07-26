@@ -5,8 +5,13 @@ from django.http import FileResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
+
+@user_passes_test(lambda u: u.is_superuser)
+def respaldo(request):
+    """Vista principal de respaldo"""
+    return render(request, 'respaldo/respaldo.html')
 
 @user_passes_test(lambda u: u.is_superuser)
 def exportar_base_datos(request):

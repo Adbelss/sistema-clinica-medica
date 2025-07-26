@@ -11,4 +11,8 @@ urlpatterns = [
     path('consultas/<int:consulta_id>/', views.detalle_consulta, name='detalle_consulta'),
     path('exportar/pdf/', views.exportar_consultas_pdf, name='exportar_consultas_pdf'),
     path('exportar/excel/', views.exportar_consultas_excel, name='exportar_consultas_excel'),
+    
+    # Nuevas funcionalidades avanzadas
+    path('buscar-pacientes/', views.buscar_pacientes, name='buscar_pacientes'),
+    path('estadisticas/', views.estadisticas_consultas, name='estadisticas_consultas'),
 ]

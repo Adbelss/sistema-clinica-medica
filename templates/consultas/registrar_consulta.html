@@ -1,46 +1,400 @@
 {% extends 'base.html' %}
 
-{% block title %}Registrar Consulta{% endblock %}
+{% block title %}Registrar Consulta | HealthLife{% endblock %}
 
 {% block content %}
+<style>
+/* Estilos para el formulario avanzado */
+.vital-signs-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.vital-signs-card h5 {
+    color: white;
+    margin-bottom: 15px;
+}
+
+.imc-display {
+    background-color: #e3f2fd;
+    border: 2px solid #2196f3;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+    text-align: center;
+    display: none;
+}
+
+.imc-normal { border-color: #4caf50; background-color: #e8f5e8; }
+.imc-warning { border-color: #ff9800; background-color: #fff3e0; }
+.imc-danger { border-color: #f44336; background-color: #ffebee; }
+
+.alert-medical {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 10px 0;
+    color: #856404;
+}
+
+.alert-emergency {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 10px 0;
+    color: #721c24;
+}
+
+.progress-indicator {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.progress-bar {
+    height: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.smart-suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    width: 100%;
+}
+
+.suggestion-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+    background-color: #f8f9fa;
+}
+
+.suggestion-item.selected {
+    background-color: #007bff;
+    color: white;
+}
+
+.field-validation {
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.field-valid { color: #28a745; }
+.field-invalid { color: #dc3545; }
+
+.consultation-type-card {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.consultation-type-card:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.consultation-type-card.selected {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.consultation-type-card h6 {
+    margin-bottom: 5px;
+    color: #007bff;
+}
+
+.consultation-type-card p {
+    font-size: 12px;
+    color: #6c757d;
+    margin: 0;
+}
+
+.auto-calculate {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #0c5460;
+    margin-top: 5px;
+}
+</style>
+
 <div class="container mt-5 mb-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm border-0">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0">
                 <div class="card-header text-white fw-bold text-center"
-                     style="background: linear-gradient(to right, var(--verde-claro), var(--verde-oscuro));">
-                    <i class="bi bi-plus-circle-fill me-2"></i> Registrar Nueva Consulta
+                     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="bi bi-plus-circle-fill me-2"></i> Registrar Nueva Consulta Médica
                 </div>
-                <div class="card-body">
-                    <form method="post">
+                <div class="card-body p-4">
+                    
+                    <!-- Indicador de Progreso -->
+                    <div class="progress-indicator">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted fw-bold">Progreso del formulario</span>
+                            <span class="text-muted fw-bold" id="progress-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Estadísticas Rápidas -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <h4 class="text-primary mb-0">{{ total_pacientes }}</h4>
+                                <small class="text-muted">Pacientes Activos</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <h4 class="text-success mb-0">{{ consultas_hoy }}</h4>
+                                <small class="text-muted">Consultas Hoy</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <h4 class="text-info mb-0" id="duracion-estimada">30</h4>
+                                <small class="text-muted">Minutos Estimados</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" id="consultaForm">
                         {% csrf_token %}
 
-                        <div class="mb-3">
-                            <label for="id_paciente_nombre" class="form-label fw-semibold">Nombre del paciente</label>
-                            {{ form.paciente_nombre }}
+                        <!-- Selección de Paciente -->
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3"><i class="bi bi-person-circle me-2"></i>Información del Paciente</h5>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <label for="{{ form.paciente.id_for_label }}" class="form-label fw-bold">
+                                        Paciente <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.paciente }}
+                                    <div class="field-helper">{{ form.paciente.help_text }}</div>
+                                    {% if form.paciente.errors %}
+                                        <div class="text-danger small">{{ form.paciente.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mt-4">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="buscarPacienteRapido()">
+                                            <i class="bi bi-search"></i> Búsqueda Rápida
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="id_motivo" class="form-label fw-semibold">Motivo de la consulta</label>
-                            {{ form.motivo }}
+                        <!-- Tipo de Consulta -->
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3"><i class="bi bi-clipboard2-pulse me-2"></i>Tipo de Consulta</h5>
+                            <div class="row">
+                                {% for value, label in form.tipo_consulta.field.choices %}
+                                    {% if value %}
+                                        <div class="col-md-4 mb-2">
+                                            <div class="consultation-type-card" data-tipo="{{ value }}">
+                                                <h6><i class="bi bi-check-circle me-1"></i>{{ label }}</h6>
+                                                <p>
+                                                    {% if value == 'Primera Vez' %}
+                                                        Consulta inicial del paciente
+                                                    {% elif value == 'Control' %}
+                                                        Revisión de rutina
+                                                    {% elif value == 'Emergencia' %}
+                                                        Atención urgente
+                                                    {% elif value == 'Seguimiento' %}
+                                                        Control de tratamiento
+                                                    {% elif value == 'Especialista' %}
+                                                        Consulta especializada
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {{ form.tipo_consulta }}
                         </div>
 
-                        <div class="mb-3">
-                            <label for="id_diagnostico" class="form-label fw-semibold">Diagnóstico</label>
-                            {{ form.diagnostico }}
+                        <!-- Signos Vitales -->
+                        <div class="vital-signs-card">
+                            <h5><i class="bi bi-heart-pulse me-2"></i>Signos Vitales</h5>
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label for="{{ form.presion_arterial.id_for_label }}" class="form-label fw-bold">Presión Arterial</label>
+                                    {{ form.presion_arterial }}
+                                    <div class="field-helper">{{ form.presion_arterial.help_text }}</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="{{ form.temperatura.id_for_label }}" class="form-label fw-bold">Temperatura (°C)</label>
+                                    {{ form.temperatura }}
+                                    <div class="field-helper">{{ form.temperatura.help_text }}</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="{{ form.peso.id_for_label }}" class="form-label fw-bold">Peso (kg)</label>
+                                    {{ form.peso }}
+                                    <div class="field-helper">{{ form.peso.help_text }}</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="{{ form.altura.id_for_label }}" class="form-label fw-bold">Altura (m)</label>
+                                    {{ form.altura }}
+                                    <div class="field-helper">{{ form.altura.help_text }}</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.frecuencia_cardiaca.id_for_label }}" class="form-label fw-bold">Frecuencia Cardíaca (lpm)</label>
+                                    {{ form.frecuencia_cardiaca }}
+                                    <div class="field-helper">{{ form.frecuencia_cardiaca.help_text }}</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="imc-display" id="imc-display">
+                                        <strong>IMC: <span id="imc-value">--</span></strong>
+                                        <br>
+                                        <small>Categoría: <span id="imc-category">--</span></small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="id_tratamiento" class="form-label fw-semibold">Tratamiento</label>
-                            {{ form.tratamiento }}
+                        <!-- Información de la Consulta -->
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3"><i class="bi bi-journal-text me-2"></i>Información de la Consulta</h5>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="{{ form.motivo.id_for_label }}" class="form-label fw-bold">
+                                        Motivo de la Consulta <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.motivo }}
+                                    <div class="field-helper">{{ form.motivo.help_text }}</div>
+                                </div>
+                                <div class="col-12">
+                                    <label for="{{ form.sintomas.id_for_label }}" class="form-label fw-bold">Síntomas</label>
+                                    {{ form.sintomas }}
+                                    <div class="field-helper">{{ form.sintomas.help_text }}</div>
+                                </div>
+                                <div class="col-12">
+                                    <label for="{{ form.diagnostico.id_for_label }}" class="form-label fw-bold">
+                                        Diagnóstico <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.diagnostico }}
+                                    <div class="field-helper">{{ form.diagnostico.help_text }}</div>
+                                </div>
+                                <div class="col-12">
+                                    <label for="{{ form.tratamiento.id_for_label }}" class="form-label fw-bold">
+                                        Tratamiento <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.tratamiento }}
+                                    <div class="field-helper">{{ form.tratamiento.help_text }}</div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-success px-4">
-                                <i class="bi bi-save2-fill me-1"></i> Guardar Consulta
+                        <!-- Medicamentos -->
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3"><i class="bi bi-capsule me-2"></i>Medicamentos</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.medicamentos_recetados.id_for_label }}" class="form-label fw-bold">Medicamentos Recetados</label>
+                                    {{ form.medicamentos_recetados }}
+                                    <div class="field-helper">{{ form.medicamentos_recetados.help_text }}</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.dosis_medicamentos.id_for_label }}" class="form-label fw-bold">Dosis y Frecuencia</label>
+                                    {{ form.dosis_medicamentos }}
+                                    <div class="field-helper">{{ form.dosis_medicamentos.help_text }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Próxima Cita -->
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3"><i class="bi bi-calendar-event me-2"></i>Próxima Cita</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.proxima_cita.id_for_label }}" class="form-label fw-bold">Fecha y Hora</label>
+                                    {{ form.proxima_cita }}
+                                    <div class="field-helper">{{ form.proxima_cita.help_text }}</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.observaciones_cita.id_for_label }}" class="form-label fw-bold">Observaciones</label>
+                                    {{ form.observaciones_cita }}
+                                    <div class="field-helper">{{ form.observaciones_cita.help_text }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información Adicional -->
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3"><i class="bi bi-gear me-2"></i>Información Adicional</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="{{ form.estado.id_for_label }}" class="form-label fw-bold">Estado</label>
+                                    {{ form.estado }}
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="{{ form.duracion_consulta.id_for_label }}" class="form-label fw-bold">Duración (min)</label>
+                                    {{ form.duracion_consulta }}
+                                    <div class="auto-calculate" id="duracion-auto">
+                                        <i class="bi bi-calculator me-1"></i>Calculado automáticamente
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="{{ form.costo_consulta.id_for_label }}" class="form-label fw-bold">Costo (Q)</label>
+                                    {{ form.costo_consulta }}
+                                </div>
+                                <div class="col-12">
+                                    <label for="{{ form.notas_adicionales.id_for_label }}" class="form-label fw-bold">Notas Adicionales</label>
+                                    {{ form.notas_adicionales }}
+                                    <div class="field-helper">{{ form.notas_adicionales.help_text }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alertas Médicas -->
+                        <div id="alertas-medicas" class="mb-4" style="display: none;">
+                            <h5 class="text-warning mb-3"><i class="bi bi-exclamation-triangle me-2"></i>Alertas Médicas</h5>
+                            <div id="alertas-container"></div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-success btn-lg px-5">
+                                <i class="bi bi-check-circle me-2"></i>Registrar Consulta
                             </button>
-                            <a href="{% url 'listar_consultas' %}" class="btn btn-secondary px-4 ms-2">
-                                <i class="bi bi-x-circle"></i> Cancelar
+                            <a href="{% url 'listar_consultas' %}" class="btn btn-secondary btn-lg px-5 ms-3">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
                             </a>
                         </div>
                     </form>
@@ -49,4 +403,323 @@
         </div>
     </div>
 </div>
+
+<script>
+// Clase para manejar el formulario avanzado de consultas
+class AdvancedConsultationForm {
+    constructor() {
+        this.form = document.getElementById('consultaForm');
+        this.progressFill = document.getElementById('progress-fill');
+        this.progressPercentage = document.getElementById('progress-percentage');
+        this.imcDisplay = document.getElementById('imc-display');
+        this.imcValue = document.getElementById('imc-value');
+        this.imcCategory = document.getElementById('imc-category');
+        this.alertasContainer = document.getElementById('alertas-container');
+        this.alertasMedicas = document.getElementById('alertas-medicas');
+        this.duracionEstimada = document.getElementById('duracion-estimada');
+        this.duracionAuto = document.getElementById('duracion-auto');
+        
+        this.requiredFields = this.form.querySelectorAll('[required]');
+        this.allFields = this.form.querySelectorAll('input, select, textarea');
+        
+        this.init();
+    }
+
+    init() {
+        this.setupEventListeners();
+        this.setupTypeSelection();
+        this.updateProgress();
+    }
+
+    setupEventListeners() {
+        // Validación en tiempo real
+        this.allFields.forEach(field => {
+            field.addEventListener('input', () => {
+                this.validateField(field);
+                this.updateProgress();
+                this.calculateIMC();
+                this.checkMedicalAlerts();
+            });
+            
+            field.addEventListener('blur', () => {
+                this.validateField(field);
+            });
+        });
+
+        // Cálculo automático de IMC
+        const pesoField = document.getElementById('id_peso');
+        const alturaField = document.getElementById('id_altura');
+        
+        if (pesoField && alturaField) {
+            pesoField.addEventListener('input', () => this.calculateIMC());
+            alturaField.addEventListener('input', () => this.calculateIMC());
+        }
+
+        // Cálculo automático de duración
+        const tipoConsulta = document.getElementById('id_tipo_consulta');
+        if (tipoConsulta) {
+            tipoConsulta.addEventListener('change', () => this.calculateDuration());
+        }
+
+        // Validación de formulario
+        this.form.addEventListener('submit', (e) => {
+            if (!this.validateForm()) {
+                e.preventDefault();
+                this.showValidationErrors();
+            }
+        });
+    }
+
+    setupTypeSelection() {
+        const typeCards = document.querySelectorAll('.consultation-type-card');
+        const typeSelect = document.getElementById('id_tipo_consulta');
+        
+        typeCards.forEach(card => {
+            card.addEventListener('click', () => {
+                // Remover selección anterior
+                typeCards.forEach(c => c.classList.remove('selected'));
+                
+                // Seleccionar nueva tarjeta
+                card.classList.add('selected');
+                
+                // Actualizar select
+                const tipo = card.dataset.tipo;
+                typeSelect.value = tipo;
+                
+                // Calcular duración
+                this.calculateDuration();
+            });
+        });
+    }
+
+    calculateIMC() {
+        const peso = parseFloat(document.getElementById('id_peso')?.value) || 0;
+        const altura = parseFloat(document.getElementById('id_altura')?.value) || 0;
+        
+        if (peso > 0 && altura > 0) {
+            const imc = peso / (altura * altura);
+            const imcRounded = Math.round(imc * 100) / 100;
+            
+            this.imcValue.textContent = imcRounded;
+            
+            let category, className;
+            if (imc < 18.5) {
+                category = "Bajo peso";
+                className = "imc-warning";
+            } else if (imc < 25) {
+                category = "Peso normal";
+                className = "imc-normal";
+            } else if (imc < 30) {
+                category = "Sobrepeso";
+                className = "imc-warning";
+            } else {
+                category = "Obesidad";
+                className = "imc-danger";
+            }
+            
+            this.imcCategory.textContent = category;
+            this.imcDisplay.className = `imc-display ${className}`;
+            this.imcDisplay.style.display = 'block';
+        } else {
+            this.imcDisplay.style.display = 'none';
+        }
+    }
+
+    calculateDuration() {
+        const tipoConsulta = document.getElementById('id_tipo_consulta')?.value;
+        const duracionField = document.getElementById('id_duracion_consulta');
+        
+        const duraciones = {
+            'Primera Vez': 45,
+            'Control': 20,
+            'Emergencia': 30,
+            'Seguimiento': 25,
+            'Especialista': 60,
+        };
+        
+        const duracionEstimada = duraciones[tipoConsulta] || 30;
+        this.duracionEstimada.textContent = duracionEstimada;
+        
+        if (duracionField && !duracionField.value) {
+            duracionField.value = duracionEstimada;
+            this.duracionAuto.style.display = 'block';
+        }
+    }
+
+    checkMedicalAlerts() {
+        const alertas = [];
+        
+        // Alerta por temperatura
+        const temperatura = parseFloat(document.getElementById('id_temperatura')?.value) || 0;
+        if (temperatura > 38) {
+            alertas.push(`⚠️ Temperatura elevada: ${temperatura}°C`);
+        }
+        
+        // Alerta por presión arterial
+        const presion = document.getElementById('id_presion_arterial')?.value;
+        if (presion) {
+            try {
+                const [sistolica, diastolica] = presion.split('/').map(Number);
+                if (sistolica > 140 || diastolica > 90) {
+                    alertas.push(`⚠️ Presión arterial alta: ${presion}`);
+                } else if (sistolica < 90 || diastolica < 60) {
+                    alertas.push(`⚠️ Presión arterial baja: ${presion}`);
+                }
+            } catch (e) {
+                // Ignorar errores de formato
+            }
+        }
+        
+        // Alerta por frecuencia cardíaca
+        const fc = parseInt(document.getElementById('id_frecuencia_cardiaca')?.value) || 0;
+        if (fc > 100) {
+            alertas.push(`⚠️ Frecuencia cardíaca alta: ${fc} lpm`);
+        } else if (fc > 0 && fc < 60) {
+            alertas.push(`⚠️ Frecuencia cardíaca baja: ${fc} lpm`);
+        }
+        
+        // Alerta por IMC
+        const peso = parseFloat(document.getElementById('id_peso')?.value) || 0;
+        const altura = parseFloat(document.getElementById('id_altura')?.value) || 0;
+        if (peso > 0 && altura > 0) {
+            const imc = peso / (altura * altura);
+            if (imc < 18.5) {
+                alertas.push(`⚠️ IMC bajo: ${Math.round(imc * 100) / 100} (Bajo peso)`);
+            } else if (imc > 30) {
+                alertas.push(`⚠️ IMC alto: ${Math.round(imc * 100) / 100} (Obesidad)`);
+            }
+        }
+        
+        // Mostrar alertas
+        if (alertas.length > 0) {
+            this.alertasContainer.innerHTML = alertas.map(alerta => 
+                `<div class="alert-medical">${alerta}</div>`
+            ).join('');
+            this.alertasMedicas.style.display = 'block';
+        } else {
+            this.alertasMedicas.style.display = 'none';
+        }
+    }
+
+    validateField(field) {
+        const value = field.value.trim();
+        const isRequired = field.hasAttribute('required');
+        
+        // Remover clases anteriores
+        field.classList.remove('is-valid', 'is-invalid');
+        
+        if (isRequired && !value) {
+            field.classList.add('is-invalid');
+            return false;
+        }
+        
+        if (value) {
+            // Validaciones específicas
+            if (field.id === 'id_presion_arterial' && !this.isValidPressure(value)) {
+                field.classList.add('is-invalid');
+                return false;
+            }
+            
+            if (field.id === 'id_temperatura' && !this.isValidTemperature(value)) {
+                field.classList.add('is-invalid');
+                return false;
+            }
+            
+            field.classList.add('is-valid');
+            return true;
+        }
+        
+        return true;
+    }
+
+    isValidPressure(pressure) {
+        const regex = /^\d{2,3}\/\d{2,3}$/;
+        if (!regex.test(pressure)) return false;
+        
+        const [sistolica, diastolica] = pressure.split('/').map(Number);
+        return sistolica > diastolica && sistolica >= 60 && sistolica <= 200 && 
+               diastolica >= 40 && diastolica <= 130;
+    }
+
+    isValidTemperature(temp) {
+        const tempValue = parseFloat(temp);
+        return tempValue >= 35.0 && tempValue <= 42.0;
+    }
+
+    updateProgress() {
+        let completed = 0;
+        let total = this.requiredFields.length;
+        
+        this.requiredFields.forEach(field => {
+            if (field.value.trim()) {
+                completed++;
+            }
+        });
+        
+        const percentage = Math.round((completed / total) * 100);
+        this.progressFill.style.width = percentage + '%';
+        this.progressPercentage.textContent = percentage + '%';
+        
+        // Cambiar color según progreso
+        if (percentage < 30) {
+            this.progressFill.style.background = 'linear-gradient(90deg, #dc3545, #fd7e14)';
+        } else if (percentage < 70) {
+            this.progressFill.style.background = 'linear-gradient(90deg, #ffc107, #fd7e14)';
+        } else {
+            this.progressFill.style.background = 'linear-gradient(90deg, #28a745, #20c997)';
+        }
+    }
+
+    validateForm() {
+        let isValid = true;
+        
+        this.requiredFields.forEach(field => {
+            if (!this.validateField(field)) {
+                isValid = false;
+            }
+        });
+        
+        return isValid;
+    }
+
+    showValidationErrors() {
+        const invalidFields = this.form.querySelectorAll('.is-invalid');
+        if (invalidFields.length > 0) {
+            const firstInvalid = invalidFields[0];
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus();
+            
+            alert(`Por favor completa ${invalidFields.length} campo(s) obligatorio(s) marcados con *`);
+        }
+    }
+}
+
+// Función para búsqueda rápida de pacientes
+function buscarPacienteRapido() {
+    const query = prompt('Ingresa el nombre o documento del paciente:');
+    if (query) {
+        fetch(`/consultas/buscar-pacientes/?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.pacientes.length > 0) {
+                    const paciente = data.pacientes[0];
+                    const pacienteSelect = document.getElementById('id_paciente');
+                    pacienteSelect.value = paciente.id;
+                    alert(`Paciente encontrado: ${paciente.nombre} (${paciente.documento})`);
+                } else {
+                    alert('No se encontraron pacientes con ese criterio.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al buscar paciente.');
+            });
+    }
+}
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    new AdvancedConsultationForm();
+});
+</script>
 {% endblock %}

@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Estadísticas de Consultas | HealthLife{% endblock %}
+
+{% block content %}
+<style>
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.stats-number {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.stats-label {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.chart-container {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.progress-custom {
+    height: 25px;
+    border-radius: 12px;
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-bar-custom {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 0.6s ease;
+}
+</style>
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary"><i class="bi bi-graph-up me-2"></i>Estadísticas de Consultas</h2>
+
+    <!-- Estadísticas Generales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ total_consultas }}</div>
+                <div class="stats-label">Total Consultas</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="stats-number">{{ consultas_mes }}</div>
+                <div class="stats-label">Este Mes</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="stats-number">{{ duracion_promedio }}</div>
+                <div class="stats-label">Minutos Promedio</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="stats-number">Q{{ costo_promedio }}</div>
+                <div class="stats-label">Costo Promedio</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Consultas por Tipo -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="text-primary mb-3"><i class="bi bi-pie-chart me-2"></i>Consultas por Tipo</h5>
+                {% for tipo in consultas_por_tipo %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold">{{ tipo.tipo_consulta }}</span>
+                            <span class="text-muted">{{ tipo.total }}</span>
+                        </div>
+                        <div class="progress-custom">
+                                                         <div class="progress-bar-custom" 
+                                  style="width: {% widthratio tipo.total total_consultas 100 %}%; background: linear-gradient(90deg, #667eea, #764ba2);">
+                             </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Consultas por Estado -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="text-primary mb-3"><i class="bi bi-check-circle me-2"></i>Consultas por Estado</h5>
+                {% for estado in consultas_por_estado %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold">{{ estado.estado }}</span>
+                            <span class="text-muted">{{ estado.total }}</span>
+                        </div>
+                        <div class="progress-custom">
+                                                         <div class="progress-bar-custom" 
+                                  style="width: {% widthratio estado.total total_consultas 100 %}%; background: {% if estado.estado == 'Completada' %}linear-gradient(90deg, #43e97b, #38f9d7){% elif estado.estado == 'Programada' %}linear-gradient(90deg, #f093fb, #f5576c){% else %}linear-gradient(90deg, #4facfe, #00f2fe){% endif %};">
+                             </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Doctores -->
+    <div class="row">
+        <div class="col-12">
+            <div class="chart-container">
+                <h5 class="text-primary mb-3"><i class="bi bi-person-badge me-2"></i>Top Doctores</h5>
+                <div class="row">
+                    {% for doctor in doctores_top %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <div class="mb-2">
+                                        <i class="bi bi-person-circle text-primary" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <h6 class="card-title mb-1">
+                                        {{ doctor.doctor__first_name|default:"" }} {{ doctor.doctor__last_name|default:"" }}
+                                    </h6>
+                                    <p class="text-muted mb-2">{{ doctor.total }} consultas</p>
+                                    <div class="progress-custom">
+                                                                                 <div class="progress-bar-custom" 
+                                              style="width: {% widthratio doctor.total total_consultas 100 %}%; background: linear-gradient(90deg, #667eea, #764ba2);">
+                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="text-center mt-4">
+        <a href="{% url 'listar_consultas' %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-arrow-left me-2"></i>Volver a Consultas
+        </a>
+        <a href="{% url 'exportar_consultas_excel' %}" class="btn btn-success btn-lg ms-3">
+            <i class="bi bi-file-earmark-excel me-2"></i>Exportar Datos
+        </a>
+    </div>
+</div>
+
+<script>
+// Animación de números
+function animateNumbers() {
+    const numbers = document.querySelectorAll('.stats-number');
+    numbers.forEach(number => {
+        const finalValue = parseInt(number.textContent.replace(/\D/g, ''));
+        let currentValue = 0;
+        const increment = finalValue / 50;
+        
+        const timer = setInterval(() => {
+            currentValue += increment;
+            if (currentValue >= finalValue) {
+                currentValue = finalValue;
+                clearInterval(timer);
+            }
+            
+            if (number.textContent.includes('Q')) {
+                number.textContent = 'Q' + Math.floor(currentValue);
+            } else {
+                number.textContent = Math.floor(currentValue);
+            }
+        }, 50);
+    });
+}
+
+// Inicializar animaciones cuando la página cargue
+document.addEventListener('DOMContentLoaded', function() {
+    animateNumbers();
+});
+</script>
+{% endblock %} 

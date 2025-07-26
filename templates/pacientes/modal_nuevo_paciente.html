@@ -1,76 +1,541 @@
+<!-- Modal para Nuevo Paciente -->
 <div class="modal fade" id="modalNuevoPaciente" tabindex="-1" aria-labelledby="modalNuevoPacienteLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content shadow">
-        <form method="post" action="{% url 'crear_paciente' %}">
-          {% csrf_token %}
-          <div class="modal-header bg-success text-white">
-            <h5 class="modal-title" id="modalNuevoPacienteLabel">
-              <i class="bi bi-person-plus-fill me-2"></i>Nuevo Paciente
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-          </div>
-  
-          <div class="modal-body">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Primer Nombre</label>
-                <input type="text" name="primer_nombre" class="form-control" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Otros Nombres</label>
-                <input type="text" name="otros_nombres" class="form-control">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Primer Apellido</label>
-                <input type="text" name="primer_apellido" class="form-control" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Segundo Apellido</label>
-                <input type="text" name="segundo_apellido" class="form-control">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Apellido de Casada</label>
-                <input type="text" name="apellido_casada" class="form-control">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Género</label>
-                <select name="genero" class="form-select" required>
-                  <option value="">Seleccione</option>
-                  <option value="M">Masculino</option>
-                  <option value="F">Femenino</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Fecha de Nacimiento</label>
-                <input type="date" name="fecha_nacimiento" class="form-control" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">DPI</label>
-                <input type="text" name="dpi" class="form-control">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Correo Electrónico</label>
-                <input type="email" name="email" class="form-control">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Celular</label>
-                <input type="text" name="celular" class="form-control" required>
-              </div>
-              <div class="col-md-12">
-                <label class="form-label">Dirección</label>
-                <textarea name="direccion" class="form-control" rows="2"></textarea>
-              </div>
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <!-- Header del Modal -->
+            <div class="modal-header" style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; border: none;">
+                <h5 class="modal-title" id="modalNuevoPacienteLabel">
+                    <i class="bi bi-person-plus me-2"></i>Nuevo Paciente
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-          </div>
-  
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-success">
-              <i class="bi bi-save me-1"></i>Guardar Paciente
-            </button>
-          </div>
-        </form>
-      </div>
+
+            <!-- Body del Modal -->
+            <div class="modal-body p-4">
+                <!-- Indicador de Progreso -->
+                <div class="progress mb-4" style="height: 8px; border-radius: 4px; background-color: #e5e7eb;">
+                    <div class="progress-bar" id="progressBar" role="progressbar" style="width: 20%; background: #2563eb; border-radius: 4px; transition: width 0.3s ease;"></div>
+                </div>
+
+                <form method="post" action="{% url 'nuevo_paciente' %}" id="pacienteForm">
+                    {% csrf_token %}
+                    
+                    <!-- Pestañas de Navegación -->
+                    <ul class="nav nav-tabs mb-4" id="pacienteTabs" role="tablist" style="border-bottom: 2px solid #e5e7eb;">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="generales-tab" data-bs-toggle="tab" data-bs-target="#generales" type="button" role="tab" style="color: #6b7280; border: none; padding: 12px 20px; font-weight: 500; border-radius: 8px 8px 0 0;">
+                                <i class="bi bi-person me-2"></i>Generales
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="direccion-tab" data-bs-toggle="tab" data-bs-target="#direccion" type="button" role="tab" style="color: #6b7280; border: none; padding: 12px 20px; font-weight: 500; border-radius: 8px 8px 0 0;">
+                                <i class="bi bi-geo-alt me-2"></i>Dirección
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="telefonos-tab" data-bs-toggle="tab" data-bs-target="#telefonos" type="button" role="tab" style="color: #6b7280; border: none; padding: 12px 20px; font-weight: 500; border-radius: 8px 8px 0 0;">
+                                <i class="bi bi-telephone me-2"></i>Teléfonos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab" style="color: #6b7280; border: none; padding: 12px 20px; font-weight: 500; border-radius: 8px 8px 0 0;">
+                                <i class="bi bi-gear me-2"></i>Admin
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="extras-tab" data-bs-toggle="tab" data-bs-target="#extras" type="button" role="tab" style="color: #6b7280; border: none; padding: 12px 20px; font-weight: 500; border-radius: 8px 8px 0 0;">
+                                <i class="bi bi-plus-circle me-2"></i>Extras
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Contenido de las Pestañas -->
+                    <div class="tab-content" id="pacienteTabContent">
+                        <!-- Pestaña Generales -->
+                        <div class="tab-pane fade show active" id="generales" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.primer_nombre.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-person me-1"></i>Primer Nombre *
+                                    </label>
+                                    {{ form.primer_nombre }}
+                                    {% if form.primer_nombre.errors %}
+                                        <div class="text-danger small mt-1">{{ form.primer_nombre.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.otros_nombres.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-person me-1"></i>Otros Nombres
+                                    </label>
+                                    {{ form.otros_nombres }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.primer_apellido.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-person me-1"></i>Primer Apellido *
+                                    </label>
+                                    {{ form.primer_apellido }}
+                                    {% if form.primer_apellido.errors %}
+                                        <div class="text-danger small mt-1">{{ form.primer_apellido.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.segundo_apellido.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-person me-1"></i>Segundo Apellido
+                                    </label>
+                                    {{ form.segundo_apellido }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.fecha_nacimiento.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-calendar me-1"></i>Fecha de Nacimiento *
+                                    </label>
+                                    {{ form.fecha_nacimiento }}
+                                    {% if form.fecha_nacimiento.errors %}
+                                        <div class="text-danger small mt-1">{{ form.fecha_nacimiento.errors.0 }}</div>
+                                    {% endif %}
+                                    <div id="edad-display" class="text-success small mt-1" style="display: none;">
+                                        <i class="bi bi-info-circle me-1"></i>Edad: <span id="edad-text"></span> años
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.genero.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-gender-ambiguous me-1"></i>Género *
+                                    </label>
+                                    {{ form.genero }}
+                                    {% if form.genero.errors %}
+                                        <div class="text-danger small mt-1">{{ form.genero.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.tipo_documento.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-card-text me-1"></i>Tipo de Documento *
+                                    </label>
+                                    {{ form.tipo_documento }}
+                                    {% if form.tipo_documento.errors %}
+                                        <div class="text-danger small mt-1">{{ form.tipo_documento.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.documento_identificacion.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-card-text me-1"></i>Número de Documento *
+                                    </label>
+                                    {{ form.documento_identificacion }}
+                                    {% if form.documento_identificacion.errors %}
+                                        <div class="text-danger small mt-1">{{ form.documento_identificacion.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Dirección -->
+                        <div class="tab-pane fade" id="direccion" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.direccion.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-house me-1"></i>Dirección *
+                                    </label>
+                                    {{ form.direccion }}
+                                    {% if form.direccion.errors %}
+                                        <div class="text-danger small mt-1">{{ form.direccion.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.ciudad.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-building me-1"></i>Ciudad *
+                                    </label>
+                                    {{ form.ciudad }}
+                                    {% if form.ciudad.errors %}
+                                        <div class="text-danger small mt-1">{{ form.ciudad.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.departamento.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-geo-alt me-1"></i>Departamento *
+                                    </label>
+                                    {{ form.departamento }}
+                                    {% if form.departamento.errors %}
+                                        <div class="text-danger small mt-1">{{ form.departamento.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.codigo_postal.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-pin-map me-1"></i>Código Postal
+                                    </label>
+                                    {{ form.codigo_postal }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Teléfonos -->
+                        <div class="tab-pane fade" id="telefonos" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.telefono.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-telephone me-1"></i>Teléfono Principal *
+                                    </label>
+                                    {{ form.telefono }}
+                                    {% if form.telefono.errors %}
+                                        <div class="text-danger small mt-1">{{ form.telefono.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.telefono_secundario.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-telephone-plus me-1"></i>Teléfono Secundario
+                                    </label>
+                                    {{ form.telefono_secundario }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.correo.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-envelope me-1"></i>Correo Electrónico
+                                    </label>
+                                    {{ form.correo }}
+                                    {% if form.correo.errors %}
+                                        <div class="text-danger small mt-1">{{ form.correo.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.contacto_emergencia.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-person-exclamation me-1"></i>Contacto de Emergencia
+                                    </label>
+                                    {{ form.contacto_emergencia }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.telefono_emergencia.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-telephone-x me-1"></i>Teléfono de Emergencia
+                                    </label>
+                                    {{ form.telefono_emergencia }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.parentesco_emergencia.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-people me-1"></i>Parentesco
+                                    </label>
+                                    {{ form.parentesco_emergencia }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Admin -->
+                        <div class="tab-pane fade" id="admin" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.estado.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-toggle-on me-1"></i>Estado *
+                                    </label>
+                                    {{ form.estado }}
+                                    {% if form.estado.errors %}
+                                        <div class="text-danger small mt-1">{{ form.estado.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.estado_civil.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-heart me-1"></i>Estado Civil
+                                    </label>
+                                    {{ form.estado_civil }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.ocupacion.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-briefcase me-1"></i>Ocupación
+                                    </label>
+                                    {{ form.ocupacion }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.nivel_educativo.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-mortarboard me-1"></i>Nivel Educativo
+                                    </label>
+                                    {{ form.nivel_educativo }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Extras -->
+                        <div class="tab-pane fade" id="extras" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.grupo_sanguineo.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-droplet me-1"></i>Grupo Sanguíneo
+                                    </label>
+                                    {{ form.grupo_sanguineo }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.factor_rh.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-plus-slash-minus me-1"></i>Factor RH
+                                    </label>
+                                    {{ form.factor_rh }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.alergias.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-exclamation-triangle me-1"></i>Alergias
+                                    </label>
+                                    {{ form.alergias }}
+                                    <div class="form-text">Separar múltiples alergias con comas</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.antecedentes_medicos.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-clipboard2-pulse me-1"></i>Antecedentes Médicos
+                                    </label>
+                                    {{ form.antecedentes_medicos }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.medicamentos_actuales.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-capsule me-1"></i>Medicamentos Actuales
+                                    </label>
+                                    {{ form.medicamentos_actuales }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.es_donador.id_for_label }}" class="form-label" style="color: #6b7280; font-weight: 500; margin-bottom: 6px;">
+                                        <i class="bi bi-heart-pulse me-1"></i>¿Es Donador de Órganos?
+                                    </label>
+                                    {{ form.es_donador }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer del Modal -->
+            <div class="modal-footer" style="border-top: 1px solid #e5e7eb; padding: 20px;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background: #6b7280; border: none; padding: 10px 20px; border-radius: 8px;">
+                    <i class="bi bi-x-circle me-2"></i>Cancelar
+                </button>
+                <button type="submit" form="pacienteForm" class="btn btn-primary" style="background: #2563eb; border: none; padding: 10px 20px; border-radius: 8px;">
+                    <i class="bi bi-check-circle me-2"></i>Guardar Paciente
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
-  
+</div>
+
+<style>
+/* Estilos para el modal médico */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-footer {
+    border-radius: 0 0 12px 12px;
+}
+
+/* Estilos para las pestañas */
+.nav-tabs .nav-link {
+    color: #6b7280 !important;
+    border: none !important;
+    padding: 12px 20px !important;
+    font-weight: 500 !important;
+    border-radius: 8px 8px 0 0 !important;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #2563eb !important;
+    background-color: #f3f4f6;
+}
+
+.nav-tabs .nav-link.active {
+    color: #2563eb !important;
+    background-color: white !important;
+    border-bottom: 3px solid #2563eb !important;
+}
+
+/* Estilos para los campos del formulario */
+.form-control, .form-select {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    padding: 10px 12px !important;
+    font-size: 0.9rem !important;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+    outline: none !important;
+}
+
+.form-label {
+    color: #6b7280 !important;
+    font-weight: 500 !important;
+    margin-bottom: 6px !important;
+    font-size: 0.9rem !important;
+}
+
+/* Estilos para los botones */
+.btn {
+    font-weight: 500 !important;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilos para el progreso */
+.progress {
+    background-color: #e5e7eb !important;
+    border-radius: 4px !important;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #2563eb, #1e40af) !important;
+    border-radius: 4px !important;
+}
+
+/* Estilos para mensajes de error */
+.text-danger {
+    color: #ef4444 !important;
+    font-size: 0.8rem !important;
+}
+
+/* Estilos para el texto de ayuda */
+.form-text {
+    color: #6b7280 !important;
+    font-size: 0.8rem !important;
+}
+
+/* Animaciones */
+.tab-pane {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<script>
+// Funcionalidades del modal
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('modalNuevoPaciente');
+    const form = document.getElementById('pacienteForm');
+    const progressBar = document.getElementById('progressBar');
+    const tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    
+    let currentTab = 0;
+    const totalTabs = tabs.length;
+
+    // Función para actualizar el progreso
+    function updateProgress() {
+        const progress = ((currentTab + 1) / totalTabs) * 100;
+        progressBar.style.width = progress + '%';
+    }
+
+    // Función para validar la pestaña actual
+    function validateCurrentTab() {
+        const currentPane = tabPanes[currentTab];
+        const requiredFields = currentPane.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.style.borderColor = '#ef4444';
+            } else {
+                field.style.borderColor = '#e5e7eb';
+            }
+        });
+
+        return isValid;
+    }
+
+    // Manejar cambios de pestaña
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('click', function(e) {
+            if (index > currentTab && !validateCurrentTab()) {
+                e.preventDefault();
+                alert('Por favor completa todos los campos requeridos antes de continuar.');
+                return;
+            }
+            currentTab = index;
+            updateProgress();
+        });
+    });
+
+    // Cálculo automático de edad
+    const fechaNacimiento = document.getElementById('{{ form.fecha_nacimiento.id_for_label }}');
+    const edadDisplay = document.getElementById('edad-display');
+    const edadText = document.getElementById('edad-text');
+
+    fechaNacimiento.addEventListener('change', function() {
+        if (this.value) {
+            const fecha = new Date(this.value);
+            const hoy = new Date();
+            const edad = hoy.getFullYear() - fecha.getFullYear();
+            const mes = hoy.getMonth() - fecha.getMonth();
+            
+            if (mes < 0 || (mes === 0 && hoy.getDate() < fecha.getDate())) {
+                edad--;
+            }
+            
+            edadText.textContent = edad;
+            edadDisplay.style.display = 'block';
+        } else {
+            edadDisplay.style.display = 'none';
+        }
+    });
+
+    // Formateo automático de teléfonos
+    const telefonos = document.querySelectorAll('input[type="tel"]');
+    telefonos.forEach(telefono => {
+        telefono.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length <= 10) {
+                value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            }
+            this.value = value;
+        });
+    });
+
+    // Formateo automático de documento
+    const documento = document.getElementById('{{ form.documento_identificacion.id_for_label }}');
+    documento.addEventListener('input', function() {
+        let value = this.value.replace(/\D/g, '');
+        if (value.length <= 10) {
+            value = value.replace(/(\d{3})(\d{3})(\d{4})/, '$1.$2.$3');
+        }
+        this.value = value;
+    });
+
+    // Validación en tiempo real
+    const requiredFields = form.querySelectorAll('[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.style.borderColor = '#ef4444';
+            } else {
+                this.style.borderColor = '#10b981';
+            }
+        });
+    });
+
+    // Manejo del envío del formulario
+    form.addEventListener('submit', function(e) {
+        if (!validateCurrentTab()) {
+            e.preventDefault();
+            alert('Por favor completa todos los campos requeridos antes de enviar.');
+            return;
+        }
+        
+        // Mostrar indicador de carga
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Guardando...';
+        submitBtn.disabled = true;
+    });
+
+    // Inicializar progreso
+    updateProgress();
+});
+</script>

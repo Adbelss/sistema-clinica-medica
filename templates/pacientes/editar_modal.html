@@ -1,0 +1,108 @@
+<div class="modal fade" id="modalEditarPaciente" tabindex="-1" aria-labelledby="editarPacienteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <form method="POST" action="{% url 'editar_paciente' paciente.id %}">
+          {% csrf_token %}
+          <div class="modal-header bg-warning text-dark">
+            <h5 class="modal-title" id="editarPacienteLabel"><i class="bi bi-pencil-square me-2"></i>Editar Paciente</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+  
+          <div class="modal-body">
+            <ul class="nav nav-tabs mb-3" id="tabsEditar" role="tablist">
+              <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#edit-generales">Generales</a></li>
+              <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#edit-direccion">Dirección</a></li>
+              <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#edit-telefonos">Teléfonos</a></li>
+              <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#edit-admin">Admin</a></li>
+              <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#edit-extras">Extras</a></li>
+            </ul>
+  
+            <div class="tab-content">
+              <!-- Generales -->
+              <div class="tab-pane fade show active" id="edit-generales">
+                <div class="row">
+                  <div class="col-md-4">{{ form.primer_nombre.label_tag }} {{ form.primer_nombre }}</div>
+                  <div class="col-md-4">{{ form.otros_nombres.label_tag }} {{ form.otros_nombres }}</div>
+                  <div class="col-md-4">{{ form.apellido_casada.label_tag }} {{ form.apellido_casada }}</div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-4">{{ form.primer_apellido.label_tag }} {{ form.primer_apellido }}</div>
+                  <div class="col-md-4">{{ form.segundo_apellido.label_tag }} {{ form.segundo_apellido }}</div>
+                  <div class="col-md-4">{{ form.fecha_nacimiento.label_tag }} {{ form.fecha_nacimiento }}</div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-4">{{ form.tipo_documento.label_tag }} {{ form.tipo_documento }}</div>
+                  <div class="col-md-4">{{ form.documento_identificacion.label_tag }} {{ form.documento_identificacion }}</div>
+                  <div class="col-md-4">{{ form.nit.label_tag }} {{ form.nit }}</div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-4">{{ form.genero.label_tag }} {{ form.genero }}</div>
+                  <div class="col-md-4">{{ form.identidad_genero.label_tag }} {{ form.identidad_genero }}</div>
+                  <div class="col-md-4">{{ form.nacionalidad.label_tag }} {{ form.nacionalidad }}</div>
+                </div>
+              </div>
+  
+              <!-- Dirección -->
+              <div class="tab-pane fade" id="edit-direccion">
+                <div class="row">
+                  <div class="col-md-6">{{ form.direccion.label_tag }} {{ form.direccion }}</div>
+                  <div class="col-md-6">{{ form.ciudad.label_tag }} {{ form.ciudad }}</div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-4">{{ form.zona.label_tag }} {{ form.zona }}</div>
+                  <div class="col-md-4">{{ form.codigo_postal.label_tag }} {{ form.codigo_postal }}</div>
+                  <div class="col-md-4">{{ form.pais.label_tag }} {{ form.pais }}</div>
+                </div>
+              </div>
+  
+              <!-- Teléfonos -->
+              <div class="tab-pane fade" id="edit-telefonos">
+                <div class="row">
+                  <div class="col-md-4">{{ form.telefono.label_tag }} {{ form.telefono }}</div>
+                  <div class="col-md-4">{{ form.notificar_whatsapp }} WhatsApp</div>
+                  <div class="col-md-4">{{ form.notificar_correo }} Correo</div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-4">{{ form.notificar_sms }} SMS</div>
+                </div>
+              </div>
+  
+              <!-- Admin -->
+              <div class="tab-pane fade" id="edit-admin">
+                <div class="row">
+                  <div class="col-md-6">{{ form.estado.label_tag }} {{ form.estado }}</div>
+                  <div class="col-md-6">{{ form.enviar_recordatorio.label_tag }} {{ form.enviar_recordatorio }}</div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-12">{{ form.notas.label_tag }} {{ form.notas }}</div>
+                </div>
+              </div>
+  
+              <!-- Extras -->
+              <div class="tab-pane fade" id="edit-extras">
+                <div class="row">
+                  <div class="col-md-4">{{ form.grupo_sanguineo.label_tag }} {{ form.grupo_sanguineo }}</div>
+                  <div class="col-md-4">{{ form.alergias.label_tag }} {{ form.alergias }}</div>
+                  <div class="col-md-4">{{ form.tipo_paciente.label_tag }} {{ form.tipo_paciente }}</div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-4">{{ form.discapacidad.label_tag }} {{ form.discapacidad }}</div>
+                  <div class="col-md-4">{{ form.es_donador }} ¿Es donador?</div>
+                  <div class="col-md-4">{{ form.fecha_donacion.label_tag }} {{ form.fecha_donacion }}</div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-12">{{ form.comentarios_donacion.label_tag }} {{ form.comentarios_donacion }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-warning"><i class="bi bi-save"></i> Actualizar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  

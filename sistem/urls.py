@@ -2,22 +2,22 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LogoutView
-from django.urls import path, include
-
 
 from consultas.views import dashboard
+from usuarios.views import custom_login, custom_logout, validate_credentials
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', dashboard, name='dashboard'),  # Página principal: dashboard
     path('consultas/', include('consultas.urls')),
 
-    # 🔄 NUEVO: ahora todas las configuraciones vienen de usuarios.urls
-    path('configuraciones/', include('usuarios.urls')),
+    # Configuraciones y gestión de usuarios
+    path('usuarios/', include('usuarios.urls')),
 
-    # Login/Logout
-    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
+    # Login/Logout Personalizado con Seguridad Avanzada
+    path('login/', custom_login, name='login'),
+    path('logout/', custom_logout, name='logout'),
+    path('api/validate-credentials/', validate_credentials, name='validate_credentials'),
 
     # Recuperación de contraseña
     path('password_reset/', auth_views.PasswordResetView.as_view(
@@ -32,10 +32,12 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
         template_name='registration/password_reset_complete.html'), name='password_reset_complete'),
 
-    # (solo si tienes una app respaldo)
+    # Respaldo
     path('respaldo/', include('respaldo.urls')),
 
-    #pacientes 
-    path('pacientes/', include('pacientes.urls')), 
+    # Pacientes 
+    path('pacientes/', include('pacientes.urls')),
     
+    # Agenda
+    path('agenda/', include('agenda.urls')),
 ]

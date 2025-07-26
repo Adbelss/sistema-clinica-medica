@@ -1,9 +1,7 @@
-from django.contrib import admin
 from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('configuraciones/', views.configuraciones, name='configuraciones'),
     path('respaldar/', views.respaldo_base_datos, name='respaldar_bd'),
     path('restaurar/', views.restaurar_base_datos, name='restaurar_bd'),

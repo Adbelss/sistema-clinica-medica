@@ -1,0 +1,547 @@
+{% extends 'base.html' %}
+
+{% block title %}Agenda | HealthLife{% endblock %}
+
+{% block content %}
+<style>
+/* Variables CSS para el sistema médico */
+:root {
+    --primary-blue: #2563eb;
+    --secondary-blue: #1e40af;
+    --accent-blue: #3b82f6;
+    --medical-green: #10b981;
+    --medical-red: #ef4444;
+    --medical-yellow: #f59e0b;
+    --medical-gray: #6b7280;
+    --light-gray: #f3f4f6;
+    --white: #ffffff;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --border-radius: 12px;
+    --border-radius-small: 8px;
+    --transition: all 0.3s ease;
+}
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    color: white;
+    padding: 24px 0;
+    margin-bottom: 24px;
+    border-radius: var(--border-radius);
+}
+
+.page-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    opacity: 0.9;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+/* Stats Cards */
+.stats-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    box-shadow: var(--shadow-light);
+    transition: var(--transition);
+    border-left: 4px solid var(--primary-blue);
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.stats-card.success {
+    border-left-color: var(--medical-green);
+}
+
+.stats-card.warning {
+    border-left-color: var(--medical-yellow);
+}
+
+.stats-card.danger {
+    border-left-color: var(--medical-red);
+}
+
+.stats-card.info {
+    border-left-color: var(--accent-blue);
+}
+
+.stats-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: 8px;
+}
+
+.stats-card.success .stats-number {
+    color: var(--medical-green);
+}
+
+.stats-card.warning .stats-number {
+    color: var(--medical-yellow);
+}
+
+.stats-card.danger .stats-number {
+    color: var(--medical-red);
+}
+
+.stats-card.info .stats-number {
+    color: var(--accent-blue);
+}
+
+.stats-label {
+    color: var(--medical-gray);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-icon {
+    font-size: 2.5rem;
+    opacity: 0.1;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
+
+/* Content Cards */
+.content-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.content-card:hover {
+    box-shadow: var(--shadow-medium);
+}
+
+.content-card .card-header {
+    background: var(--light-gray);
+    padding: 16px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.content-card .card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    color: var(--medical-gray);
+}
+
+.content-card .card-body {
+    padding: 24px;
+}
+
+/* Appointment List */
+.appointment-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+    transition: var(--transition);
+}
+
+.appointment-item:last-child {
+    border-bottom: none;
+}
+
+.appointment-item:hover {
+    background: #f9fafb;
+    margin: 0 -24px;
+    padding: 12px 24px;
+}
+
+.appointment-time {
+    background: var(--primary-blue);
+    color: white;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-small);
+    font-size: 0.85rem;
+    font-weight: 600;
+    min-width: 80px;
+    text-align: center;
+    margin-right: 16px;
+}
+
+.appointment-info {
+    flex: 1;
+}
+
+.appointment-patient {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
+}
+
+.appointment-doctor {
+    font-size: 0.85rem;
+    color: var(--medical-gray);
+}
+
+.appointment-status {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.appointment-status.programada {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent-blue);
+}
+
+.appointment-status.confirmada {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--medical-green);
+}
+
+.appointment-status.completada {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--medical-gray);
+}
+
+.appointment-status.cancelada {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--medical-red);
+}
+
+/* Action Buttons */
+.action-btn {
+    background: var(--primary-blue);
+    border: none;
+    border-radius: var(--border-radius-small);
+    color: white;
+    padding: 10px 16px;
+    font-weight: 500;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.action-btn:hover {
+    background: var(--secondary-blue);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
+    color: white;
+    text-decoration: none;
+}
+
+.action-btn.success {
+    background: var(--medical-green);
+}
+
+.action-btn.success:hover {
+    background: #059669;
+}
+
+.action-btn.warning {
+    background: var(--medical-yellow);
+}
+
+.action-btn.warning:hover {
+    background: #d97706;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.quick-action-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--shadow-light);
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    border-color: var(--primary-blue);
+}
+
+.quick-action-icon {
+    font-size: 2rem;
+    color: var(--primary-blue);
+    margin-bottom: 12px;
+}
+
+.quick-action-title {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.quick-action-desc {
+    font-size: 0.85rem;
+    color: var(--medical-gray);
+    margin-bottom: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 20px 0;
+    }
+    
+    .page-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .stats-card {
+        padding: 20px;
+    }
+    
+    .stats-number {
+        font-size: 1.75rem;
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animación de entrada sutil */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<div class="container-fluid">
+    <!-- Header de la página -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="bi bi-calendar-event me-3"></i>Agenda Clínica</h2>
+                <p>Gestiona citas, doctores y horarios del sistema médico</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'nueva_cita' %}" class="action-btn success">
+                    <i class="bi bi-plus-circle"></i>
+                    Nueva Cita
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="quick-actions">
+        <div class="quick-action-card">
+            <div class="quick-action-icon">
+                <i class="bi bi-calendar-plus"></i>
+            </div>
+            <div class="quick-action-title">Nueva Cita</div>
+            <div class="quick-action-desc">Programar una nueva cita médica</div>
+            <a href="{% url 'nueva_cita' %}" class="action-btn">Crear Cita</a>
+        </div>
+        
+        <div class="quick-action-card">
+            <div class="quick-action-icon">
+                <i class="bi bi-calendar-week"></i>
+            </div>
+            <div class="quick-action-title">Calendario</div>
+            <div class="quick-action-desc">Ver calendario mensual de citas</div>
+            <a href="{% url 'calendario' %}" class="action-btn">Ver Calendario</a>
+        </div>
+        
+        <div class="quick-action-card">
+            <div class="quick-action-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="quick-action-title">Doctores</div>
+            <div class="quick-action-desc">Gestionar doctores y especialidades</div>
+            <a href="{% url 'gestion_doctores' %}" class="action-btn">Gestionar</a>
+        </div>
+        
+        <div class="quick-action-card">
+            <div class="quick-action-icon">
+                <i class="bi bi-clock"></i>
+            </div>
+            <div class="quick-action-title">Horarios</div>
+            <div class="quick-action-desc">Configurar horarios de trabajo</div>
+            <a href="{% url 'disponibilidad_doctores' %}" class="action-btn">Configurar</a>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card success">
+                <div class="stats-number">{{ total_citas_hoy }}</div>
+                <div class="stats-label">Citas Hoy</div>
+                <i class="bi bi-calendar-check stats-icon"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card info">
+                <div class="stats-number">{{ citas_pendientes }}</div>
+                <div class="stats-label">Citas Pendientes</div>
+                <i class="bi bi-clock-history stats-icon"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card warning">
+                <div class="stats-number">{{ doctores_activos }}</div>
+                <div class="stats-label">Doctores Activos</div>
+                <i class="bi bi-person-badge stats-icon"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ proximas_citas|length }}</div>
+                <div class="stats-label">Próximas Citas</div>
+                <i class="bi bi-calendar-event stats-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Citas de Hoy -->
+        <div class="col-md-6">
+            <div class="content-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-calendar-day me-2"></i>Citas de Hoy</h5>
+                </div>
+                <div class="card-body">
+                    {% if citas_hoy %}
+                        {% for cita in citas_hoy %}
+                        <div class="appointment-item">
+                            <div class="appointment-time">
+                                {{ cita.hora_inicio|time:"H:i" }}
+                            </div>
+                            <div class="appointment-info">
+                                <div class="appointment-patient">{{ cita.paciente.nombre_completo }}</div>
+                                <div class="appointment-doctor">Dr. {{ cita.doctor.nombre_completo }}</div>
+                            </div>
+                            <span class="appointment-status {{ cita.estado }}">
+                                {{ cita.get_estado_display }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-calendar-x" style="font-size: 2rem; opacity: 0.5;"></i>
+                            <p class="mt-2">No hay citas programadas para hoy</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Próximas Citas -->
+        <div class="col-md-6">
+            <div class="content-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-calendar-week me-2"></i>Próximas Citas</h5>
+                </div>
+                <div class="card-body">
+                    {% if proximas_citas %}
+                        {% for cita in proximas_citas %}
+                        <div class="appointment-item">
+                            <div class="appointment-time">
+                                {{ cita.fecha|date:"d/m" }}
+                            </div>
+                            <div class="appointment-info">
+                                <div class="appointment-patient">{{ cita.paciente.nombre_completo }}</div>
+                                <div class="appointment-doctor">Dr. {{ cita.doctor.nombre_completo }} - {{ cita.hora_inicio|time:"H:i" }}</div>
+                            </div>
+                            <span class="appointment-status {{ cita.estado }}">
+                                {{ cita.get_estado_display }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-calendar-x" style="font-size: 2rem; opacity: 0.5;"></i>
+                            <p class="mt-2">No hay próximas citas programadas</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctores más ocupados esta semana -->
+    {% if doctores_ocupados %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="content-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-graph-up me-2"></i>Doctores más ocupados esta semana</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for doctor in doctores_ocupados %}
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex align-items-center p-3 border rounded">
+                                <i class="bi bi-person-circle text-primary me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <div class="fw-bold">{{ doctor.nombre_completo }}</div>
+                                    <div class="text-muted">{{ doctor.get_especialidad_display }}</div>
+                                    <small class="text-primary">{{ doctor.total_citas }} citas</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Funcionalidades del dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    // Efectos hover en las tarjetas
+    const cards = document.querySelectorAll('.stats-card, .content-card, .quick-action-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Actualizar estadísticas cada 5 minutos
+    setInterval(function() {
+        // Aquí se podría hacer una llamada AJAX para actualizar las estadísticas
+        console.log('Actualizando estadísticas...');
+    }, 300000);
+});
+</script>
+{% endblock %} 

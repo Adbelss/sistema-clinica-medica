@@ -1,34 +1,316 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Dashboard | HealthLife{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4 text-primary-emphasis"><i class="bi bi-speedometer2 me-2"></i>Bienvenido, {{ usuario }}</h2>
-
-    {% if messages %}
-        <div class="mt-3">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
-                    <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+<div class="container-fluid">
+    <!-- Header del Dashboard -->
+    <div class="dashboard-header text-center mb-5 fade-in">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1><i class="bi bi-speedometer2 me-3"></i>Dashboard Médico</h1>
+                <p class="mb-0">Bienvenido, {{ usuario }} | {{ fecha_actual }}</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <!-- Weather Widget -->
+                <div class="weather-widget d-inline-block">
+                    <i class="bi bi-cloud-sun weather-icon"></i>
+                    <div class="weather-temp">28°C</div>
+                    <div class="weather-desc">Soleado</div>
                 </div>
-            {% endfor %}
+            </div>
         </div>
-    {% endif %}
+    </div>
 
-    <!-- Estadísticas -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <a href="{% url 'listar_consultas' %}" class="text-decoration-none">
-                <div class="card shadow border-0" style="background: linear-gradient(135deg, #28a745, #4caf50);">
-                    <div class="card-header text-white fw-bold">Total de Consultas</div>
-                    <div class="card-body">
-                        <h5 class="card-title display-4 text-center text-white">{{ total_consultas }}</h5>
+    <div class="row fade-in">
+        <!-- Tarjetas de Estadísticas -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card primary">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stats-number">{{ total_consultas }}</div>
+                        <div class="stats-label">Total Consultas</div>
+                        <div class="stats-change positive">+12% este mes</div>
+                    </div>
+                    <i class="bi bi-journal-text text-primary" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card success">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stats-number">{{ total_pacientes }}</div>
+                        <div class="stats-label">Pacientes Activos</div>
+                        <div class="stats-change positive">+5% este mes</div>
+                    </div>
+                    <i class="bi bi-people text-success" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card warning">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stats-number">{{ consultas_hoy }}</div>
+                        <div class="stats-label">Consultas Hoy</div>
+                        <div class="stats-change positive">+3 vs ayer</div>
+                    </div>
+                    <i class="bi bi-calendar-check text-warning" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card danger">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stats-number">{{ consultas_emergencia|default:0 }}</div>
+                        <div class="stats-label">Emergencias</div>
+                        <div class="stats-change negative">+2 esta semana</div>
+                    </div>
+                    <i class="bi bi-exclamation-triangle text-danger" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row fade-in">
+        <!-- Gráficos y Análisis -->
+        <div class="col-lg-6 mb-4">
+            <div class="chart-container">
+                <h5><i class="bi bi-pie-chart me-2"></i>Consultas por Tipo</h5>
+                {% for tipo in tipos_consulta %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">{{ tipo.tipo_consulta }}</span>
+                            <span class="fw-bold">{{ tipo.total }} ({{ tipo.porcentaje|floatformat:1 }}%)</span>
+                        </div>
+                        <div class="progress-custom">
+                            <div class="progress-bar-custom" style="width: {% widthratio tipo.total total_consultas 100 %}%; background: {% if tipo.tipo_consulta == 'Emergencia' %}#ef4444{% elif tipo.tipo_consulta == 'Primera Vez' %}#2563eb{% else %}#10b981{% endif %};"></div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No hay datos de tipos de consulta.</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="chart-container">
+                <h5><i class="bi bi-graph-up me-2"></i>Actividad Semanal</h5>
+                <div class="row text-center">
+                    <div class="col">
+                        <div class="stats-number">{{ consultas_semana }}</div>
+                        <div class="stats-label">Esta Semana</div>
+                        <div class="progress-custom mt-2">
+                            <div class="progress-bar-custom" style="width: {% widthratio consultas_semana consultas_mes 100 %}%; background: #2563eb;"></div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="stats-number">{{ consultas_mes }}</div>
+                        <div class="stats-label">Este Mes</div>
+                        <div class="progress-custom mt-2">
+                            <div class="progress-bar-custom" style="width: 100%; background: #10b981;"></div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="stats-number">{{ duracion_promedio|floatformat:0 }} min</div>
+                        <div class="stats-label">Duración Promedio</div>
+                        <div class="progress-custom mt-2">
+                            <div class="progress-bar-custom" style="width: {% widthratio duracion_promedio 60 100 %}%; background: #f59e0b;"></div>
+                        </div>
                     </div>
                 </div>
-            </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row fade-in">
+        <!-- Alertas y Notificaciones -->
+        {% if alertas %}
+        <div class="col-lg-6 mb-4">
+            <div class="alert-card">
+                <h5><i class="bi bi-exclamation-triangle me-2"></i>Alertas Médicas</h5>
+                <div class="row">
+                    {% for alerta in alertas|slice:":6" %}
+                    <div class="col-12 mb-2">
+                        <span class="badge bg-danger me-2">¡Alerta!</span> {{ alerta }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Actividad Reciente -->
+        <div class="col-lg-6 mb-4">
+            <div class="recent-activity">
+                <h5><i class="bi bi-clock-history me-2"></i>Actividad Reciente</h5>
+                {% for consulta in ultimas_consultas %}
+                    <div class="activity-item">
+                        <div class="activity-icon {% if consulta.tipo_consulta == 'Emergencia' %}emergencia{% elif consulta.tipo_consulta == 'Primera Vez' %}paciente{% else %}consulta{% endif %}">
+                            <i class="bi {% if consulta.tipo_consulta == 'Emergencia' %}bi-heart-fill{% elif consulta.tipo_consulta == 'Primera Vez' %}bi-person-plus{% else %}bi-journal-medical{% endif %}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Consulta de {{ consulta.get_paciente_nombre }} ({{ consulta.tipo_consulta }})</div>
+                            <div class="activity-time">{{ consulta.fecha_consulta|date:"d M, H:i" }}</div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No hay actividad reciente.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row fade-in">
+        <!-- Acciones Rápidas -->
+        <div class="col-lg-6 mb-4">
+            <div class="chart-container">
+                <h5><i class="bi bi-lightning me-2"></i>Acciones Rápidas</h5>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <a href="{% url 'registrar_consulta' %}" class="quick-action-card d-block">
+                            <i class="bi bi-journal-plus quick-action-icon"></i>
+                            <div class="fw-bold">Nueva Consulta</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'listar_pacientes' %}" class="quick-action-card d-block" data-bs-toggle="modal" data-bs-target="#modalNuevoPaciente">
+                            <i class="bi bi-person-plus quick-action-icon"></i>
+                            <div class="fw-bold">Nuevo Paciente</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'listar_consultas' %}" class="quick-action-card d-block">
+                            <i class="bi bi-list-check quick-action-icon"></i>
+                            <div class="fw-bold">Ver Consultas</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'listar_pacientes' %}" class="quick-action-card d-block">
+                            <i class="bi bi-people quick-action-icon"></i>
+                            <div class="fw-bold">Ver Pacientes</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Próximas Citas -->
+        <div class="col-lg-6 mb-4">
+            <div class="chart-container">
+                <h5><i class="bi bi-calendar-event me-2"></i>Próximas Citas</h5>
+                {% if proximas_citas %}
+                    <div class="timeline">
+                        {% for cita in proximas_citas %}
+                        <div class="timeline-item {% if cita.es_emergencia %}emergency{% endif %}">
+                            <div class="timeline-content">
+                                <h6 class="mb-1">{{ cita.proxima_cita|date:"d M, H:i" }} - {{ cita.get_paciente_nombre }}</h6>
+                                <p class="text-muted mb-0">{{ cita.observaciones_cita|default:"Sin observaciones." }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No hay próximas citas programadas.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row fade-in">
+        <!-- Pacientes Frecuentes -->
+        <div class="col-12 mb-4">
+            <div class="chart-container">
+                <h5><i class="bi bi-star me-2"></i>Pacientes Frecuentes</h5>
+                {% if pacientes_frecuentes %}
+                    <ul class="list-group list-group-flush">
+                        {% for paciente in pacientes_frecuentes %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ paciente.nombre_completo }}
+                                <span class="badge bg-primary rounded-pill">{{ paciente.total_consultas }} consultas</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No hay pacientes frecuentes.</p>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+// Funcionalidades del dashboard simplificadas
+document.addEventListener('DOMContentLoaded', function() {
+    // Efectos hover en las tarjetas
+    const statsCards = document.querySelectorAll('.stats-card');
+    statsCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    const chartContainers = document.querySelectorAll('.chart-container');
+    chartContainers.forEach(container => {
+        container.addEventListener('mouseenter', function() {
+            this.style.boxShadow = 'var(--shadow-medium)';
+        });
+        container.addEventListener('mouseleave', function() {
+            this.style.boxShadow = 'var(--shadow-light)';
+        });
+    });
+
+    const quickActionCards = document.querySelectorAll('.quick-action-card');
+    quickActionCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = 'var(--shadow-medium)';
+            this.style.borderColor = 'var(--primary-blue)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = 'var(--shadow-light)';
+            this.style.borderColor = '#e5e7eb';
+        });
+    });
+
+    const activityItems = document.querySelectorAll('.activity-item');
+    activityItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f9fafb';
+            this.style.paddingLeft = '8px';
+            this.style.paddingRight = '8px';
+        });
+        item.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+            this.style.paddingLeft = '';
+            this.style.paddingRight = '';
+        });
+    });
+
+    const timelineContents = document.querySelectorAll('.timeline-content');
+    timelineContents.forEach(content => {
+        content.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(4px)';
+            this.style.boxShadow = 'var(--shadow-medium)';
+        });
+        content.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+            this.style.boxShadow = 'var(--shadow-light)';
+        });
+    });
+
+    // Actualizar datos cada 30 segundos (simulado)
+    setInterval(() => {
+        // Aquí se podrían actualizar los datos en tiempo real
+        console.log('Dashboard actualizado');
+    }, 30000);
+});
+</script>
 {% endblock %}

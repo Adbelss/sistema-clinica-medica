@@ -1,0 +1,680 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Paciente | HealthLife{% endblock %}
+
+{% block content %}
+<style>
+/* Variables CSS para el sistema médico */
+:root {
+    --primary-blue: #2563eb;
+    --secondary-blue: #1e40af;
+    --accent-blue: #3b82f6;
+    --medical-green: #10b981;
+    --medical-red: #ef4444;
+    --medical-gray: #6b7280;
+    --light-gray: #f3f4f6;
+    --white: #ffffff;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --border-radius: 12px;
+    --border-radius-small: 8px;
+    --transition: all 0.3s ease;
+}
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    color: white;
+    padding: 24px 0;
+    margin-bottom: 24px;
+    border-radius: var(--border-radius);
+}
+
+.page-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    opacity: 0.9;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+/* Form Card */
+.form-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    padding: 32px;
+    margin-bottom: 24px;
+    transition: var(--transition);
+}
+
+.form-card:hover {
+    box-shadow: var(--shadow-medium);
+}
+
+/* Form Styling */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    color: var(--medical-gray);
+    font-weight: 500;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+}
+
+.form-control, .form-select {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--white);
+    border: 1px solid #e5e7eb;
+    border-radius: var(--border-radius-small);
+    color: #374151;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-control::placeholder {
+    color: #9ca3af;
+}
+
+/* Error Messages */
+.text-danger {
+    color: var(--medical-red) !important;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+/* Action Buttons */
+.action-btn {
+    background: var(--primary-blue);
+    border: none;
+    border-radius: var(--border-radius-small);
+    color: white;
+    padding: 12px 24px;
+    font-weight: 500;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background: var(--secondary-blue);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
+    color: white;
+    text-decoration: none;
+}
+
+.action-btn.success {
+    background: var(--medical-green);
+}
+
+.action-btn.success:hover {
+    background: #059669;
+}
+
+.action-btn.warning {
+    background: #f59e0b;
+}
+
+.action-btn.warning:hover {
+    background: #d97706;
+}
+
+.action-btn.danger {
+    background: var(--medical-red);
+}
+
+.action-btn.danger:hover {
+    background: #dc2626;
+}
+
+/* Tab Navigation */
+.nav-tabs {
+    border-bottom: 2px solid var(--light-gray);
+    margin-bottom: 24px;
+}
+
+.nav-tabs .nav-link {
+    color: var(--medical-gray);
+    border: none;
+    padding: 12px 20px;
+    font-weight: 500;
+    border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
+    transition: var(--transition);
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--primary-blue);
+    background-color: var(--light-gray);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-blue);
+    background-color: var(--white);
+    border-bottom: 3px solid var(--primary-blue);
+}
+
+/* Tab Content */
+.tab-content {
+    padding: 20px 0;
+}
+
+.tab-pane {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Patient Info Card */
+.patient-info {
+    background: linear-gradient(135deg, var(--light-gray) 0%, #e5e7eb 100%);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.patient-info h6 {
+    color: var(--primary-blue);
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(107, 114, 128, 0.1);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 500;
+    color: var(--medical-gray);
+}
+
+.info-value {
+    font-weight: 600;
+    color: var(--dark-gray);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 20px 0;
+    }
+    
+    .page-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .form-card {
+        padding: 24px;
+    }
+    
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+}
+
+/* Animación de entrada */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+</style>
+
+<div class="container-fluid">
+    <!-- Header de la página -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="bi bi-pencil-square me-3"></i>Editar Paciente</h2>
+                <p>Actualiza la información del paciente {{ paciente.nombre_completo }}</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'listar_pacientes' %}" class="action-btn">
+                    <i class="bi bi-arrow-left"></i>
+                    Volver a Pacientes
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes de éxito/error -->
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="bi {% if message.tags == 'success' %}bi-check-circle{% elif message.tags == 'error' %}bi-exclamation-triangle{% else %}bi-info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Información del paciente -->
+    <div class="patient-info">
+        <h6><i class="bi bi-person-circle me-2"></i>Información del Paciente</h6>
+        <div class="info-item">
+            <span class="info-label">Nombre Completo:</span>
+            <span class="info-value">{{ paciente.nombre_completo }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Documento:</span>
+            <span class="info-value">{{ paciente.tipo_documento }}: {{ paciente.documento_identificacion }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Estado:</span>
+            <span class="info-value">
+                <span class="badge {% if paciente.estado == 'Activo' %}bg-success{% else %}bg-secondary{% endif %}">
+                    {{ paciente.estado }}
+                </span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Formulario de edición -->
+    <div class="form-card">
+        <form method="post" id="editarPacienteForm">
+            {% csrf_token %}
+            
+            <!-- Pestañas de Navegación -->
+            <ul class="nav nav-tabs" id="pacienteTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="generales-tab" data-bs-toggle="tab" data-bs-target="#generales" type="button" role="tab">
+                        <i class="bi bi-person me-2"></i>Generales
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="direccion-tab" data-bs-toggle="tab" data-bs-target="#direccion" type="button" role="tab">
+                        <i class="bi bi-geo-alt me-2"></i>Dirección
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="telefonos-tab" data-bs-toggle="tab" data-bs-target="#telefonos" type="button" role="tab">
+                        <i class="bi bi-telephone me-2"></i>Teléfonos
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab">
+                        <i class="bi bi-gear me-2"></i>Admin
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="extras-tab" data-bs-toggle="tab" data-bs-target="#extras" type="button" role="tab">
+                        <i class="bi bi-plus-circle me-2"></i>Extras
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Contenido de las Pestañas -->
+            <div class="tab-content" id="pacienteTabContent">
+                <!-- Pestaña Generales -->
+                <div class="tab-pane fade show active" id="generales" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.primer_nombre.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person me-1"></i>Primer Nombre *
+                                </label>
+                                {{ form.primer_nombre }}
+                                {% if form.primer_nombre.errors %}
+                                    <div class="text-danger">{{ form.primer_nombre.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.otros_nombres.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person me-1"></i>Otros Nombres
+                                </label>
+                                {{ form.otros_nombres }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.primer_apellido.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person me-1"></i>Primer Apellido *
+                                </label>
+                                {{ form.primer_apellido }}
+                                {% if form.primer_apellido.errors %}
+                                    <div class="text-danger">{{ form.primer_apellido.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.segundo_apellido.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person me-1"></i>Segundo Apellido
+                                </label>
+                                {{ form.segundo_apellido }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.fecha_nacimiento.id_for_label }}" class="form-label">
+                                    <i class="bi bi-calendar me-1"></i>Fecha de Nacimiento *
+                                </label>
+                                {{ form.fecha_nacimiento }}
+                                {% if form.fecha_nacimiento.errors %}
+                                    <div class="text-danger">{{ form.fecha_nacimiento.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.genero.id_for_label }}" class="form-label">
+                                    <i class="bi bi-gender-ambiguous me-1"></i>Género *
+                                </label>
+                                {{ form.genero }}
+                                {% if form.genero.errors %}
+                                    <div class="text-danger">{{ form.genero.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.tipo_documento.id_for_label }}" class="form-label">
+                                    <i class="bi bi-card-text me-1"></i>Tipo de Documento *
+                                </label>
+                                {{ form.tipo_documento }}
+                                {% if form.tipo_documento.errors %}
+                                    <div class="text-danger">{{ form.tipo_documento.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.documento_identificacion.id_for_label }}" class="form-label">
+                                    <i class="bi bi-card-text me-1"></i>Número de Documento *
+                                </label>
+                                {{ form.documento_identificacion }}
+                                {% if form.documento_identificacion.errors %}
+                                    <div class="text-danger">{{ form.documento_identificacion.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestaña Dirección -->
+                <div class="tab-pane fade" id="direccion" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.direccion.id_for_label }}" class="form-label">
+                                    <i class="bi bi-house me-1"></i>Dirección *
+                                </label>
+                                {{ form.direccion }}
+                                {% if form.direccion.errors %}
+                                    <div class="text-danger">{{ form.direccion.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.ciudad.id_for_label }}" class="form-label">
+                                    <i class="bi bi-building me-1"></i>Ciudad *
+                                </label>
+                                {{ form.ciudad }}
+                                {% if form.ciudad.errors %}
+                                    <div class="text-danger">{{ form.ciudad.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.departamento.id_for_label }}" class="form-label">
+                                    <i class="bi bi-geo-alt me-1"></i>Departamento *
+                                </label>
+                                {{ form.departamento }}
+                                {% if form.departamento.errors %}
+                                    <div class="text-danger">{{ form.departamento.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.codigo_postal.id_for_label }}" class="form-label">
+                                    <i class="bi bi-pin-map me-1"></i>Código Postal
+                                </label>
+                                {{ form.codigo_postal }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestaña Teléfonos -->
+                <div class="tab-pane fade" id="telefonos" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.telefono.id_for_label }}" class="form-label">
+                                    <i class="bi bi-telephone me-1"></i>Teléfono Principal *
+                                </label>
+                                {{ form.telefono }}
+                                {% if form.telefono.errors %}
+                                    <div class="text-danger">{{ form.telefono.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.telefono_secundario.id_for_label }}" class="form-label">
+                                    <i class="bi bi-telephone-plus me-1"></i>Teléfono Secundario
+                                </label>
+                                {{ form.telefono_secundario }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.correo.id_for_label }}" class="form-label">
+                                    <i class="bi bi-envelope me-1"></i>Correo Electrónico
+                                </label>
+                                {{ form.correo }}
+                                {% if form.correo.errors %}
+                                    <div class="text-danger">{{ form.correo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.contacto_emergencia.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person-exclamation me-1"></i>Contacto de Emergencia
+                                </label>
+                                {{ form.contacto_emergencia }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.telefono_emergencia.id_for_label }}" class="form-label">
+                                    <i class="bi bi-telephone-x me-1"></i>Teléfono de Emergencia
+                                </label>
+                                {{ form.telefono_emergencia }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.parentesco_emergencia.id_for_label }}" class="form-label">
+                                    <i class="bi bi-people me-1"></i>Parentesco
+                                </label>
+                                {{ form.parentesco_emergencia }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestaña Admin -->
+                <div class="tab-pane fade" id="admin" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.estado.id_for_label }}" class="form-label">
+                                    <i class="bi bi-toggle-on me-1"></i>Estado *
+                                </label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <div class="text-danger">{{ form.estado.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.estado_civil.id_for_label }}" class="form-label">
+                                    <i class="bi bi-heart me-1"></i>Estado Civil
+                                </label>
+                                {{ form.estado_civil }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.ocupacion.id_for_label }}" class="form-label">
+                                    <i class="bi bi-briefcase me-1"></i>Ocupación
+                                </label>
+                                {{ form.ocupacion }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.nivel_educativo.id_for_label }}" class="form-label">
+                                    <i class="bi bi-mortarboard me-1"></i>Nivel Educativo
+                                </label>
+                                {{ form.nivel_educativo }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestaña Extras -->
+                <div class="tab-pane fade" id="extras" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.grupo_sanguineo.id_for_label }}" class="form-label">
+                                    <i class="bi bi-droplet me-1"></i>Grupo Sanguíneo
+                                </label>
+                                {{ form.grupo_sanguineo }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.factor_rh.id_for_label }}" class="form-label">
+                                    <i class="bi bi-plus-slash-minus me-1"></i>Factor RH
+                                </label>
+                                {{ form.factor_rh }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.alergias.id_for_label }}" class="form-label">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>Alergias
+                                </label>
+                                {{ form.alergias }}
+                                <div class="form-text">Separar múltiples alergias con comas</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.antecedentes_medicos.id_for_label }}" class="form-label">
+                                    <i class="bi bi-clipboard2-pulse me-1"></i>Antecedentes Médicos
+                                </label>
+                                {{ form.antecedentes_medicos }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.medicamentos_actuales.id_for_label }}" class="form-label">
+                                    <i class="bi bi-capsule me-1"></i>Medicamentos Actuales
+                                </label>
+                                {{ form.medicamentos_actuales }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.es_donador.id_for_label }}" class="form-label">
+                                    <i class="bi bi-heart-pulse me-1"></i>¿Es Donador de Órganos?
+                                </label>
+                                {{ form.es_donador }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'listar_pacientes' %}" class="action-btn danger">
+                    <i class="bi bi-x-circle"></i>
+                    Cancelar
+                </a>
+                <button type="submit" class="action-btn success">
+                    <i class="bi bi-check-circle"></i>
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Aplicar estilos a los campos del formulario
+    const formControls = document.querySelectorAll('.form-control, .form-select');
+    formControls.forEach(control => {
+        control.classList.add('form-control');
+    });
+
+    // Validación en tiempo real
+    const requiredFields = document.querySelectorAll('[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.style.borderColor = '#ef4444';
+            } else {
+                this.style.borderColor = '#10b981';
+            }
+        });
+    });
+
+    // Manejo del envío del formulario
+    const form = document.getElementById('editarPacienteForm');
+    form.addEventListener('submit', function(e) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Guardando...';
+        submitBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+
+{% block title %}Respaldo | HealthLife{% endblock %}
+
+{% block content %}
+<style>
+/* Variables CSS para el sistema médico */
+:root {
+    --primary-blue: #2563eb;
+    --secondary-blue: #1e40af;
+    --accent-blue: #3b82f6;
+    --medical-green: #10b981;
+    --medical-red: #ef4444;
+    --medical-gray: #6b7280;
+    --light-gray: #f3f4f6;
+    --white: #ffffff;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --border-radius: 12px;
+    --border-radius-small: 8px;
+    --transition: all 0.3s ease;
+}
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    color: white;
+    padding: 24px 0;
+    margin-bottom: 24px;
+    border-radius: var(--border-radius);
+}
+
+.page-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    opacity: 0.9;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+/* Cards de respaldo */
+.backup-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: var(--transition);
+    border: 1px solid var(--border-color);
+}
+
+.backup-card:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-2px);
+}
+
+.backup-card h5 {
+    color: var(--primary-blue);
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.backup-card p {
+    color: var(--medical-gray);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+/* Botones de acción */
+.action-btn {
+    background: var(--primary-blue);
+    border: none;
+    border-radius: var(--border-radius-small);
+    color: white;
+    padding: 12px 20px;
+    font-weight: 500;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background: var(--secondary-blue);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
+    color: white;
+    text-decoration: none;
+}
+
+.action-btn.success {
+    background: var(--medical-green);
+}
+
+.action-btn.success:hover {
+    background: #059669;
+}
+
+.action-btn.warning {
+    background: #f59e0b;
+}
+
+.action-btn.warning:hover {
+    background: #d97706;
+}
+
+.action-btn.danger {
+    background: var(--medical-red);
+}
+
+.action-btn.danger:hover {
+    background: #dc2626;
+}
+
+/* Formulario de importación */
+.upload-form {
+    background: var(--light-gray);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-top: 16px;
+}
+
+.upload-form .form-control {
+    border: 2px dashed var(--medical-gray);
+    background: var(--white);
+    border-radius: var(--border-radius-small);
+    padding: 16px;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.upload-form .form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+/* Información del sistema */
+.system-info {
+    background: linear-gradient(135deg, var(--light-gray) 0%, #e5e7eb 100%);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.system-info h6 {
+    color: var(--primary-blue);
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(107, 114, 128, 0.1);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 500;
+    color: var(--medical-gray);
+}
+
+.info-value {
+    font-weight: 600;
+    color: var(--dark-gray);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 20px 0;
+    }
+    
+    .page-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .backup-card {
+        padding: 20px;
+    }
+    
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+}
+
+/* Animación de entrada */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<div class="container-fluid">
+    <!-- Header de la página -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="bi bi-cloud-arrow-up me-3"></i>Gestión de Respaldo</h2>
+                <p>Administra la seguridad de los datos del sistema clínico</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes de éxito/error -->
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="bi {% if message.tags == 'success' %}bi-check-circle{% elif message.tags == 'error' %}bi-exclamation-triangle{% else %}bi-info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Información del sistema -->
+    <div class="system-info">
+        <h6><i class="bi bi-info-circle me-2"></i>Información del Sistema</h6>
+        <div class="info-item">
+            <span class="info-label">Base de Datos:</span>
+            <span class="info-value">SQLite3</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Estado:</span>
+            <span class="info-value"><i class="bi bi-check-circle-fill text-success me-1"></i>Operativo</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Último respaldo:</span>
+            <span class="info-value">Hoy, 12:30 PM</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Exportar Base de Datos -->
+        <div class="col-md-6">
+            <div class="backup-card fade-in">
+                <h5><i class="bi bi-download"></i>Exportar Base de Datos</h5>
+                <p>Descarga una copia completa de la base de datos actual. Esta acción creará un archivo .sqlite3 que contiene todos los datos del sistema.</p>
+                
+                <div class="d-flex gap-2">
+                    <a href="{% url 'exportar_base_datos' %}" class="action-btn success">
+                        <i class="bi bi-download"></i>
+                        Descargar Respaldo
+                    </a>
+                </div>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        El archivo se descargará automáticamente en tu dispositivo
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Importar Base de Datos -->
+        <div class="col-md-6">
+            <div class="backup-card fade-in">
+                <h5><i class="bi bi-upload"></i>Restaurar Base de Datos</h5>
+                <p>Restaura la base de datos desde un archivo de respaldo. Esta acción reemplazará todos los datos actuales.</p>
+                
+                <button class="action-btn warning" data-bs-toggle="collapse" data-bs-target="#uploadForm">
+                    <i class="bi bi-upload"></i>
+                    Seleccionar Archivo
+                </button>
+                
+                <div class="collapse mt-3" id="uploadForm">
+                    <div class="upload-form">
+                        <form method="post" enctype="multipart/form-data" action="{% url 'importar_base_datos' %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <input type="file" class="form-control" name="respaldo" accept=".sqlite3" required>
+                                <small class="text-muted">Solo archivos .sqlite3</small>
+                            </div>
+                            <button type="submit" class="action-btn danger" onclick="return confirm('¿Estás seguro? Esta acción reemplazará todos los datos actuales.')">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                Restaurar Base de Datos
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Esta acción es irreversible. Asegúrate de tener un respaldo actual
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recomendaciones de seguridad -->
+    <div class="backup-card mt-4">
+        <h5><i class="bi bi-shield-check"></i>Recomendaciones de Seguridad</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Realiza respaldos regulares</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Guarda los archivos en ubicaciones seguras</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Verifica la integridad de los respaldos</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="bi bi-exclamation-triangle text-warning me-2"></i>No compartas archivos de respaldo</li>
+                    <li class="mb-2"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Usa contraseñas seguras</li>
+                    <li class="mb-2"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Mantén múltiples copias</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Efectos hover en las tarjetas
+    const cards = document.querySelectorAll('.backup-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Confirmación de restauración
+    const restoreForm = document.querySelector('form[action*="importar"]');
+    if (restoreForm) {
+        restoreForm.addEventListener('submit', function(e) {
+            if (!confirm('¿Estás seguro de que deseas restaurar la base de datos? Esta acción reemplazará todos los datos actuales y no se puede deshacer.')) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

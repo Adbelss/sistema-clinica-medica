@@ -3,39 +3,387 @@
 {% block title %}Pacientes | HealthLife{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4 text-success"><i class="bi bi-people-fill me-2"></i>Listado de Pacientes</h2>
+<style>
+/* Variables CSS para el sistema médico */
+:root {
+    --primary-blue: #2563eb;
+    --secondary-blue: #1e40af;
+    --accent-blue: #3b82f6;
+    --medical-green: #10b981;
+    --medical-red: #ef4444;
+    --medical-gray: #6b7280;
+    --light-gray: #f3f4f6;
+    --white: #ffffff;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --border-radius: 12px;
+    --border-radius-small: 8px;
+    --transition: all 0.3s ease;
+}
 
-    <!-- 🔘 BOTÓN PARA ABRIR EL MODAL -->
-    <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#modalNuevoPaciente">
-        <i class="bi bi-person-plus"></i> Nuevo Paciente
-    </button>
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    color: white;
+    padding: 24px 0;
+    margin-bottom: 24px;
+    border-radius: var(--border-radius);
+}
 
-    <!-- 🟩 AQUÍ IRÍA TU TABLA DE PACIENTES -->
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Apellidos</th>
-                <th>Celular</th>
-                <!-- más columnas -->
-            </tr>
-        </thead>
-        <tbody>
-            {% for paciente in pacientes %}
-            <tr>
-                <td>{{ paciente.primer_nombre }} {{ paciente.otros_nombres }}</td>
-                <td>{{ paciente.primer_apellido }} {{ paciente.segundo_apellido }}</td>
-                <td>{{ paciente.celular }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+.page-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    opacity: 0.9;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+/* Action Buttons */
+.action-btn {
+    background: var(--primary-blue);
+    border: none;
+    border-radius: var(--border-radius-small);
+    color: white;
+    padding: 10px 16px;
+    font-weight: 500;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.action-btn:hover {
+    background: var(--secondary-blue);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
+    color: white;
+    text-decoration: none;
+}
+
+.action-btn.success {
+    background: var(--medical-green);
+}
+
+.action-btn.success:hover {
+    background: #059669;
+}
+
+.action-btn.warning {
+    background: #f59e0b;
+}
+
+.action-btn.warning:hover {
+    background: #d97706;
+}
+
+.action-btn.danger {
+    background: var(--medical-red);
+}
+
+.action-btn.danger:hover {
+    background: #dc2626;
+}
+
+/* Table Styling */
+.table-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.table-container:hover {
+    box-shadow: var(--shadow-medium);
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background: var(--light-gray);
+    border: none;
+    color: var(--medical-gray);
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 16px 12px;
+    text-align: center;
+}
+
+.table tbody td {
+    border: none;
+    border-bottom: 1px solid #f3f4f6;
+    padding: 12px;
+    vertical-align: middle;
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+.table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--medical-green);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-badge.inactive {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--medical-gray);
+    border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--medical-gray);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-state h4 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: var(--medical-gray);
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 20px 0;
+    }
+    
+    .page-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .table-responsive {
+        border-radius: var(--border-radius);
+    }
+    
+    .action-btn {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Animación de entrada sutil */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<div class="container-fluid">
+    <!-- Header de la página -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="bi bi-people-fill me-3"></i>Gestión de Pacientes</h2>
+                <p>Administra la información de todos los pacientes registrados en el sistema</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="action-btn success" data-bs-toggle="modal" data-bs-target="#modalNuevoPaciente">
+                    <i class="bi bi-person-plus"></i>
+                    Nuevo Paciente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes de éxito/error -->
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="bi {% if message.tags == 'success' %}bi-check-circle{% elif message.tags == 'error' %}bi-exclamation-triangle{% else %}bi-info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Tabla de pacientes -->
+    <div class="table-container">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre Completo</th>
+                        <th>Fecha Nacimiento</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>Documento</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for paciente in pacientes %}
+                    <tr>
+                        <td class="text-center">{{ forloop.counter }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-circle text-primary me-2" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <div class="fw-bold">{{ paciente.primer_nombre }} {{ paciente.otros_nombres }} {{ paciente.primer_apellido }} {{ paciente.segundo_apellido }}</div>
+                                    <small class="text-muted">{{ paciente.genero }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center">{{ paciente.fecha_nacimiento|date:"d/m/Y" }}</td>
+                        <td class="text-center">{{ paciente.telefono }}</td>
+                        <td class="text-center">{{ paciente.correo|default:"-" }}</td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark">{{ paciente.tipo_documento }}: {{ paciente.documento_identificacion }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="status-badge {% if paciente.estado == 'Activo' %}active{% else %}inactive{% endif %}">
+                                {{ paciente.estado }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'editar_paciente' paciente.id %}" class="action-btn warning btn-sm" title="Editar">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a href="{% url 'eliminar_paciente' paciente.id %}" class="action-btn danger btn-sm" title="Eliminar"
+                                   onclick="return confirm('¿Estás seguro de eliminar este paciente? Esta acción no se puede deshacer.');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="bi bi-people"></i>
+                                <h4>No hay pacientes registrados</h4>
+                                <p>Comienza agregando el primer paciente al sistema</p>
+                                <button class="action-btn success mt-3" data-bs-toggle="modal" data-bs-target="#modalNuevoPaciente">
+                                    <i class="bi bi-person-plus"></i>
+                                    Agregar Primer Paciente
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    {% if pacientes %}
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-people text-primary" style="font-size: 2rem;"></i>
+                    <h5 class="mt-2 mb-1">{{ pacientes|length }}</h5>
+                    <small class="text-muted">Total Pacientes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-check text-success" style="font-size: 2rem;"></i>
+                    <h5 class="mt-2 mb-1">{{ pacientes|length }}</h5>
+                    <small class="text-muted">Pacientes Activos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-event text-warning" style="font-size: 2rem;"></i>
+                    <h5 class="mt-2 mb-1">0</h5>
+                    <small class="text-muted">Citas Hoy</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up text-info" style="font-size: 2rem;"></i>
+                    <h5 class="mt-2 mb-1">+12%</h5>
+                    <small class="text-muted">Crecimiento</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
-<!-- 🪟 MODAL NUEVO PACIENTE -->
+<!-- Modal para nuevo paciente -->
 {% include 'pacientes/modal_nuevo_paciente.html' %}
 
-{% endblock %}
+<script>
+// Funcionalidades de la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Efectos hover en las tarjetas
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
 
-  
+    // Confirmación de eliminación mejorada
+    const deleteButtons = document.querySelectorAll('.action-btn.danger');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!confirm('¿Estás seguro de eliminar este paciente? Esta acción no se puede deshacer.')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

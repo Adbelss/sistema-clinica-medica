@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'usuarios',  # nuestra app personalizada
     'consultas',
     'pacientes',
+    'agenda',  # nueva app de agenda
     
 ]
 

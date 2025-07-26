@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Pacientes | HealthLife{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-success mb-4"><i class="bi bi-people-fill me-2"></i>Listado de Pacientes</h2>
+
+    <!-- Botón para nuevo paciente -->
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalNuevoPaciente">
+        <i class="bi bi-person-plus"></i> Nuevo Paciente
+    </button>
+
+    <!-- Tabla de pacientes -->
+    <table id="tablaPacientes" class="table table-bordered table-striped table-hover">
+        <thead class="table-success text-center">
+            <tr>
+                <th>#</th>
+                <th>Nombre(s)</th>
+                <th>Apellido(s)</th>
+                <th>Edad</th>
+                <th>Teléfono</th>
+                <th>Correo</th>
+                <th>Dirección</th>
+                <th>Documento</th>
+                <th>Estado</th>
+                <th>Creado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in pacientes %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ p.primer_nombre }} {{ p.otros_nombres }}</td>
+                <td>{{ p.primer_apellido }} {{ p.segundo_apellido }}</td>
+                <td>{{ p.edad }} años</td>
+                <td>{{ p.telefono }}</td>
+                <td>{{ p.correo }}</td>
+                <td>{{ p.direccion }}</td>
+                <td>{{ p.tipo_documento }} {{ p.documento_identificacion }}</td>
+                <td>
+                    <span class="badge {% if p.estado == 'Activo' %}bg-success{% else %}bg-secondary{% endif %}">
+                        {{ p.estado }}
+                    </span>
+                </td>
+                <td>{{ p.fecha_creacion|date:"d/m/Y" }}</td>
+                <td class="text-center">
+                    <!-- Botón de edición AJAX -->
+                    <a href="{% url 'editar_paciente' p.id %}" class="btn btn-sm btn-warning btn-editar-paciente">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- 🟩 Modal para crear nuevo paciente -->
+{% include 'pacientes/nuevo_modal.html' %}
+
+<!-- 🟨 Modal dinámico para editar (cargado por AJAX) -->
+<div id="contenedor-modal-editar"></div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- DataTables y script AJAX edición -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Inicializar DataTable
+        const tabla = $('#tablaPacientes').DataTable({
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
+            }
+        });
+
+        // Delegar evento a los botones de edición (para que funcione con DataTables)
+        $('#tablaPacientes tbody').on('click', '.btn-editar-paciente', function (e) {
+            e.preventDefault();
+            const url = $(this).attr('href');
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (data) {
+                    $('#contenedor-modal-editar').html(data.html);
+                    const modal = new bootstrap.Modal(document.getElementById('modalEditarPaciente'));
+                    modal.show();
+                },
+                error: function () {
+                    alert("❌ Error al cargar el formulario de edición.");
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
