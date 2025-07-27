@@ -57,71 +57,99 @@ def registrar_consulta(request):
 # ----------------------------
 @login_required
 def dashboard(request):
-    # Estadísticas básicas
-    total_consultas = Consulta.objects.count()
-    total_pacientes = Paciente.objects.filter(estado='Activo').count()
-    usuario = request.user.get_full_name() or request.user.username
-    
-    # Estadísticas por fecha
-    hoy = timezone.now().date()
-    consultas_hoy = Consulta.objects.filter(fecha__date=hoy).count()
-    consultas_semana = Consulta.objects.filter(fecha__date__gte=hoy - timedelta(days=7)).count()
-    consultas_mes = Consulta.objects.filter(fecha__date__gte=hoy - timedelta(days=30)).count()
-    
-    # Consultas de emergencia
-    consultas_emergencia = Consulta.objects.filter(tipo_consulta='Emergencia').count()
-    
-    # Duración promedio
-    duracion_promedio = Consulta.objects.aggregate(
-        promedio=Avg('duracion_consulta')
-    )['promedio'] or 30
-    
-    # Consultas recientes
-    ultimas_consultas = Consulta.objects.select_related('paciente').order_by('-fecha')[:5]
-    
-    # Estadísticas por tipo de consulta
-    tipos_consulta = Consulta.objects.values('tipo_consulta').annotate(
-        total=Count('id')
-    ).order_by('-total')[:5]
-    
-    # Pacientes con más consultas
-    pacientes_frecuentes = Paciente.objects.annotate(
-        total_consultas=Count('consultas')
-    ).filter(total_consultas__gt=0).order_by('-total_consultas')[:5]
-    
-    # Alertas médicas recientes
-    consultas_recientes = Consulta.objects.select_related('paciente').filter(
-        fecha__date__gte=hoy - timedelta(days=7)
-    )
-    alertas = []
-    for consulta in consultas_recientes:
-        alertas.extend(consulta.obtener_alertas_medicas())
-    
-    # Próximas citas
-    proximas_citas = Consulta.objects.select_related('paciente').filter(
-        proxima_cita__gte=timezone.now()
-    ).order_by('proxima_cita')[:5]
+    try:
+        # Estadísticas básicas
+        total_consultas = Consulta.objects.count()
+        total_pacientes = Paciente.objects.filter(estado='Activo').count()
+        usuario = request.user.get_full_name() or request.user.username
+        
+        # Estadísticas por fecha
+        hoy = timezone.now().date()
+        consultas_hoy = Consulta.objects.filter(fecha__date=hoy).count()
+        consultas_semana = Consulta.objects.filter(fecha__date__gte=hoy - timedelta(days=7)).count()
+        consultas_mes = Consulta.objects.filter(fecha__date__gte=hoy - timedelta(days=30)).count()
+        
+        # Consultas de emergencia
+        consultas_emergencia = Consulta.objects.filter(tipo_consulta='Emergencia').count()
+        
+        # Duración promedio
+        duracion_promedio = Consulta.objects.aggregate(
+            promedio=Avg('duracion_consulta')
+        )['promedio'] or 30
+        
+        # Consultas recientes
+        ultimas_consultas = Consulta.objects.select_related('paciente').order_by('-fecha')[:5]
+        
+        # Estadísticas por tipo de consulta
+        tipos_consulta = Consulta.objects.values('tipo_consulta').annotate(
+            total=Count('id')
+        ).order_by('-total')[:5]
+        
+        # Pacientes con más consultas
+        pacientes_frecuentes = Paciente.objects.annotate(
+            total_consultas=Count('consultas')
+        ).filter(total_consultas__gt=0).order_by('-total_consultas')[:5]
+        
+        # Alertas médicas recientes (con manejo de errores)
+        alertas = []
+        try:
+            consultas_recientes = Consulta.objects.select_related('paciente').filter(
+                fecha__date__gte=hoy - timedelta(days=7)
+            )
+            for consulta in consultas_recientes:
+                try:
+                    alertas.extend(consulta.obtener_alertas_medicas())
+                except Exception as e:
+                    # Si hay error en una consulta específica, continuar con las demás
+                    continue
+        except Exception as e:
+            # Si hay error general, continuar sin alertas
+            pass
+        
+        # Próximas citas
+        proximas_citas = Consulta.objects.select_related('paciente').filter(
+            proxima_cita__gte=timezone.now()
+        ).order_by('proxima_cita')[:5]
 
-    # Fecha actual formateada
-    from datetime import datetime
-    fecha_actual = datetime.now().strftime("%A, %d de %B de %Y")
+        # Fecha actual formateada
+        from datetime import datetime
+        fecha_actual = datetime.now().strftime("%A, %d de %B de %Y")
 
-    context = {
-        'total_consultas': total_consultas,
-        'total_pacientes': total_pacientes,
-        'consultas_hoy': consultas_hoy,
-        'consultas_semana': consultas_semana,
-        'consultas_mes': consultas_mes,
-        'consultas_emergencia': consultas_emergencia,
-        'duracion_promedio': round(duracion_promedio, 1),
-        'usuario': usuario,
-        'fecha_actual': fecha_actual,
-        'ultimas_consultas': ultimas_consultas,
-        'tipos_consulta': tipos_consulta,
-        'pacientes_frecuentes': pacientes_frecuentes,
-        'alertas': alertas[:10],  # Máximo 10 alertas
-        'proximas_citas': proximas_citas,
-    }
+        context = {
+            'total_consultas': total_consultas,
+            'total_pacientes': total_pacientes,
+            'consultas_hoy': consultas_hoy,
+            'consultas_semana': consultas_semana,
+            'consultas_mes': consultas_mes,
+            'consultas_emergencia': consultas_emergencia,
+            'duracion_promedio': round(duracion_promedio, 1),
+            'usuario': usuario,
+            'fecha_actual': fecha_actual,
+            'ultimas_consultas': ultimas_consultas,
+            'tipos_consulta': tipos_consulta,
+            'pacientes_frecuentes': pacientes_frecuentes,
+            'alertas': alertas[:10],  # Máximo 10 alertas
+            'proximas_citas': proximas_citas,
+        }
+    except Exception as e:
+        # Si hay algún error, mostrar dashboard básico
+        context = {
+            'total_consultas': 0,
+            'total_pacientes': 0,
+            'consultas_hoy': 0,
+            'consultas_semana': 0,
+            'consultas_mes': 0,
+            'consultas_emergencia': 0,
+            'duracion_promedio': 30,
+            'usuario': request.user.get_full_name() or request.user.username,
+            'fecha_actual': datetime.now().strftime("%A, %d de %B de %Y"),
+            'ultimas_consultas': [],
+            'tipos_consulta': [],
+            'pacientes_frecuentes': [],
+            'alertas': [],
+            'proximas_citas': [],
+        }
+    
     return render(request, 'consultas/dashboard.html', context)
 
 
