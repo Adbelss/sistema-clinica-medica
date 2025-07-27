@@ -8,4 +8,5 @@ PyMySQL==1.1.1
 cryptography==45.0.5
 whitenoise==6.6.0
 gunicorn==21.2.0
-psycopg2-binary==2.9.9 
+psycopg2-binary==2.9.9
+dj-database-url==2.1.0 
