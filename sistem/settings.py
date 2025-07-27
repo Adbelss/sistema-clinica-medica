@@ -55,16 +55,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sistem.wsgi.application'
 
-# Base de datos: PostgreSQL para producción, SQLite para desarrollo
+# Base de datos: SQLite por defecto (funciona en Railway)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='railway'),
-        'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD', default=''),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
-    } if config('DATABASE_URL', default='') else {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
