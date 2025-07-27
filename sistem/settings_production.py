@@ -8,6 +8,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = config('SECRET_KEY', default='django-insecure--guqrkq$ml1od6iiedk(ro_nrh*x7l=)2x=sbz!ge59w=n&lqf')
 DEBUG = config('DEBUG', default=False, cast=bool)
+if os.environ.get('RAILWAY_ENVIRONMENT'):
+    DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', '.railway.app', '.up.railway.app']
 
 # Application definition
