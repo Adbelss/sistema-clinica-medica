@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notificaciones WhatsApp{% endblock %}
+
+{% block extra_css %}
+<style>
+    .notification-card {
+        transition: transform 0.2s;
+        border-left: 4px solid #25D366;
+    }
+    
+    .notification-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .status-pendiente { border-left-color: #ffc107; }
+    .status-enviado { border-left-color: #17a2b8; }
+    .status-entregado { border-left-color: #28a745; }
+    .status-leido { border-left-color: #20c997; }
+    .status-error { border-left-color: #dc3545; }
+    .status-cancelado { border-left-color: #6c757d; }
+    
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+    
+    .type-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: bold;
+        background: #e9ecef;
+        color: #495057;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .filter-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .whatsapp-icon {
+        color: #25D366;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="bi bi-whatsapp whatsapp-icon me-2"></i>
+                        Notificaciones WhatsApp
+                    </h1>
+                    <p class="text-muted">Gestión y seguimiento de mensajes enviados por WhatsApp</p>
+                </div>
+                <div>
+                    <a href="{% url 'verificar_configuracion_whatsapp' %}" class="btn btn-info me-2">
+                        <i class="bi bi-gear me-2"></i>Configuración
+                    </a>
+                    <a href="{% url 'prueba_whatsapp_demo' %}" class="btn btn-warning me-2">
+                        <i class="bi bi-play-circle me-2"></i>Probar Demo
+                    </a>
+                    <a href="{% url 'estadisticas_whatsapp' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-graph-up me-2"></i>Estadísticas
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alertas -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Estadísticas Rápidas -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <div class="h4 mb-0">{{ total_notificaciones }}</div>
+                        <div class="small">Total Notificaciones</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                        <div class="h4 mb-0">{{ notificaciones_exitosas }}</div>
+                        <div class="small">Envíos Exitosos</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+                        <div class="h4 mb-0">{{ notificaciones_pendientes }}</div>
+                        <div class="small">Pendientes</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);">
+                        <div class="h4 mb-0">{{ notificaciones_error }}</div>
+                        <div class="small">Con Error</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filter-section">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="paciente" class="form-label">Paciente</label>
+                        <input type="text" class="form-control" id="paciente" name="paciente" 
+                               value="{{ filtros.paciente }}" placeholder="Buscar por nombre o documento">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="tipo" class="form-label">Tipo</label>
+                        <select class="form-select" id="tipo" name="tipo">
+                            <option value="">Todos los tipos</option>
+                            {% for tipo_value, tipo_label in tipos_notificacion %}
+                                <option value="{{ tipo_value }}" {% if filtros.tipo == tipo_value %}selected{% endif %}>
+                                    {{ tipo_label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select class="form-select" id="estado" name="estado">
+                            <option value="">Todos los estados</option>
+                            {% for estado_value, estado_label in estados_notificacion %}
+                                <option value="{{ estado_value }}" {% if filtros.estado == estado_value %}selected{% endif %}>
+                                    {{ estado_label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="fecha" class="form-label">Fecha</label>
+                        <input type="date" class="form-control" id="fecha" name="fecha" 
+                               value="{{ filtros.fecha }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-2"></i>Filtrar
+                            </button>
+                            <a href="{% url 'listar_notificaciones_whatsapp' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Limpiar
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Lista de Notificaciones -->
+            <div class="row">
+                {% for notificacion in page_obj %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card notification-card status-{{ notificacion.estado }}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <span class="type-badge">{{ notificacion.get_tipo_display }}</span>
+                                </div>
+                                <div class="text-end">
+                                    <div class="status-badge status-{{ notificacion.estado }}">
+                                        {{ notificacion.obtener_estado_display }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h6 class="card-title mb-2">
+                                <i class="bi bi-person-circle me-2"></i>
+                                {{ notificacion.paciente.nombre_completo }}
+                            </h6>
+                            
+                            <p class="card-text small text-muted mb-2">
+                                <i class="bi bi-telephone me-1"></i>
+                                {{ notificacion.telefono }}
+                            </p>
+                            
+                            {% if notificacion.consulta %}
+                            <p class="card-text small text-muted mb-2">
+                                <i class="bi bi-file-medical me-1"></i>
+                                Consulta: {{ notificacion.consulta.fecha|date:"d/m/Y" }}
+                            </p>
+                            {% endif %}
+                            
+                            <p class="card-text small mb-3">
+                                {{ notificacion.mensaje|truncatechars:100 }}
+                            </p>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-clock me-1"></i>
+                                    {{ notificacion.fecha_envio|date:"d/m/Y H:i" }}
+                                </small>
+                                
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'detalle_notificacion_whatsapp' notificacion.id %}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    
+                                    {% if notificacion.puede_reintentar %}
+                                    <a href="{% url 'reintentar_notificacion_whatsapp' notificacion.id %}" 
+                                       class="btn btn-outline-warning btn-sm">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if notificacion.error_mensaje %}
+                            <div class="mt-2">
+                                <small class="text-danger">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    {{ notificacion.error_mensaje|truncatechars:50 }}
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="bi bi-whatsapp whatsapp-icon" style="font-size: 3rem;"></i>
+                        <h4 class="mt-3">No hay notificaciones</h4>
+                        <p class="text-muted">No se encontraron notificaciones de WhatsApp con los filtros aplicados.</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginación -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Paginación de notificaciones" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if filtros.paciente %}&paciente={{ filtros.paciente }}{% endif %}{% if filtros.tipo %}&tipo={{ filtros.tipo }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}{% if filtros.fecha %}&fecha={{ filtros.fecha }}{% endif %}">
+                                <i class="bi bi-chevron-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filtros.paciente %}&paciente={{ filtros.paciente }}{% endif %}{% if filtros.tipo %}&tipo={{ filtros.tipo }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}{% if filtros.fecha %}&fecha={{ filtros.fecha }}{% endif %}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if filtros.paciente %}&paciente={{ filtros.paciente }}{% endif %}{% if filtros.tipo %}&tipo={{ filtros.tipo }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}{% if filtros.fecha %}&fecha={{ filtros.fecha }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filtros.paciente %}&paciente={{ filtros.paciente }}{% endif %}{% if filtros.tipo %}&tipo={{ filtros.tipo }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}{% if filtros.fecha %}&fecha={{ filtros.fecha }}{% endif %}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if filtros.paciente %}&paciente={{ filtros.paciente }}{% endif %}{% if filtros.tipo %}&tipo={{ filtros.tipo }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}{% if filtros.fecha %}&fecha={{ filtros.fecha }}{% endif %}">
+                                <i class="bi bi-chevron-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit del formulario cuando cambien los filtros
+    const filterForm = document.querySelector('form[method="get"]');
+    const filterInputs = filterForm.querySelectorAll('select, input[type="date"]');
+    
+    filterInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            filterForm.submit();
+        });
+    });
+});
+</script>
+{% endblock %} 

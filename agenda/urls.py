@@ -13,10 +13,7 @@ urlpatterns = [
     path('citas/<int:pk>/eliminar/', views.eliminar_cita, name='eliminar_cita'),
     path('citas/<int:pk>/estado/', views.cambiar_estado_cita, name='cambiar_estado_cita'),
     
-    # Gestión de doctores
-    path('doctores/', views.gestion_doctores, name='gestion_doctores'),
-    path('doctores/nuevo/', views.nuevo_doctor, name='nuevo_doctor'),
-    path('doctores/<int:pk>/editar/', views.editar_doctor, name='editar_doctor'),
+    # Horarios de doctores
     path('doctores/<int:pk>/horarios/', views.horarios_doctor, name='horarios_doctor'),
     path('horarios/<int:pk>/eliminar/', views.eliminar_horario, name='eliminar_horario'),
     

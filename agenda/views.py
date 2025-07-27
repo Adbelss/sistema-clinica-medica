@@ -10,9 +10,12 @@ from django.template.loader import render_to_string
 from datetime import datetime, timedelta, date
 import calendar
 
-from .models import Doctor, HorarioDoctor, Cita, Disponibilidad
-from .forms import DoctorForm, HorarioDoctorForm, CitaForm, DisponibilidadForm, BusquedaCitaForm
+from .models import HorarioDoctor, Cita, Disponibilidad
+from .forms import HorarioDoctorForm, CitaForm, DisponibilidadForm, BusquedaCitaForm
 from pacientes.models import Paciente
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 @login_required
 def agenda_dashboard(request):
@@ -25,7 +28,7 @@ def agenda_dashboard(request):
         fecha__gte=hoy,
         estado__in=['programada', 'confirmada']
     ).count()
-    doctores_activos = Doctor.objects.filter(estado='activo').count()
+    doctores_activos = User.objects.filter(rol='doctor', estado='activo').count()
     
     # Próximas citas
     proximas_citas = Cita.objects.filter(
@@ -42,7 +45,8 @@ def agenda_dashboard(request):
     inicio_semana = hoy - timedelta(days=hoy.weekday())
     fin_semana = inicio_semana + timedelta(days=6)
     
-    doctores_ocupados = Doctor.objects.filter(
+    doctores_ocupados = User.objects.filter(
+        rol='doctor',
         citas__fecha__range=[inicio_semana, fin_semana],
         citas__estado__in=['programada', 'confirmada']
     ).annotate(
@@ -111,60 +115,57 @@ def calendario(request):
         mes_siguiente = month + 1
         año_siguiente = year
     
+    # Obtener doctores para filtros
+    doctores = User.objects.filter(rol='doctor', estado='activo')
+    
     context = {
-        'cal': cal,
+        'calendario': cal,
+        'citas_por_dia': citas_por_dia,
         'year': year,
         'month': month,
-        'month_name': calendar.month_name[month],
-        'citas_por_dia': citas_por_dia,
         'mes_anterior': mes_anterior,
         'año_anterior': año_anterior,
         'mes_siguiente': mes_siguiente,
         'año_siguiente': año_siguiente,
-        'hoy': timezone.now().date(),
+        'nombre_mes': calendar.month_name[month],
+        'doctores': doctores,
     }
     
     return render(request, 'agenda/calendario.html', context)
 
 @login_required
 def listar_citas(request):
-    """Lista todas las citas con filtros"""
-    form = BusquedaCitaForm(request.GET)
+    """Lista de citas con filtros"""
     citas = Cita.objects.select_related('paciente', 'doctor').all()
     
+    # Aplicar filtros
+    form = BusquedaCitaForm(request.GET)
     if form.is_valid():
-        fecha_inicio = form.cleaned_data.get('fecha_inicio')
-        fecha_fin = form.cleaned_data.get('fecha_fin')
-        doctor = form.cleaned_data.get('doctor')
-        paciente = form.cleaned_data.get('paciente')
-        estado = form.cleaned_data.get('estado')
-        tipo_cita = form.cleaned_data.get('tipo_cita')
-        
-        if fecha_inicio:
-            citas = citas.filter(fecha__gte=fecha_inicio)
-        if fecha_fin:
-            citas = citas.filter(fecha__lte=fecha_fin)
-        if doctor:
-            citas = citas.filter(doctor=doctor)
-        if paciente:
-            citas = citas.filter(paciente=paciente)
-        if estado:
-            citas = citas.filter(estado=estado)
-        if tipo_cita:
-            citas = citas.filter(tipo_cita=tipo_cita)
-    
-    # Ordenar por fecha y hora
-    citas = citas.order_by('-fecha', '-hora_inicio')
+        if form.cleaned_data.get('fecha_inicio'):
+            citas = citas.filter(fecha__gte=form.cleaned_data['fecha_inicio'])
+        if form.cleaned_data.get('fecha_fin'):
+            citas = citas.filter(fecha__lte=form.cleaned_data['fecha_fin'])
+        if form.cleaned_data.get('doctor'):
+            citas = citas.filter(doctor=form.cleaned_data['doctor'])
+        if form.cleaned_data.get('paciente'):
+            citas = citas.filter(paciente=form.cleaned_data['paciente'])
+        if form.cleaned_data.get('estado'):
+            citas = citas.filter(estado=form.cleaned_data['estado'])
+        if form.cleaned_data.get('tipo_cita'):
+            citas = citas.filter(tipo_cita=form.cleaned_data['tipo_cita'])
     
     # Paginación
     paginator = Paginator(citas, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
+    # Obtener doctores para filtros
+    doctores = User.objects.filter(rol='doctor', estado='activo')
+    
     context = {
-        'form': form,
         'page_obj': page_obj,
-        'citas': page_obj,
+        'form': form,
+        'doctores': doctores,
     }
     
     return render(request, 'agenda/listar_citas.html', context)
@@ -226,80 +227,25 @@ def eliminar_cita(request, pk):
         'cita': cita,
     }
     
-    return render(request, 'agenda/confirmar_eliminar_cita.html', context)
+    return render(request, 'agenda/eliminar_cita.html', context)
 
 @login_required
 def cambiar_estado_cita(request, pk):
     """Cambiar estado de una cita"""
     cita = get_object_or_404(Cita, pk=pk)
+    nuevo_estado = request.POST.get('estado')
     
-    if request.method == 'POST':
-        nuevo_estado = request.POST.get('estado')
-        if nuevo_estado in dict(Cita.ESTADOS_CITA):
-            cita.estado = nuevo_estado
-            cita.save()
-            messages.success(request, f'Estado de la cita cambiado a {cita.get_estado_display()}.')
-        else:
-            messages.error(request, 'Estado inválido.')
+    if nuevo_estado in dict(Cita.ESTADOS_CITA):
+        cita.estado = nuevo_estado
+        cita.save()
+        messages.success(request, f'Estado de cita cambiado a {cita.get_estado_display()}.')
     
     return redirect('listar_citas')
 
 @login_required
-def gestion_doctores(request):
-    """Gestión de doctores"""
-    doctores = Doctor.objects.select_related('user').all()
-    
-    context = {
-        'doctores': doctores,
-    }
-    
-    return render(request, 'agenda/gestion_doctores.html', context)
-
-@login_required
-def nuevo_doctor(request):
-    """Crear nuevo doctor"""
-    if request.method == 'POST':
-        form = DoctorForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Doctor creado exitosamente.')
-            return redirect('gestion_doctores')
-    else:
-        form = DoctorForm()
-    
-    context = {
-        'form': form,
-        'titulo': 'Nuevo Doctor',
-    }
-    
-    return render(request, 'agenda/form_doctor.html', context)
-
-@login_required
-def editar_doctor(request, pk):
-    """Editar doctor existente"""
-    doctor = get_object_or_404(Doctor, pk=pk)
-    
-    if request.method == 'POST':
-        form = DoctorForm(request.POST, request.FILES, instance=doctor)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Doctor actualizado exitosamente.')
-            return redirect('gestion_doctores')
-    else:
-        form = DoctorForm(instance=doctor)
-    
-    context = {
-        'form': form,
-        'doctor': doctor,
-        'titulo': 'Editar Doctor',
-    }
-    
-    return render(request, 'agenda/form_doctor.html', context)
-
-@login_required
 def horarios_doctor(request, pk):
     """Gestionar horarios de un doctor"""
-    doctor = get_object_or_404(Doctor, pk=pk)
+    doctor = get_object_or_404(User, pk=pk, rol='doctor')
     horarios = HorarioDoctor.objects.filter(doctor=doctor)
     
     if request.method == 'POST':
@@ -311,7 +257,7 @@ def horarios_doctor(request, pk):
             messages.success(request, 'Horario agregado exitosamente.')
             return redirect('horarios_doctor', pk=pk)
     else:
-        form = HorarioDoctorForm()
+        form = HorarioDoctorForm(initial={'doctor': doctor})
     
     context = {
         'doctor': doctor,
@@ -338,6 +284,20 @@ def disponibilidad_doctores(request):
     """Gestión de disponibilidad de doctores"""
     disponibilidades = Disponibilidad.objects.select_related('doctor').filter(activo=True)
     
+    # Obtener doctores para el formulario
+    doctores = User.objects.filter(rol='doctor', estado='activo')
+    
+    # Estadísticas
+    total_doctores = doctores.count()
+    doctores_disponibles = User.objects.filter(
+        rol='doctor', 
+        estado='activo'
+    ).exclude(
+        disponibilidades__activo=True,
+        disponibilidades__fecha_inicio__lte=timezone.now().date(),
+        disponibilidades__fecha_fin__gte=timezone.now().date()
+    ).count()
+    
     if request.method == 'POST':
         form = DisponibilidadForm(request.POST)
         if form.is_valid():
@@ -350,23 +310,25 @@ def disponibilidad_doctores(request):
     context = {
         'disponibilidades': disponibilidades,
         'form': form,
+        'doctores': doctores,
+        'total_doctores': total_doctores,
+        'doctores_disponibles': doctores_disponibles,
     }
     
     return render(request, 'agenda/disponibilidad_doctores.html', context)
 
-# API endpoints para AJAX
 @login_required
 def api_citas_dia(request):
     """API para obtener citas de un día específico"""
-    fecha_str = request.GET.get('fecha')
+    fecha = request.GET.get('fecha')
     doctor_id = request.GET.get('doctor')
     
     try:
-        fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
     except (ValueError, TypeError):
-        fecha = timezone.now().date()
+        fecha_obj = timezone.now().date()
     
-    citas = Cita.objects.filter(fecha=fecha)
+    citas = Cita.objects.filter(fecha=fecha_obj)
     
     if doctor_id:
         citas = citas.filter(doctor_id=doctor_id)
@@ -374,14 +336,13 @@ def api_citas_dia(request):
     citas_data = []
     for cita in citas:
         citas_data.append({
-            'id': cita.id,
+            'id': cita.pk,
             'paciente': cita.paciente.nombre_completo,
             'doctor': cita.doctor.nombre_completo,
             'hora_inicio': cita.hora_inicio.strftime('%H:%M'),
             'hora_fin': cita.hora_fin.strftime('%H:%M'),
             'estado': cita.get_estado_display(),
             'tipo': cita.get_tipo_cita_display(),
-            'motivo': cita.motivo or '',
         })
     
     return JsonResponse({'citas': citas_data})
@@ -390,56 +351,39 @@ def api_citas_dia(request):
 def api_horarios_disponibles(request):
     """API para obtener horarios disponibles de un doctor en una fecha"""
     doctor_id = request.GET.get('doctor')
-    fecha_str = request.GET.get('fecha')
+    fecha = request.GET.get('fecha')
     
     try:
-        fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
-        doctor = Doctor.objects.get(id=doctor_id)
-    except (ValueError, TypeError, Doctor.DoesNotExist):
-        return JsonResponse({'error': 'Datos inválidos'}, status=400)
+        fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
+        doctor = User.objects.get(pk=doctor_id, rol='doctor')
+    except (ValueError, TypeError, User.DoesNotExist):
+        return JsonResponse({'error': 'Parámetros inválidos'}, status=400)
     
     # Obtener día de la semana (0=Lunes, 6=Domingo)
-    dia_semana = fecha.weekday()
+    dia_semana = fecha_obj.weekday()
     
     # Buscar horario del doctor para ese día
     try:
-        horario = HorarioDoctor.objects.get(
-            doctor=doctor,
-            dia_semana=dia_semana,
-            activo=True
-        )
+        horario = HorarioDoctor.objects.get(doctor=doctor, dia_semana=dia_semana, activo=True)
     except HorarioDoctor.DoesNotExist:
-        return JsonResponse({'error': 'No hay horario disponible para este día'})
-    
-    # Verificar si el doctor está disponible en esa fecha
-    disponibilidad = Disponibilidad.objects.filter(
-        doctor=doctor,
-        fecha_inicio__lte=fecha,
-        fecha_fin__gte=fecha,
-        activo=True
-    ).first()
-    
-    if disponibilidad:
-        return JsonResponse({'error': f'Doctor no disponible: {disponibilidad.get_tipo_display()}'})
+        return JsonResponse({'error': 'No hay horario disponible para este día'}, status=404)
     
     # Obtener citas existentes para ese día
     citas_existentes = Cita.objects.filter(
         doctor=doctor,
-        fecha=fecha,
-        estado__in=['programada', 'confirmada', 'en_proceso']
-    )
+        fecha=fecha_obj,
+        estado__in=['programada', 'confirmada']
+    ).order_by('hora_inicio')
     
-    # Generar slots disponibles
+    # Calcular slots disponibles
     slots_disponibles = []
     hora_actual = horario.hora_inicio
     
     while hora_actual < horario.hora_fin:
-        hora_fin_slot = (
-            datetime.combine(date.today(), hora_actual) + 
-            timedelta(minutes=horario.duracion_cita)
-        ).time()
+        hora_fin_slot = (datetime.combine(date.today(), hora_actual) + 
+                        timedelta(minutes=horario.duracion_cita)).time()
         
-        # Verificar si hay conflicto
+        # Verificar si hay conflicto con citas existentes
         conflicto = False
         for cita in citas_existentes:
             if (hora_actual < cita.hora_fin and hora_fin_slot > cita.hora_inicio):

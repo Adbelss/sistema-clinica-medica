@@ -210,6 +210,43 @@
                                     </label>
                                     {{ form.parentesco_emergencia }}
                                 </div>
+                                
+                                <!-- Checkboxes de Notificaciones -->
+                                <div class="col-12 mb-3">
+                                    <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; background-color: #f9fafb;">
+                                        <div class="card-body">
+                                            <h6 class="card-title" style="color: #374151; font-weight: 600; margin-bottom: 15px;">
+                                                <i class="bi bi-bell me-2"></i>Preferencias de Notificación
+                                            </h6>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="notificar_correo" name="notificar_correo" style="margin-top: 0.2rem;">
+                                                        <label class="form-check-label" for="notificar_correo" style="color: #6b7280; font-weight: 500;">
+                                                            <i class="bi bi-envelope me-2"></i>Notificar por Correo
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="notificar_whatsapp" name="notificar_whatsapp" style="margin-top: 0.2rem;">
+                                                        <label class="form-check-label" for="notificar_whatsapp" style="color: #6b7280; font-weight: 500;">
+                                                            <i class="bi bi-whatsapp me-2" style="color: #25D366;"></i>Notificar por WhatsApp
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="notificar_sms" name="notificar_sms" style="margin-top: 0.2rem;">
+                                                        <label class="form-check-label" for="notificar_sms" style="color: #6b7280; font-weight: 500;">
+                                                            <i class="bi bi-chat-text me-2"></i>Notificar por SMS
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

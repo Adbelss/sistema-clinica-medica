@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Configuración de Impresión - Sistema Médico{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0">
+                                <i class="fas fa-cog me-2"></i>
+                                Configuración de Impresión
+                            </h2>
+                            <p class="mb-0">Personaliza la configuración del sistema de impresión médica</p>
+                        </div>
+                        <div class="text-end">
+                            <h5 class="mb-0">{{ config.nombre_clinica }}</h5>
+                            <small>Configuración del sistema</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de configuración -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <i class="fas fa-hospital me-2"></i>Información de la Clínica
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Información básica -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="font-weight-bold text-primary mb-3">Información Básica</h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre de la Clínica *</label>
+                                    <input type="text" name="nombre_clinica" class="form-control" 
+                                           value="{{ config.nombre_clinica }}" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Dirección</label>
+                                    <textarea name="direccion_clinica" class="form-control" rows="3">{{ config.direccion_clinica }}</textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Teléfono</label>
+                                    <input type="text" name="telefono_clinica" class="form-control" 
+                                           value="{{ config.telefono_clinica }}">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6 class="font-weight-bold text-primary mb-3">Información de Contacto</h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" name="email_clinica" class="form-control" 
+                                           value="{{ config.email_clinica }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Sitio Web</label>
+                                    <input type="url" name="sitio_web_clinica" class="form-control" 
+                                           value="{{ config.sitio_web_clinica }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Pie de Página por Defecto</label>
+                                    <textarea name="pie_pagina_default" class="form-control" rows="3">{{ config.pie_pagina_default }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Elementos visuales -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="font-weight-bold text-primary mb-3">Elementos Visuales</h6>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Logo de la Clínica</label>
+                                            {% if config.logo_clinica %}
+                                            <div class="mb-2">
+                                                <img src="{{ config.logo_clinica.url }}" alt="Logo actual" style="max-height: 100px;">
+                                            </div>
+                                            {% endif %}
+                                            <input type="file" name="logo_clinica" class="form-control" accept="image/*">
+                                            <small class="text-muted">Formatos: JPG, PNG, GIF. Tamaño máximo: 2MB</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Sello de la Clínica</label>
+                                            {% if config.sello_clinica %}
+                                            <div class="mb-2">
+                                                <img src="{{ config.sello_clinica.url }}" alt="Sello actual" style="max-height: 100px;">
+                                            </div>
+                                            {% endif %}
+                                            <input type="file" name="sello_clinica" class="form-control" accept="image/*">
+                                            <small class="text-muted">Formatos: JPG, PNG, GIF. Tamaño máximo: 2MB</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configuración de documentos -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="font-weight-bold text-primary mb-3">Elementos del Documento</h6>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="incluir_codigo_qr" class="form-check-input" 
+                                               {% if config.incluir_codigo_qr %}checked{% endif %}>
+                                        <label class="form-check-label">Incluir código QR en documentos</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="incluir_fecha_generacion" class="form-check-input" 
+                                               {% if config.incluir_fecha_generacion %}checked{% endif %}>
+                                        <label class="form-check-label">Incluir fecha de generación</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="incluir_numero_pagina" class="form-check-input" 
+                                               {% if config.incluir_numero_pagina %}checked{% endif %}>
+                                        <label class="form-check-label">Incluir números de página</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="incluir_watermark" class="form-check-input" 
+                                               {% if config.incluir_watermark %}checked{% endif %}>
+                                        <label class="form-check-label">Incluir marca de agua</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Texto de Marca de Agua</label>
+                                    <input type="text" name="texto_watermark" class="form-control" 
+                                           value="{{ config.texto_watermark }}">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6 class="font-weight-bold text-primary mb-3">Configuración de Impresión</h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Tamaño de Papel por Defecto</label>
+                                    <select name="tamano_papel_default" class="form-select">
+                                        <option value="A4" {% if config.tamano_papel_default == 'A4' %}selected{% endif %}>A4</option>
+                                        <option value="letter" {% if config.tamano_papel_default == 'letter' %}selected{% endif %}>Carta</option>
+                                        <option value="legal" {% if config.tamano_papel_default == 'legal' %}selected{% endif %}>Legal</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Orientación por Defecto</label>
+                                    <select name="orientacion_default" class="form-select">
+                                        <option value="portrait" {% if config.orientacion_default == 'portrait' %}selected{% endif %}>Vertical</option>
+                                        <option value="landscape" {% if config.orientacion_default == 'landscape' %}selected{% endif %}>Horizontal</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Márgenes por Defecto</label>
+                                    <select name="margenes_default" class="form-select">
+                                        <option value="normal" {% if config.margenes_default == 'normal' %}selected{% endif %}>Normal</option>
+                                        <option value="estrecho" {% if config.margenes_default == 'estrecho' %}selected{% endif %}>Estrecho</option>
+                                        <option value="ancho" {% if config.margenes_default == 'ancho' %}selected{% endif %}>Ancho</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="row">
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'impresion:dashboard' %}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+                                    </a>
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-save me-2"></i>Guardar Configuración
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Animaciones suaves
+    $('.card').hover(
+        function() { $(this).addClass('shadow-lg'); },
+        function() { $(this).removeClass('shadow-lg'); }
+    );
+    
+    // Validación del formulario
+    $('form').on('submit', function(e) {
+        var nombreClinica = $('input[name="nombre_clinica"]').val().trim();
+        if (!nombreClinica) {
+            e.preventDefault();
+            alert('El nombre de la clínica es obligatorio.');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %} 

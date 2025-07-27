@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+
+{% block title %}Nueva Cita | HealthLife{% endblock %}
+
+{% block content %}
+<style>
+/* Variables CSS para el sistema médico */
+:root {
+    --primary-blue: #2563eb;
+    --secondary-blue: #1e40af;
+    --accent-blue: #3b82f6;
+    --medical-green: #10b981;
+    --medical-yellow: #f59e0b;
+    --medical-red: #ef4444;
+    --medical-gray: #6b7280;
+    --light-gray: #f3f4f6;
+    --white: #ffffff;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --border-radius: 12px;
+    --border-radius-small: 8px;
+    --transition: all 0.3s ease;
+}
+
+.form-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+}
+
+.form-section h4 {
+    color: var(--primary-blue);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--light-gray);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--medical-gray);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control {
+    border: 2px solid var(--light-gray);
+    border-radius: var(--border-radius-small);
+    padding: 0.75rem;
+    transition: var(--transition);
+    width: 100%;
+}
+
+.form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    outline: none;
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    border: none;
+    border-radius: var(--border-radius-small);
+    padding: 0.75rem 1.5rem;
+    color: var(--white);
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background: var(--secondary-blue);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--medical-gray);
+    border: none;
+    border-radius: var(--border-radius-small);
+    padding: 0.75rem 1.5rem;
+    color: var(--white);
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+    transform: translateY(-1px);
+}
+
+.alert {
+    border-radius: var(--border-radius-small);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background: #d1fae5;
+    border: 1px solid var(--medical-green);
+    color: #065f46;
+}
+
+.alert-danger {
+    background: #fee2e2;
+    border: 1px solid var(--medical-red);
+    color: #991b1b;
+}
+
+.time-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.time-slot {
+    padding: 0.5rem;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius-small);
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.875rem;
+}
+
+.time-slot:hover {
+    background: var(--light-gray);
+    border-color: var(--primary-blue);
+}
+
+.time-slot.selected {
+    background: var(--primary-blue);
+    color: var(--white);
+    border-color: var(--primary-blue);
+}
+
+.time-slot.unavailable {
+    background: #f3f4f6;
+    color: var(--medical-gray);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+</style>
+
+<div class="container-fluid">
+    <!-- Header de la página -->
+    <div class="page-header">
+        <h2><i class="bi bi-calendar-plus me-3"></i>Nueva Cita</h2>
+        <p>Programa una nueva cita médica en el sistema.</p>
+    </div>
+
+    <!-- Mensajes de alerta -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Formulario de cita -->
+    <div class="form-container">
+        <form method="post" id="citaForm">
+            {% csrf_token %}
+            
+            <!-- Información básica -->
+            <div class="form-section">
+                <h4><i class="bi bi-info-circle me-2"></i>Información Básica</h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.paciente.id_for_label }}" class="form-label">
+                                <i class="bi bi-person me-1"></i>Paciente *
+                            </label>
+                            {{ form.paciente }}
+                            {% if form.paciente.errors %}
+                                <div class="text-danger small">{{ form.paciente.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.doctor.id_for_label }}" class="form-label">
+                                <i class="bi bi-person-badge me-1"></i>Doctor *
+                            </label>
+                            {{ form.doctor }}
+                            {% if form.doctor.errors %}
+                                <div class="text-danger small">{{ form.doctor.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fecha y hora -->
+            <div class="form-section">
+                <h4><i class="bi bi-clock me-2"></i>Fecha y Hora</h4>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="{{ form.fecha.id_for_label }}" class="form-label">
+                                <i class="bi bi-calendar me-1"></i>Fecha *
+                            </label>
+                            {{ form.fecha }}
+                            {% if form.fecha.errors %}
+                                <div class="text-danger small">{{ form.fecha.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="{{ form.hora_inicio.id_for_label }}" class="form-label">
+                                <i class="bi bi-clock me-1"></i>Hora de Inicio *
+                            </label>
+                            {{ form.hora_inicio }}
+                            {% if form.hora_inicio.errors %}
+                                <div class="text-danger small">{{ form.hora_inicio.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="{{ form.duracion.id_for_label }}" class="form-label">
+                                <i class="bi bi-stopwatch me-1"></i>Duración (minutos) *
+                            </label>
+                            {{ form.duracion }}
+                            {% if form.duracion.errors %}
+                                <div class="text-danger small">{{ form.duracion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tipo y estado -->
+            <div class="form-section">
+                <h4><i class="bi bi-tag me-2"></i>Tipo y Estado</h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.tipo_cita.id_for_label }}" class="form-label">
+                                <i class="bi bi-tag me-1"></i>Tipo de Cita *
+                            </label>
+                            {{ form.tipo_cita }}
+                            {% if form.tipo_cita.errors %}
+                                <div class="text-danger small">{{ form.tipo_cita.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.estado.id_for_label }}" class="form-label">
+                                <i class="bi bi-check-circle me-1"></i>Estado *
+                            </label>
+                            {{ form.estado }}
+                            {% if form.estado.errors %}
+                                <div class="text-danger small">{{ form.estado.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notas -->
+            <div class="form-section">
+                <h4><i class="bi bi-sticky me-2"></i>Notas Adicionales</h4>
+                
+                <div class="form-group">
+                    <label for="{{ form.notas.id_for_label }}" class="form-label">
+                        <i class="bi bi-pencil me-1"></i>Notas
+                    </label>
+                    {{ form.notas }}
+                    {% if form.notas.errors %}
+                        <div class="text-danger small">{{ form.notas.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'agenda_dashboard' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle me-2"></i>Crear Cita
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Estilizar los campos del formulario
+    const formControls = document.querySelectorAll('.form-control, select, textarea');
+    formControls.forEach(control => {
+        control.classList.add('form-control');
+    });
+
+    // Validación de fecha (no permitir fechas pasadas)
+    const fechaInput = document.getElementById('{{ form.fecha.id_for_label }}');
+    if (fechaInput) {
+        const today = new Date().toISOString().split('T')[0];
+        fechaInput.setAttribute('min', today);
+    }
+
+    // Validación de duración
+    const duracionInput = document.getElementById('{{ form.duracion.id_for_label }}');
+    if (duracionInput) {
+        duracionInput.addEventListener('change', function() {
+            const value = parseInt(this.value);
+            if (value < 15) {
+                this.value = 15;
+            } else if (value > 480) {
+                this.value = 480;
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

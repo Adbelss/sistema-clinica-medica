@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Estadísticas WhatsApp{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .whatsapp-icon {
+        color: #25D366;
+    }
+    
+    .period-selector {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="bi bi-graph-up whatsapp-icon me-2"></i>
+                        Estadísticas WhatsApp
+                    </h1>
+                    <p class="text-muted">Análisis y métricas de notificaciones enviadas por WhatsApp</p>
+                </div>
+                <div>
+                    <a href="{% url 'listar_notificaciones_whatsapp' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-whatsapp me-2"></i>Ver Notificaciones
+                    </a>
+                </div>
+            </div>
+
+            <!-- Selector de Período -->
+            <div class="period-selector">
+                <form method="get" class="row align-items-end">
+                    <div class="col-md-3">
+                        <label for="dias" class="form-label">Período de Análisis</label>
+                        <select class="form-select" id="dias" name="dias" onchange="this.form.submit()">
+                            <option value="7" {% if dias == 7 %}selected{% endif %}>Últimos 7 días</option>
+                            <option value="30" {% if dias == 30 %}selected{% endif %}>Últimos 30 días</option>
+                            <option value="90" {% if dias == 90 %}selected{% endif %}>Últimos 90 días</option>
+                            <option value="365" {% if dias == 365 %}selected{% endif %}>Último año</option>
+                        </select>
+                    </div>
+                    <div class="col-md-9">
+                        <small class="text-muted">
+                            Analizando datos desde: {{ fecha_inicio|date:"d/m/Y" }}
+                        </small>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Estadísticas Principales -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <div class="h2 mb-0">{{ total_notificaciones }}</div>
+                        <div class="small">Total Notificaciones</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                        <div class="h2 mb-0">{{ notificaciones_exitosas }}</div>
+                        <div class="small">Envíos Exitosos</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+                        <div class="h2 mb-0">{{ tasa_exito }}%</div>
+                        <div class="small">Tasa de Éxito</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);">
+                        <div class="h2 mb-0">{{ dias }}</div>
+                        <div class="small">Días Analizados</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Gráfico por Tipo -->
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h5 class="mb-3">
+                            <i class="bi bi-pie-chart me-2"></i>Notificaciones por Tipo
+                        </h5>
+                        {% if stats_por_tipo %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Total</th>
+                                            <th>Exitosas</th>
+                                            <th>Errores</th>
+                                            <th>% Éxito</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for stat in stats_por_tipo %}
+                                        <tr>
+                                            <td>
+                                                {% if stat.tipo == 'receta' %}
+                                                    <i class="bi bi-prescription me-2"></i>Receta
+                                                {% elif stat.tipo == 'consulta' %}
+                                                    <i class="bi bi-file-medical me-2"></i>Resumen
+                                                {% elif stat.tipo == 'recordatorio' %}
+                                                    <i class="bi bi-calendar-check me-2"></i>Recordatorio
+                                                {% else %}
+                                                    <i class="bi bi-whatsapp me-2"></i>{{ stat.tipo|title }}
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ stat.total }}</td>
+                                            <td class="text-success">{{ stat.exitosas }}</td>
+                                            <td class="text-danger">{{ stat.errores }}</td>
+                                            <td>
+                                                {% if stat.total > 0 %}
+                                                    {{ stat.exitosas|floatformat:0 }}%
+                                                {% else %}
+                                                    0%
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="bi bi-graph-down text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-2">No hay datos para mostrar</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Gráfico por Día -->
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h5 class="mb-3">
+                            <i class="bi bi-calendar-week me-2"></i>Actividad por Día (Últimos 7 días)
+                        </h5>
+                        {% if stats_por_dia %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Cantidad</th>
+                                            <th>Gráfico</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for stat in stats_por_dia %}
+                                        <tr>
+                                            <td>{{ stat.fecha }}</td>
+                                            <td>{{ stat.cantidad }}</td>
+                                            <td>
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-success" 
+                                                         style="width: {% if total_notificaciones > 0 %}{{ stat.cantidad|floatformat:0 }}{% else %}0{% endif %}%">
+                                                        {{ stat.cantidad }}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-2">No hay actividad reciente</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Usuarios -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h5 class="mb-3">
+                            <i class="bi bi-people me-2"></i>Top Pacientes
+                        </h5>
+                        {% if top_pacientes %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Paciente</th>
+                                            <th>Notificaciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for paciente in top_pacientes %}
+                                        <tr>
+                                            <td>{{ paciente.paciente__primer_nombre }} {{ paciente.paciente__primer_apellido }}</td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ paciente.total }}</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="bi bi-person-x text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-2">No hay datos de pacientes</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h5 class="mb-3">
+                            <i class="bi bi-person-gear me-2"></i>Top Doctores
+                        </h5>
+                        {% if top_doctores %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Doctor</th>
+                                            <th>Enviados</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for doctor in top_doctores %}
+                                        <tr>
+                                            <td>{{ doctor.enviado_por__first_name }} {{ doctor.enviado_por__last_name }}</td>
+                                            <td>
+                                                <span class="badge bg-success">{{ doctor.total }}</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="bi bi-person-x text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-2">No hay datos de doctores</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit del formulario cuando cambie el período
+    const periodSelect = document.getElementById('dias');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', function() {
+            this.form.submit();
+        });
+    }
+});
+</script>
+{% endblock %} 

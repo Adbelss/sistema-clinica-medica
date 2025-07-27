@@ -1,0 +1,425 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Antecedentes Médicos - {{ paciente.nombre_completo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .antecedentes-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+    
+    .antecedentes-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .antecedentes-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .antecedentes-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 300;
+    }
+    
+    .antecedentes-content {
+        padding: 30px;
+    }
+    
+    .form-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    .form-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-title i {
+        color: #4facfe;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #4facfe;
+        box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .antecedentes-list {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    .antecedente-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-left: 4px solid #4facfe;
+        transition: all 0.3s ease;
+    }
+    
+    .antecedente-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+    
+    .antecedente-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .antecedente-title {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+    }
+    
+    .antecedente-meta {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-warning { background: #fff3cd; color: #856404; }
+    .badge-danger { background: #f8d7da; color: #721c24; }
+    .badge-info { background: #d1ecf1; color: #0c5460; }
+    
+    .antecedente-description {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+    
+    .antecedente-dates {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 15px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        padding: 10px 20px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-primary-action {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+    
+    .btn-secondary-action {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .antecedentes-header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="antecedentes-container">
+    <div class="antecedentes-card">
+        <!-- Header -->
+        <div class="antecedentes-header">
+            <h1><i class="fas fa-history"></i> Antecedentes Médicos</h1>
+            <p>{{ paciente.nombre_completo }} | {{ paciente.edad }} años</p>
+        </div>
+        
+        <div class="antecedentes-content">
+            <!-- Formulario para agregar antecedente -->
+            <div class="form-section">
+                <div class="form-title">
+                    <i class="fas fa-plus-circle"></i>
+                    Agregar Nuevo Antecedente
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tipo_antecedente">Tipo de Antecedente *</label>
+                            <select name="tipo_antecedente" id="tipo_antecedente" class="form-control" required>
+                                <option value="">Selecciona un tipo</option>
+                                <option value="personal">Personal</option>
+                                <option value="familiar">Familiar</option>
+                                <option value="quirurgico">Quirúrgico</option>
+                                <option value="alergico">Alérgico</option>
+                                <option value="medicamento">Medicamento</option>
+                                <option value="habito">Hábito</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="severidad">Severidad</label>
+                            <select name="severidad" id="severidad" class="form-control">
+                                <option value="">Selecciona severidad</option>
+                                <option value="leve">Leve</option>
+                                <option value="moderado">Moderado</option>
+                                <option value="severo">Severo</option>
+                                <option value="crítico">Crítico</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descripcion">Descripción *</label>
+                        <textarea name="descripcion" id="descripcion" class="form-control" rows="4" 
+                                  placeholder="Describe el antecedente médico..." required></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fecha_inicio">Fecha de Inicio</label>
+                            <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fecha_fin">Fecha de Fin</label>
+                            <input type="date" name="fecha_fin" id="fecha_fin" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="estado_actual">Estado Actual</label>
+                        <input type="text" name="estado_actual" id="estado_actual" class="form-control" 
+                               placeholder="Ej: Controlado, Activo, Remitido...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notas">Notas Adicionales</label>
+                        <textarea name="notas" id="notas" class="form-control" rows="3" 
+                                  placeholder="Información adicional relevante..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-save"></i> Guardar Antecedente
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Lista de antecedentes -->
+            <div class="antecedentes-list">
+                <div class="form-title">
+                    <i class="fas fa-list"></i>
+                    Antecedentes Registrados ({{ antecedentes.count }})
+                </div>
+                
+                {% if antecedentes %}
+                    {% for antecedente in antecedentes %}
+                    <div class="antecedente-item">
+                        <div class="antecedente-header">
+                            <div class="antecedente-title">{{ antecedente.get_tipo_antecedente_display }}</div>
+                            <div class="antecedente-meta">
+                                {% if antecedente.severidad %}
+                                <span class="badge badge-{% if antecedente.severidad == 'severo' %}danger{% elif antecedente.severidad == 'moderado' %}warning{% else %}success{% endif %}">
+                                    {{ antecedente.get_severidad_display }}
+                                </span>
+                                {% endif %}
+                                <span class="badge badge-info">{{ antecedente.fecha_creacion|date:"d/m/Y" }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="antecedente-description">
+                            {{ antecedente.descripcion }}
+                        </div>
+                        
+                        {% if antecedente.estado_actual %}
+                        <div class="antecedente-meta">
+                            <strong>Estado:</strong> {{ antecedente.estado_actual }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="antecedente-dates">
+                            {% if antecedente.fecha_inicio %}
+                            <strong>Inicio:</strong> {{ antecedente.fecha_inicio|date:"d/m/Y" }}
+                            {% endif %}
+                            {% if antecedente.fecha_fin %}
+                            | <strong>Fin:</strong> {{ antecedente.fecha_fin|date:"d/m/Y" }}
+                            {% endif %}
+                        </div>
+                        
+                        {% if antecedente.notas %}
+                        <div class="antecedente-description" style="margin-top: 10px; font-style: italic;">
+                            <strong>Notas:</strong> {{ antecedente.notas }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No hay antecedentes médicos registrados</p>
+                        <p>Agrega el primer antecedente usando el formulario de arriba</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="action-buttons">
+                <a href="{% url 'historial_medico' paciente.id %}" class="btn-action btn-secondary-action">
+                    <i class="fas fa-arrow-left"></i> Volver al Historial
+                </a>
+                <a href="{% url 'listar_pacientes' %}" class="btn-action btn-primary-action">
+                    <i class="fas fa-users"></i> Ver Todos los Pacientes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validación del formulario
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const tipoSelect = document.getElementById('tipo_antecedente');
+        const descripcionTextarea = document.getElementById('descripcion');
+        
+        form.addEventListener('submit', function(e) {
+            if (!tipoSelect.value) {
+                e.preventDefault();
+                alert('Por favor selecciona un tipo de antecedente');
+                tipoSelect.focus();
+                return;
+            }
+            
+            if (!descripcionTextarea.value.trim()) {
+                e.preventDefault();
+                alert('Por favor describe el antecedente médico');
+                descripcionTextarea.focus();
+                return;
+            }
+        });
+        
+        // Animaciones suaves
+        const items = document.querySelectorAll('.antecedente-item');
+        items.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                item.style.transition = 'all 0.5s ease';
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %} 

@@ -2,17 +2,313 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-success mb-4"><i class="bi bi-file-earmark-medical-fill me-2"></i>Detalle de Consulta</h2>
-    <ul class="list-group list-group-flush fs-5 shadow-sm">
-        <li class="list-group-item"><strong>Paciente:</strong> {{ consulta.paciente_nombre|default:"(No indicado)" }}</li>
-        <li class="list-group-item"><strong>Fecha:</strong> {{ consulta.fecha|date:"F j, Y, g:i a" }}</li>
-        <li class="list-group-item"><strong>Motivo:</strong> {{ consulta.motivo }}</li>
-        <li class="list-group-item"><strong>Diagnóstico:</strong> {{ consulta.diagnostico }}</li>
-        <li class="list-group-item"><strong>Tratamiento:</strong> {{ consulta.tratamiento }}</li>
-        <li class="list-group-item"><strong>Doctor:</strong> {{ consulta.doctor.get_full_name|default:consulta.doctor.username }}</li>
-    </ul>
-    <a href="{% url 'listar_consultas' %}" class="btn btn-outline-success mt-4">
-        <i class="bi bi-arrow-left"></i> Volver al Listado
-    </a>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0">
+                                <i class="fas fa-stethoscope me-2"></i>
+                                Detalle de Consulta Médica
+                            </h2>
+                            <p class="mb-0">{{ consulta.paciente.nombre_completo }} - {{ consulta.fecha|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        <div class="text-end">
+                            <h5 class="mb-0">{{ consulta.get_tipo_consulta_display }}</h5>
+                            <small>{{ consulta.get_estado_display }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-cog me-2"></i>Acciones Disponibles
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2 mb-3">
+                            <a href="{% url 'impresion:generar_consulta' consulta.id %}" 
+                               class="btn btn-primary btn-block">
+                                <i class="fas fa-file-medical me-2"></i>
+                                Generar Consulta
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <a href="{% url 'impresion:generar_receta' consulta.id %}" 
+                               class="btn btn-success btn-block">
+                                <i class="fas fa-prescription me-2"></i>
+                                Generar Receta
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <a href="{% url 'historial_medico' consulta.paciente.id %}" 
+                               class="btn btn-info btn-block">
+                                <i class="fas fa-user-md me-2"></i>
+                                Historial Médico
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <a href="{% url 'editar_consulta' consulta.id %}" 
+                               class="btn btn-warning btn-block">
+                                <i class="fas fa-edit me-2"></i>
+                                Editar Consulta
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <a href="{% url 'listar_consultas' %}" 
+                               class="btn btn-secondary btn-block">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Volver
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <a href="{% url 'enviar_receta_whatsapp' consulta.id %}" 
+                               class="btn btn-success btn-block" style="background-color: #25D366; border-color: #25D366;">
+                                <i class="bi bi-whatsapp me-2"></i>
+                                Enviar Receta
+                            </a>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <a href="{% url 'enviar_resumen_whatsapp' consulta.id %}" 
+                               class="btn btn-info btn-block" style="background-color: #128C7E; border-color: #128C7E;">
+                                <i class="bi bi-whatsapp me-2"></i>
+                                Enviar Resumen
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información de la consulta -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle me-2"></i>Información de la Consulta
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Paciente:</strong></td>
+                                    <td>{{ consulta.paciente.nombre_completo }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Documento:</strong></td>
+                                    <td>{{ consulta.paciente.documento_identificacion }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Edad:</strong></td>
+                                    <td>{{ consulta.paciente.edad }} años</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fecha:</strong></td>
+                                    <td>{{ consulta.fecha|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tipo:</strong></td>
+                                    <td>{{ consulta.get_tipo_consulta_display }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Estado:</strong></td>
+                                    <td>{{ consulta.get_estado_display }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Doctor:</strong></td>
+                                    <td>{{ consulta.doctor.get_full_name }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Duración:</strong></td>
+                                    <td>{{ consulta.duracion_consulta|default:consulta.calcular_duracion_consulta }} min</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Costo:</strong></td>
+                                    <td>${{ consulta.costo_consulta|default:"0.00" }}</td>
+                                </tr>
+                                {% if consulta.proxima_cita %}
+                                <tr>
+                                    <td><strong>Próxima cita:</strong></td>
+                                    <td>{{ consulta.proxima_cita|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signos vitales -->
+            {% if consulta.presion_arterial or consulta.temperatura or consulta.peso or consulta.altura or consulta.frecuencia_cardiaca %}
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-heartbeat me-2"></i>Signos Vitales
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if consulta.presion_arterial %}
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <h5 class="text-primary">{{ consulta.presion_arterial }}</h5>
+                                <small class="text-muted">Presión Arterial</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if consulta.temperatura %}
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <h5 class="text-success">{{ consulta.temperatura }}°C</h5>
+                                <small class="text-muted">Temperatura</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if consulta.peso %}
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <h5 class="text-info">{{ consulta.peso }} kg</h5>
+                                <small class="text-muted">Peso</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if consulta.altura %}
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <h5 class="text-warning">{{ consulta.altura }} m</h5>
+                                <small class="text-muted">Altura</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if consulta.frecuencia_cardiaca %}
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <h5 class="text-danger">{{ consulta.frecuencia_cardiaca }} lpm</h5>
+                                <small class="text-muted">Frecuencia Cardíaca</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if consulta.calcular_imc %}
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <h5 class="text-dark">{{ consulta.calcular_imc }}</h5>
+                                <small class="text-muted">IMC ({{ consulta.obtener_categoria_imc }})</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Detalles médicos -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-notes-medical me-2"></i>Detalles Médicos
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary">Motivo de Consulta</h6>
+                        <p class="text-justify">{{ consulta.motivo }}</p>
+                    </div>
+                    
+                    {% if consulta.sintomas %}
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary">Síntomas</h6>
+                        <p class="text-justify">{{ consulta.sintomas }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary">Diagnóstico</h6>
+                        <p class="text-justify">{{ consulta.diagnostico }}</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary">Tratamiento</h6>
+                        <p class="text-justify">{{ consulta.tratamiento }}</p>
+                    </div>
+                    
+                    {% if consulta.medicamentos_recetados %}
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary">Medicamentos Recetados</h6>
+                        <p class="text-justify">{{ consulta.medicamentos_recetados }}</p>
+                        {% if consulta.dosis_medicamentos %}
+                        <h6 class="font-weight-bold text-primary mt-3">Dosis y Frecuencia</h6>
+                        <p class="text-justify">{{ consulta.dosis_medicamentos }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if consulta.notas_adicionales %}
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary">Notas Adicionales</h6>
+                        <p class="text-justify">{{ consulta.notas_adicionales }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-md-4">
+            <!-- Alertas médicas -->
+            {% if alertas_medicas %}
+            <div class="card shadow mb-4 border-left-danger">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Alertas Médicas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for alerta in alertas_medicas %}
+                    <div class="alert alert-danger">
+                        {{ alerta }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Historial de consultas -->
+            {% if historial_consultas %}
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-history me-2"></i>Historial de Consultas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for consulta_hist in historial_consultas|slice:":5" %}
+                    <div class="border-bottom pb-2 mb-2">
+                        <small class="text-muted">{{ consulta_hist.fecha|date:"d/m/Y" }}</small>
+                        <p class="mb-1"><strong>{{ consulta_hist.get_tipo_consulta_display }}</strong></p>
+                        <p class="small text-muted mb-0">{{ consulta_hist.diagnostico|truncatechars:50 }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

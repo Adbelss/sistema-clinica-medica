@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Prueba WhatsApp Demo | HealthLife{% endblock %}
+
+{% block extra_css %}
+<style>
+    .demo-container {
+        background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .demo-warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .demo-warning h5 {
+        color: #856404;
+        margin-bottom: 10px;
+    }
+    
+    .form-container {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .whatsapp-preview {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .whatsapp-bubble {
+        background: #dcf8c6;
+        border-radius: 15px;
+        padding: 15px;
+        margin: 10px 0;
+        max-width: 80%;
+        position: relative;
+    }
+    
+    .whatsapp-bubble::before {
+        content: '';
+        position: absolute;
+        left: -10px;
+        top: 15px;
+        width: 0;
+        height: 0;
+        border: 10px solid transparent;
+        border-right-color: #dcf8c6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="demo-container">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-0">
+                            <i class="bi bi-whatsapp me-2"></i>
+                            Prueba WhatsApp Demo
+                        </h1>
+                        <p class="mb-0">Simula el envío de mensajes por WhatsApp</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'listar_notificaciones_whatsapp' %}" class="btn btn-outline-light">
+                            <i class="bi bi-arrow-left me-2"></i>Volver a Notificaciones
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advertencia Demo -->
+            <div class="demo-warning">
+                <h5><i class="bi bi-exclamation-triangle me-2"></i>Modo Demo Activo</h5>
+                <p class="mb-0">
+                    <strong>⚠️ Importante:</strong> Este sistema está en modo demo. Los mensajes se simulan pero 
+                    <strong>NO se envían realmente a WhatsApp</strong>. Para recibir mensajes reales, necesitas 
+                    configurar WhatsApp Business API siguiendo las instrucciones en 
+                    <code>WHATSAPP_SETUP.md</code>.
+                </p>
+            </div>
+
+            <!-- Mensajes de éxito/error -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        <i class="bi {% if message.tags == 'success' %}bi-check-circle{% elif message.tags == 'error' %}bi-exclamation-triangle{% elif message.tags == 'warning' %}bi-exclamation-triangle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="row">
+                <!-- Formulario de Prueba -->
+                <div class="col-md-6">
+                    <div class="form-container">
+                        <h4><i class="bi bi-send me-2"></i>Enviar Mensaje de Prueba</h4>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label for="telefono" class="form-label">
+                                    <i class="bi bi-telephone me-2"></i>Número de Teléfono
+                                </label>
+                                <input type="text" class="form-control" id="telefono" name="telefono" 
+                                       value="50212345678" placeholder="50212345678">
+                                <div class="form-text">Formato: código de país + número (ej: 50212345678)</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="mensaje" class="form-label">
+                                    <i class="bi bi-chat-text me-2"></i>Mensaje
+                                </label>
+                                <textarea class="form-control" id="mensaje" name="mensaje" rows="4" 
+                                          placeholder="Escribe tu mensaje aquí...">Hola, este es un mensaje de prueba desde HealthLife. 🏥
+
+Fecha: {{ fecha_actual }}
+Hora: {{ hora_actual }}
+
+Este mensaje se está enviando en modo demo.</textarea>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-whatsapp me-2"></i>Enviar Mensaje Demo
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Vista Previa -->
+                <div class="col-md-6">
+                    <div class="form-container">
+                        <h4><i class="bi bi-eye me-2"></i>Vista Previa del Mensaje</h4>
+                        
+                        <div class="whatsapp-preview">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-whatsapp text-success me-2" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <strong>HealthLife</strong>
+                                    <div class="text-muted small">en línea</div>
+                                </div>
+                            </div>
+                            
+                            <div class="whatsapp-bubble" id="mensaje-preview">
+                                <div id="contenido-preview">
+                                    Hola, este es un mensaje de prueba desde HealthLife. 🏥<br><br>
+                                    Fecha: {{ fecha_actual }}<br>
+                                    Hora: {{ hora_actual }}<br><br>
+                                    Este mensaje se está enviando en modo demo.
+                                </div>
+                                <div class="text-muted small mt-2">
+                                    <i class="bi bi-check2-all text-primary"></i> Enviado
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <h6><i class="bi bi-info-circle me-2"></i>Información del Demo</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Mensaje simulado correctamente</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Guardado en base de datos</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Estado: Enviado</li>
+                                <li><i class="bi bi-x-circle text-warning me-2"></i>No llega realmente a WhatsApp</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instrucciones -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-gear me-2"></i>¿Cómo activar WhatsApp real?</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>1. Configurar WhatsApp Business API</h6>
+                                    <ul>
+                                        <li>Crear cuenta en Meta for Developers</li>
+                                        <li>Configurar aplicación de WhatsApp</li>
+                                        <li>Obtener credenciales (token, phone_number_id)</li>
+                                        <li>Crear plantillas de mensaje</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>2. Configurar Variables de Entorno</h6>
+                                    <ul>
+                                        <li>Editar archivo <code>.env</code></li>
+                                        <li>Agregar credenciales de WhatsApp</li>
+                                        <li>Cambiar <code>WHATSAPP_DEMO_MODE=False</code></li>
+                                        <li>Reiniciar servidor</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="{% url 'listar_notificaciones_whatsapp' %}" class="btn btn-primary">
+                                    <i class="bi bi-whatsapp me-2"></i>Ver Notificaciones
+                                </a>
+                                <a href="{% url 'estadisticas_whatsapp' %}" class="btn btn-info">
+                                    <i class="bi bi-graph-up me-2"></i>Ver Estadísticas
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const telefonoInput = document.getElementById('telefono');
+    const mensajeInput = document.getElementById('mensaje');
+    const previewDiv = document.getElementById('contenido-preview');
+    
+    // Actualizar vista previa en tiempo real
+    function updatePreview() {
+        const mensaje = mensajeInput.value;
+        const fecha = new Date().toLocaleDateString('es-ES');
+        const hora = new Date().toLocaleTimeString('es-ES');
+        
+        const mensajeFormateado = mensaje
+            .replace('{{ fecha_actual }}', fecha)
+            .replace('{{ hora_actual }}', hora);
+        
+        previewDiv.innerHTML = mensajeFormateado.replace(/\n/g, '<br>');
+    }
+    
+    mensajeInput.addEventListener('input', updatePreview);
+    updatePreview(); // Inicializar vista previa
+});
+</script>
+{% endblock %} 

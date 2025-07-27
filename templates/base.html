@@ -72,10 +72,33 @@
 
                 <!-- Gestión de Pacientes - Visible para todos -->
                 <li class="nav-item">
-                    <a href="{% url 'listar_pacientes' %}" class="nav-link {% if 'pacientes' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="{% url 'listar_pacientes' %}" class="nav-link {% if 'pacientes' in request.resolver_match.url_name and 'historial' not in request.resolver_match.url_name %}active{% endif %}">
                         <i class="bi bi-people"></i>
                         <span>Pacientes</span>
                     </a>
+                </li>
+
+                <!-- Historial Médico - Visible para todos -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link {% if 'historial' in request.resolver_match.url_name %}active{% endif %}" onclick="showHistorialSubmenu()">
+                        <i class="bi bi-file-medical"></i>
+                        <span>Historial Médico</span>
+                        <i class="bi bi-chevron-down submenu-arrow"></i>
+                    </a>
+                    <ul class="submenu" id="historialSubmenu">
+                        <li>
+                            <a href="{% url 'historial_medico_buscar' %}" class="submenu-link">
+                                <i class="bi bi-search"></i>
+                                <span>Buscar Paciente</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'pacientes_recientes' %}" class="submenu-link">
+                                <i class="bi bi-clock-history"></i>
+                                <span>Pacientes Recientes</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
                 <!-- Agenda -->
@@ -91,6 +114,22 @@
                     <a href="{% url 'listar_consultas' %}" class="nav-link {% if 'consultas' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="bi bi-journal-text"></i>
                         <span>Consultas</span>
+                    </a>
+                </li>
+
+                <!-- Impresión Médica - Visible para todos -->
+                <li class="nav-item">
+                    <a href="{% url 'impresion:dashboard' %}" class="nav-link {% if 'impresion' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-printer"></i>
+                        <span>Impresión</span>
+                    </a>
+                </li>
+
+                <!-- WhatsApp Notifications - Visible para todos -->
+                <li class="nav-item">
+                    <a href="{% url 'listar_notificaciones_whatsapp' %}" class="nav-link {% if 'whatsapp' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-whatsapp"></i>
+                        <span>WhatsApp</span>
                     </a>
                 </li>
 

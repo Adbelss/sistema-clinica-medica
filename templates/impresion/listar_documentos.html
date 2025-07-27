@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Documentos de Impresión - Sistema Médico{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0">
+                                <i class="fas fa-file-medical me-2"></i>
+                                Documentos de Impresión
+                            </h2>
+                            <p class="mb-0">Gestión de todos los documentos médicos generados</p>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="mb-0">{{ documentos.count }}</h4>
+                            <small>Documentos en total</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-filter me-2"></i>Filtros de Búsqueda
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row">
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">Tipo de Documento</label>
+                            <select name="tipo" class="form-select">
+                                <option value="">Todos los tipos</option>
+                                {% for tipo in tipos_documento %}
+                                <option value="{{ tipo.0 }}" {% if tipo_query == tipo.0 %}selected{% endif %}>
+                                    {{ tipo.1 }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">Estado</label>
+                            <select name="estado" class="form-select">
+                                <option value="">Todos los estados</option>
+                                {% for estado in estados_documento %}
+                                <option value="{{ estado.0 }}" {% if estado_query == estado.0 %}selected{% endif %}>
+                                    {{ estado.1 }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Paciente</label>
+                            <input type="text" name="paciente" class="form-control" 
+                                   value="{{ paciente_query }}" placeholder="Buscar por paciente...">
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">Fecha</label>
+                            <input type="date" name="fecha" class="form-control" value="{{ fecha_query }}">
+                        </div>
+                        <div class="col-md-3 mb-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-search me-1"></i>Buscar
+                            </button>
+                            <a href="{% url 'impresion:listar_documentos' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>Limpiar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de documentos -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-list me-2"></i>Documentos Generados
+                    </h6>
+                    <a href="{% url 'impresion:dashboard' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-arrow-left me-1"></i>Volver al Dashboard
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if documentos %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Número</th>
+                                    <th>Tipo</th>
+                                    <th>Paciente</th>
+                                    <th>Doctor</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for documento in documentos %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ documento.numero_documento }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-primary">
+                                            {{ documento.get_tipo_documento_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-circle text-primary me-2"></i>
+                                            <div>
+                                                <div class="fw-bold">{{ documento.paciente.nombre_completo }}</div>
+                                                <small class="text-muted">{{ documento.paciente.documento_identificacion }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ documento.doctor.get_full_name }}</td>
+                                    <td>
+                                        {% if documento.estado == 'finalizado' %}
+                                            <span class="badge badge-success">Finalizado</span>
+                                        {% elif documento.estado == 'borrador' %}
+                                            <span class="badge badge-warning">Borrador</span>
+                                        {% elif documento.estado == 'impreso' %}
+                                            <span class="badge badge-info">Impreso</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Archivado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ documento.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'impresion:previsualizar_documento' documento.id %}" 
+                                               class="btn btn-sm btn-outline-primary" title="Previsualizar">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'impresion:imprimir_documento' documento.id %}" 
+                                               class="btn btn-sm btn-outline-success" title="Imprimir PDF" target="_blank">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <a href="{% url 'impresion:descargar_documento_pdf' documento.id %}" 
+                                               class="btn btn-sm btn-outline-info" title="Descargar PDF">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    {% if documentos.has_other_pages %}
+                    <nav aria-label="Navegación de páginas" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if documentos.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ documentos.previous_page_number }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.paciente %}&paciente={{ request.GET.paciente }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in documentos.paginator.page_range %}
+                                {% if documentos.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > documentos.number|add:'-3' and num < documentos.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.paciente %}&paciente={{ request.GET.paciente }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if documentos.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ documentos.next_page_number }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.paciente %}&paciente={{ request.GET.paciente }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-file-medical fa-3x text-gray-300 mb-3"></i>
+                        <h4 class="text-gray-500">No hay documentos generados</h4>
+                        <p class="text-gray-400">Comienza generando documentos desde las consultas o pacientes</p>
+                        <a href="{% url 'listar_consultas' %}" class="btn btn-primary mt-3">
+                            <i class="fas fa-plus me-2"></i>Generar Primer Documento
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Animaciones suaves
+    $('.card').hover(
+        function() { $(this).addClass('shadow-lg'); },
+        function() { $(this).removeClass('shadow-lg'); }
+    );
+    
+    // Tooltips
+    $('[title]').tooltip();
+});
+</script>
+{% endblock %} 

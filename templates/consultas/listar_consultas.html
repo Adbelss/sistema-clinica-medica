@@ -525,7 +525,13 @@
                                 <a href="{% url 'detalle_consulta' consulta.id %}" class="action-btn info btn-sm" title="Ver Detalle">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{% url 'editar_consulta' consulta.id %}" class="action-btn warning btn-sm" title="Editar">
+                                <a href="{% url 'impresion:generar_consulta' consulta.id %}" class="action-btn success btn-sm" title="Generar Consulta">
+                                    <i class="bi bi-file-earmark-medical"></i>
+                                </a>
+                                <a href="{% url 'impresion:generar_receta' consulta.id %}" class="action-btn warning btn-sm" title="Generar Receta">
+                                    <i class="bi bi-prescription"></i>
+                                </a>
+                                <a href="{% url 'editar_consulta' consulta.id %}" class="action-btn info btn-sm" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
                                 <a href="{% url 'eliminar_consulta' consulta.id %}" class="action-btn danger btn-sm" title="Eliminar"

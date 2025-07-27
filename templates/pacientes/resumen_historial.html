@@ -1,0 +1,578 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Resumen Historial - {{ paciente.nombre_completo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .resumen-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+    
+    .resumen-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .resumen-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .resumen-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 300;
+    }
+    
+    .resumen-content {
+        padding: 30px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #4facfe;
+        margin-bottom: 10px;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .resumen-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid #4facfe;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .section-title i {
+        color: #4facfe;
+        font-size: 1.5rem;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .info-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        border-left: 3px solid #4facfe;
+    }
+    
+    .info-label {
+        font-size: 0.8rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 5px;
+    }
+    
+    .info-value {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #4facfe;
+    }
+    
+    .timeline-item {
+        position: relative;
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-left: 3px solid #4facfe;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -22px;
+        top: 20px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #4facfe;
+        border: 3px solid white;
+    }
+    
+    .timeline-date {
+        font-size: 0.8rem;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .timeline-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .timeline-description {
+        color: #555;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    
+    .alert-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-left: 10px;
+    }
+    
+    .alert-alta {
+        background: #ff6b6b;
+        color: white;
+    }
+    
+    .alert-media {
+        background: #ffd93d;
+        color: #333;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 15px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        padding: 12px 24px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-primary-action {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+    
+    .btn-secondary-action {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-success-action {
+        background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+        color: white;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .print-button {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .print-button:hover {
+        transform: scale(1.1);
+    }
+    
+    @media print {
+        .print-button, .action-buttons {
+            display: none;
+        }
+        
+        .resumen-container {
+            background: white;
+            padding: 0;
+        }
+        
+        .resumen-card {
+            box-shadow: none;
+            border: none;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .resumen-header h1 {
+            font-size: 2rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="resumen-container">
+    <div class="resumen-card">
+        <!-- Header -->
+        <div class="resumen-header">
+            <h1><i class="fas fa-file-medical"></i> Resumen Historial Médico</h1>
+            <p>{{ paciente.nombre_completo }} | {{ paciente.edad }} años | DPI: {{ paciente.documento_identificacion }}</p>
+        </div>
+        
+        <div class="resumen-content">
+            <!-- Estadísticas -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ estadisticas.total_consultas }}</div>
+                    <div class="stat-label">Consultas Totales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ estadisticas.consultas_ultimo_mes }}</div>
+                    <div class="stat-label">Último Mes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ estadisticas.medicamentos_activos }}</div>
+                    <div class="stat-label">Medicamentos Activos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ estadisticas.examenes_pendientes }}</div>
+                    <div class="stat-label">Exámenes Pendientes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ estadisticas.antecedentes_importantes }}</div>
+                    <div class="stat-label">Antecedentes Importantes</div>
+                </div>
+            </div>
+            
+            <!-- Información del Paciente -->
+            <div class="resumen-section">
+                <div class="section-title">
+                    <i class="fas fa-user"></i>
+                    Información del Paciente
+                </div>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Nombre Completo</div>
+                        <div class="info-value">{{ paciente.nombre_completo }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Edad</div>
+                        <div class="info-value">{{ paciente.edad }} años</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Género</div>
+                        <div class="info-value">{{ paciente.get_genero_display }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Grupo Sanguíneo</div>
+                        <div class="info-value">{{ paciente.grupo_sanguineo|default:"No registrado" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Teléfono</div>
+                        <div class="info-value">{{ paciente.telefono }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Correo</div>
+                        <div class="info-value">{{ paciente.correo|default:"No registrado" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Dirección</div>
+                        <div class="info-value">{{ paciente.direccion }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Estado</div>
+                        <div class="info-value">{{ paciente.get_estado_display }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Antecedentes Importantes -->
+            <div class="resumen-section">
+                <div class="section-title">
+                    <i class="fas fa-history"></i>
+                    Antecedentes Médicos Importantes
+                    {% if paciente.tiene_antecedentes_importantes %}
+                    <span class="alert-badge alert-media">Importantes</span>
+                    {% endif %}
+                </div>
+                
+                {% if historial.antecedentes %}
+                    <div class="timeline">
+                        {% for antecedente in historial.antecedentes %}
+                        <div class="timeline-item">
+                            <div class="timeline-date">{{ antecedente.fecha_creacion|date:"d/m/Y" }}</div>
+                            <div class="timeline-title">{{ antecedente.get_tipo_antecedente_display }}</div>
+                            <div class="timeline-description">{{ antecedente.descripcion }}</div>
+                            {% if antecedente.severidad %}
+                            <div style="margin-top: 5px;">
+                                <span class="badge bg-{% if antecedente.severidad == 'severo' %}danger{% elif antecedente.severidad == 'moderado' %}warning{% else %}success{% endif %}">
+                                    {{ antecedente.get_severidad_display }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No hay antecedentes médicos registrados</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Medicamentos Activos -->
+            <div class="resumen-section">
+                <div class="section-title">
+                    <i class="fas fa-pills"></i>
+                    Medicamentos Activos
+                    {% if estadisticas.medicamentos_activos > 5 %}
+                    <span class="alert-badge alert-media">Muchos medicamentos</span>
+                    {% endif %}
+                </div>
+                
+                {% if historial.medicamentos_activos %}
+                    <div class="timeline">
+                        {% for medicamento in historial.medicamentos_activos %}
+                        <div class="timeline-item">
+                            <div class="timeline-date">{{ medicamento.fecha_inicio|date:"d/m/Y" }}</div>
+                            <div class="timeline-title">{{ medicamento.nombre_medicamento }}</div>
+                            <div class="timeline-description">
+                                {{ medicamento.dosis }} | {{ medicamento.get_frecuencia_display }}
+                                {% if medicamento.alergia %}
+                                <span class="badge bg-danger">Alergia</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-pills"></i>
+                        <p>No hay medicamentos activos</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Exámenes Recientes -->
+            <div class="resumen-section">
+                <div class="section-title">
+                    <i class="fas fa-flask"></i>
+                    Exámenes Recientes
+                </div>
+                
+                {% if historial.examenes_recientes %}
+                    <div class="timeline">
+                        {% for examen in historial.examenes_recientes %}
+                        <div class="timeline-item">
+                            <div class="timeline-date">{{ examen.fecha_solicitud|date:"d/m/Y" }}</div>
+                            <div class="timeline-title">{{ examen.nombre_examen }}</div>
+                            <div class="timeline-description">
+                                {{ examen.get_tipo_examen_display }} | 
+                                <span class="badge bg-{% if examen.estado == 'completado' %}success{% elif examen.estado == 'en_proceso' %}warning{% else %}secondary{% endif %}">
+                                    {{ examen.get_estado_display }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-flask"></i>
+                        <p>No hay exámenes recientes</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Evolución Clínica -->
+            <div class="resumen-section">
+                <div class="section-title">
+                    <i class="fas fa-chart-line"></i>
+                    Evolución Clínica Reciente
+                </div>
+                
+                {% if historial.evolucion_reciente %}
+                    <div class="timeline">
+                        {% for evolucion in historial.evolucion_reciente %}
+                        <div class="timeline-item">
+                            <div class="timeline-date">{{ evolucion.fecha_evolucion|date:"d/m/Y" }}</div>
+                            <div class="timeline-title">{{ evolucion.get_tipo_evolucion_display }}</div>
+                            <div class="timeline-description">{{ evolucion.diagnostico_actual|truncatewords:20 }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-chart-line"></i>
+                        <p>No hay evolución clínica registrada</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Consultas Recientes -->
+            <div class="resumen-section">
+                <div class="section-title">
+                    <i class="fas fa-stethoscope"></i>
+                    Consultas Recientes
+                </div>
+                
+                {% if historial.consultas_recientes %}
+                    <div class="timeline">
+                        {% for consulta in historial.consultas_recientes %}
+                        <div class="timeline-item">
+                            <div class="timeline-date">{{ consulta.fecha|date:"d/m/Y" }}</div>
+                            <div class="timeline-title">{{ consulta.get_tipo_consulta_display }}</div>
+                            <div class="timeline-description">
+                                {{ consulta.diagnostico|truncatewords:15 }} | 
+                                Dr. {{ consulta.doctor.get_full_name|default:consulta.doctor.username }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-stethoscope"></i>
+                        <p>No hay consultas registradas</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="action-buttons">
+                <a href="{% url 'historial_medico' paciente.id %}" class="btn-action btn-secondary-action">
+                    <i class="fas fa-arrow-left"></i> Volver al Historial
+                </a>
+                <a href="{% url 'antecedentes_paciente' paciente.id %}" class="btn-action btn-primary-action">
+                    <i class="fas fa-history"></i> Antecedentes
+                </a>
+                <a href="{% url 'medicamentos_paciente' paciente.id %}" class="btn-action btn-success-action">
+                    <i class="fas fa-pills"></i> Medicamentos
+                </a>
+                <a href="{% url 'examenes_paciente' paciente.id %}" class="btn-action btn-primary-action">
+                    <i class="fas fa-flask"></i> Exámenes
+                </a>
+                <a href="{% url 'evolucion_paciente' paciente.id %}" class="btn-action btn-secondary-action">
+                    <i class="fas fa-chart-line"></i> Evolución
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Botón de impresión -->
+    <button class="print-button" onclick="window.print()">
+        <i class="fas fa-print"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animaciones suaves al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.stat-card, .timeline-item');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %} 

@@ -14,33 +14,74 @@
 
     <a href="{% url 'crear_usuario' %}" class="btn btn-primary mb-3">➕ Nuevo usuario</a>
 
-    <table class="table table-bordered table-hover">
-        <thead class="table-success">
-            <tr>
-                <th>Usuario</th>
-                <th>Nombre completo</th>
-                <th>Correo</th>
-                <th>Rol</th>
-                <th>Activo</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for u in usuarios %}
-            <tr>
-                <td>{{ u.username }}</td>
-                <td>{{ u.get_full_name }}</td>
-                <td>{{ u.email }}</td>
-                <td>{{ u.rol }}</td>
-                <td>
-                    {% if u.is_active %}
-                        <span class="badge bg-success">Sí</span>
-                    {% else %}
-                        <span class="badge bg-danger">No</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-success">
+                <tr>
+                    <th>Usuario</th>
+                    <th>Nombre completo</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>Especialidad</th>
+                    <th>Estado</th>
+                    <th>Activo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in usuarios %}
+                <tr>
+                    <td>{{ u.username }}</td>
+                    <td>{{ u.nombre_completo }}</td>
+                    <td>{{ u.email }}</td>
+                    <td>
+                        <span class="badge {% if u.rol == 'administrador' %}bg-danger{% elif u.rol == 'doctor' %}bg-primary{% else %}bg-success{% endif %}">
+                            {{ u.get_rol_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if u.es_doctor %}
+                            {{ u.especialidad|default:"No especificada" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if u.es_doctor %}
+                            <span class="badge {% if u.estado == 'activo' %}bg-success{% elif u.estado == 'inactivo' %}bg-danger{% elif u.estado == 'vacaciones' %}bg-warning{% else %}bg-info{% endif %}">
+                                {{ u.get_estado_display }}
+                            </span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if u.is_active %}
+                            <span class="badge bg-success">Sí</span>
+                        {% else %}
+                            <span class="badge bg-danger">No</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'editar_usuario' u.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            {% if u != request.user %}
+                                <a href="{% url 'eliminar_usuario' u.pk %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center">No hay usuarios registrados</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

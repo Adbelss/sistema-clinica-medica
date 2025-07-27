@@ -1,5 +1,5 @@
 from django.contrib.auth import logout
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.http import FileResponse
@@ -8,12 +8,12 @@ import os
 import shutil
 from datetime import datetime
 
-from .forms import RestaurarBDForm, CrearUsuarioForm
+from .forms import RestaurarBDForm, CrearUsuarioForm, EditarUsuarioForm
 from .models import CustomUser  # Modelo personalizado
 
 # Verificación de admin
 def es_admin(user):
-    return user.is_superuser or user.rol == 'Admin'
+    return user.is_superuser or user.rol == 'administrador'
 
 # =============================
 # 🔧 CONFIGURACIONES DE BD
@@ -83,6 +83,50 @@ def crear_usuario(request):
     else:
         form = CrearUsuarioForm()
     return render(request, 'usuarios/crear_usuario.html', {'form': form})
+
+@user_passes_test(es_admin)
+def editar_usuario(request, pk):
+    """Editar usuario existente"""
+    usuario = get_object_or_404(CustomUser, pk=pk)
+    
+    if request.method == 'POST':
+        form = EditarUsuarioForm(request.POST, request.FILES, instance=usuario)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "✅ Usuario actualizado exitosamente.")
+            return redirect('gestion_usuarios')
+    else:
+        form = EditarUsuarioForm(instance=usuario)
+    
+    context = {
+        'form': form,
+        'usuario': usuario,
+        'titulo': 'Editar Usuario',
+    }
+    
+    return render(request, 'usuarios/editar_usuario.html', context)
+
+@user_passes_test(es_admin)
+def eliminar_usuario(request, pk):
+    """Eliminar usuario"""
+    usuario = get_object_or_404(CustomUser, pk=pk)
+    
+    # No permitir eliminar el usuario actual
+    if usuario == request.user:
+        messages.error(request, "❌ No puedes eliminar tu propia cuenta.")
+        return redirect('gestion_usuarios')
+    
+    if request.method == 'POST':
+        nombre_usuario = usuario.nombre_completo or usuario.username
+        usuario.delete()
+        messages.success(request, f"✅ Usuario {nombre_usuario} eliminado exitosamente.")
+        return redirect('gestion_usuarios')
+    
+    context = {
+        'usuario': usuario,
+    }
+    
+    return render(request, 'usuarios/eliminar_usuario.html', context)
 
 # ----------------------------
 # Vista de Login Personalizada con Seguridad Avanzada

@@ -4,16 +4,214 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4"><i class="bi bi-person-plus-fill"></i> Crear nuevo usuario</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0"><i class="bi bi-person-plus-fill"></i> Crear Nuevo Usuario</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
 
-    <form method="post" enctype="multipart/form-data" class="shadow p-4 rounded bg-light">
-        {% csrf_token %}
-        {{ form.as_p }}
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Información básica -->
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Información Básica</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.username.id_for_label }}" class="form-label">Nombre de Usuario *</label>
+                                    {{ form.username }}
+                                    {% if form.username.errors %}
+                                        <div class="text-danger">{{ form.username.errors }}</div>
+                                    {% endif %}
+                                </div>
 
-        <div class="d-flex justify-content-start mt-3">
-            <button type="submit" class="btn btn-success me-2">Guardar usuario</button>
-            <a href="{% url 'gestion_usuarios' %}" class="btn btn-secondary">Cancelar</a>
+                                <div class="mb-3">
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">Nombres *</label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="text-danger">{{ form.first_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">Apellidos *</label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="text-danger">{{ form.last_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label">Correo Electrónico *</label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="text-danger">{{ form.email.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Información de rol y contraseña -->
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Rol y Acceso</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.rol.id_for_label }}" class="form-label">Rol *</label>
+                                    {{ form.rol }}
+                                    {% if form.rol.errors %}
+                                        <div class="text-danger">{{ form.rol.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.password1.id_for_label }}" class="form-label">Contraseña *</label>
+                                    {{ form.password1 }}
+                                    {% if form.password1.errors %}
+                                        <div class="text-danger">{{ form.password1.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.password2.id_for_label }}" class="form-label">Confirmar Contraseña *</label>
+                                    {{ form.password2 }}
+                                    {% if form.password2.errors %}
+                                        <div class="text-danger">{{ form.password2.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.is_active.id_for_label }}" class="form-label">Usuario Activo</label>
+                                    <div class="form-check">
+                                        {{ form.is_active }}
+                                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                            Activar cuenta
+                                        </label>
+                                    </div>
+                                    {% if form.is_active.errors %}
+                                        <div class="text-danger">{{ form.is_active.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campos específicos de doctores -->
+                        <div id="campos-doctor" class="mt-4" style="display: none;">
+                            <h5 class="mb-3">Información de Doctor</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.especialidad.id_for_label }}" class="form-label">Especialidad *</label>
+                                        {{ form.especialidad }}
+                                        {% if form.especialidad.errors %}
+                                            <div class="text-danger">{{ form.especialidad.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.numero_colegio.id_for_label }}" class="form-label">Número de Colegio Médico *</label>
+                                        {{ form.numero_colegio }}
+                                        {% if form.numero_colegio.errors %}
+                                            <div class="text-danger">{{ form.numero_colegio.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.telefono.id_for_label }}" class="form-label">Teléfono</label>
+                                        {{ form.telefono }}
+                                        {% if form.telefono.errors %}
+                                            <div class="text-danger">{{ form.telefono.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.estado.id_for_label }}" class="form-label">Estado</label>
+                                        {{ form.estado }}
+                                        {% if form.estado.errors %}
+                                            <div class="text-danger">{{ form.estado.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.direccion_consultorio.id_for_label }}" class="form-label">Dirección del Consultorio</label>
+                                        {{ form.direccion_consultorio }}
+                                        {% if form.direccion_consultorio.errors %}
+                                            <div class="text-danger">{{ form.direccion_consultorio.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.foto.id_for_label }}" class="form-label">Foto</label>
+                                        {{ form.foto }}
+                                        {% if form.foto.errors %}
+                                            <div class="text-danger">{{ form.foto.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.biografia.id_for_label }}" class="form-label">Biografía</label>
+                                        {{ form.biografia }}
+                                        {% if form.biografia.errors %}
+                                            <div class="text-danger">{{ form.biografia.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campos adicionales -->
+                        <div class="mt-4">
+                            <h5 class="mb-3">Información Adicional</h5>
+                            <div class="mb-3">
+                                <label for="{{ form.firma_digital.id_for_label }}" class="form-label">Firma Digital</label>
+                                {{ form.firma_digital }}
+                                {% if form.firma_digital.errors %}
+                                    <div class="text-danger">{{ form.firma_digital.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'gestion_usuarios' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Crear Usuario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-    </form>
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rolSelect = document.getElementById('{{ form.rol.id_for_label }}');
+    const camposDoctor = document.getElementById('campos-doctor');
+    
+    function toggleCamposDoctor() {
+        if (rolSelect.value === 'doctor') {
+            camposDoctor.style.display = 'block';
+        } else {
+            camposDoctor.style.display = 'none';
+        }
+    }
+    
+    // Ejecutar al cargar la página
+    toggleCamposDoctor();
+    
+    // Ejecutar cuando cambie el rol
+    rolSelect.addEventListener('change', toggleCamposDoctor);
+});
+</script>
 {% endblock %}

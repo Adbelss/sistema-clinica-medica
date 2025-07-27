@@ -1,0 +1,577 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Citas | HealthLife{% endblock %}
+
+{% block content %}
+<style>
+/* Variables CSS para el sistema médico */
+:root {
+    --primary-blue: #2563eb;
+    --secondary-blue: #1e40af;
+    --accent-blue: #3b82f6;
+    --medical-green: #10b981;
+    --medical-yellow: #f59e0b;
+    --medical-red: #ef4444;
+    --medical-gray: #6b7280;
+    --light-gray: #f3f4f6;
+    --white: #ffffff;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --border-radius: 12px;
+    --border-radius-small: 8px;
+    --transition: all 0.3s ease;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    padding: 1.5rem;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--medical-gray);
+    font-weight: 500;
+}
+
+.filters-section {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.filters-form {
+    display: flex;
+    gap: 1rem;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--medical-gray);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control {
+    border: 2px solid var(--light-gray);
+    border-radius: var(--border-radius-small);
+    padding: 0.75rem;
+    transition: var(--transition);
+    width: 100%;
+}
+
+.form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    outline: none;
+}
+
+.table-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    background: var(--primary-blue);
+    color: var(--white);
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--light-gray);
+    vertical-align: middle;
+}
+
+.table tbody tr:hover {
+    background: var(--light-gray);
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-confirmada {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-pendiente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-cancelada {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-completada {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn {
+    border-radius: var(--border-radius-small);
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: var(--white);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: var(--secondary-blue);
+    color: var(--white);
+}
+
+.btn-success {
+    background: var(--medical-green);
+    color: var(--white);
+    border: none;
+}
+
+.btn-warning {
+    background: var(--medical-yellow);
+    color: #000;
+    border: none;
+}
+
+.btn-danger {
+    background: var(--medical-red);
+    color: var(--white);
+    border: none;
+}
+
+.btn-secondary {
+    background: var(--medical-gray);
+    color: var(--white);
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.pagination {
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.page-link {
+    color: var(--primary-blue);
+    border-color: var(--light-gray);
+}
+
+.page-link:hover {
+    color: var(--secondary-blue);
+    background: var(--light-gray);
+    border-color: var(--primary-blue);
+}
+
+.page-item.active .page-link {
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.alert {
+    border-radius: var(--border-radius-small);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background: #d1fae5;
+    border: 1px solid var(--medical-green);
+    color: #065f46;
+}
+
+.alert-danger {
+    background: #fee2e2;
+    border: 1px solid var(--medical-red);
+    color: #991b1b;
+}
+
+.no-appointments {
+    text-align: center;
+    padding: 3rem;
+    color: var(--medical-gray);
+}
+
+.no-appointments i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+</style>
+
+<div class="container-fluid">
+    <!-- Header de la página -->
+    <div class="page-header">
+        <h2><i class="bi bi-calendar-event me-3"></i>Lista de Citas</h2>
+        <p>Gestiona y visualiza todas las citas programadas en el sistema.</p>
+    </div>
+
+    <!-- Mensajes de alerta -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Estadísticas -->
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_citas }}</div>
+            <div class="stat-label">Total de Citas</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ citas_hoy }}</div>
+            <div class="stat-label">Citas Hoy</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ citas_pendientes }}</div>
+            <div class="stat-label">Pendientes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ citas_confirmadas }}</div>
+            <div class="stat-label">Confirmadas</div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-section">
+        <form method="get" class="filters-form">
+            <div class="form-group">
+                <label for="search" class="form-label">Buscar</label>
+                <input type="text" name="search" id="search" class="form-control" 
+                       placeholder="Paciente, doctor o notas" 
+                       value="{{ request.GET.search }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="doctor" class="form-label">Doctor</label>
+                <select name="doctor" id="doctor" class="form-control">
+                    <option value="">Todos los doctores</option>
+                    {% for doctor in doctores %}
+                        <option value="{{ doctor.id }}" {% if request.GET.doctor == doctor.id|stringformat:"s" %}selected{% endif %}>
+                            {{ doctor.nombre_completo }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="estado" class="form-label">Estado</label>
+                <select name="estado" id="estado" class="form-control">
+                    <option value="">Todos los estados</option>
+                    <option value="CONFIRMADA" {% if request.GET.estado == 'CONFIRMADA' %}selected{% endif %}>Confirmada</option>
+                    <option value="PENDIENTE" {% if request.GET.estado == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
+                    <option value="CANCELADA" {% if request.GET.estado == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
+                    <option value="COMPLETADA" {% if request.GET.estado == 'COMPLETADA' %}selected{% endif %}>Completada</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="fecha_desde" class="form-label">Desde</label>
+                <input type="date" name="fecha_desde" id="fecha_desde" class="form-control" 
+                       value="{{ request.GET.fecha_desde }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="fecha_hasta" class="form-label">Hasta</label>
+                <input type="date" name="fecha_hasta" id="fecha_hasta" class="form-control" 
+                       value="{{ request.GET.fecha_hasta }}">
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i>Buscar
+                </button>
+                <a href="{% url 'listar_citas' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-clockwise"></i>Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Botón de nueva cita -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Resultados ({{ citas|length }} citas)</h4>
+        <a href="{% url 'nueva_cita' %}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i>Nueva Cita
+        </a>
+    </div>
+
+    <!-- Tabla de citas -->
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Paciente</th>
+                    <th>Doctor</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cita in citas %}
+                <tr>
+                    <td>
+                        <div>
+                            <strong>{{ cita.paciente.primer_nombre }} {{ cita.paciente.primer_apellido }}</strong>
+                            <br>
+                            <small class="text-muted">{{ cita.paciente.telefono }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>{{ cita.doctor.nombre_completo }}</strong>
+                            <br>
+                            <small class="text-muted">{{ cita.doctor.especialidad }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>{{ cita.fecha|date:"d/m/Y" }}</strong>
+                            <br>
+                            <small class="text-muted">{{ cita.fecha|date:"l" }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>{{ cita.hora_inicio|time:"H:i" }}</strong>
+                            <br>
+                            <small class="text-muted">{{ cita.hora_fin|time:"H:i" }}</small>
+                        </div>
+                    </td>
+                    <td>{{ cita.get_tipo_cita_display }}</td>
+                    <td>
+                        <span class="status-badge status-{{ cita.estado|lower }}">
+                            {{ cita.get_estado_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'editar_cita' cita.id %}" class="btn btn-warning" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button onclick="changeStatus({{ cita.id }}, '{{ cita.estado }}')" 
+                                    class="btn btn-primary" title="Cambiar Estado">
+                                <i class="bi bi-check-circle"></i>
+                            </button>
+                            <button onclick="deleteAppointment({{ cita.id }})" 
+                                    class="btn btn-danger" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="no-appointments">
+                        <i class="bi bi-calendar-x"></i>
+                        <h5>No se encontraron citas</h5>
+                        <p>No hay citas que coincidan con los criterios de búsqueda.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    {% if citas.has_other_pages %}
+    <nav aria-label="Paginación de citas">
+        <ul class="pagination">
+            {% if citas.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.doctor %}&doctor={{ request.GET.doctor }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ citas.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.doctor %}&doctor={{ request.GET.doctor }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for num in citas.paginator.page_range %}
+                {% if citas.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > citas.number|add:'-3' and num < citas.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.doctor %}&doctor={{ request.GET.doctor }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if citas.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ citas.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.doctor %}&doctor={{ request.GET.doctor }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ citas.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.doctor %}&doctor={{ request.GET.doctor }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<script>
+function changeStatus(appointmentId, currentStatus) {
+    const statusOptions = {
+        'PENDIENTE': 'CONFIRMADA',
+        'CONFIRMADA': 'COMPLETADA',
+        'COMPLETADA': 'PENDIENTE'
+    };
+    
+    const newStatus = statusOptions[currentStatus] || 'CONFIRMADA';
+    const action = newStatus === 'CONFIRMADA' ? 'confirmar' : 
+                   newStatus === 'COMPLETADA' ? 'marcar como completada' : 'marcar como pendiente';
+    
+    if (confirm(`¿Estás seguro de que quieres ${action} esta cita?`)) {
+        fetch(`/agenda/citas/${appointmentId}/estado/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                estado: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error al cambiar el estado de la cita');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cambiar el estado de la cita');
+        });
+    }
+}
+
+function deleteAppointment(appointmentId) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta cita?')) {
+        fetch(`/agenda/citas/${appointmentId}/eliminar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error al eliminar la cita');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar la cita');
+        });
+    }
+}
+
+// Auto-submit del formulario cuando cambien los filtros
+document.getElementById('doctor').addEventListener('change', function() {
+    this.form.submit();
+});
+
+document.getElementById('estado').addEventListener('change', function() {
+    this.form.submit();
+});
+
+// Establecer fecha mínima como hoy para los filtros de fecha
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    
+    const fechaDesdeInput = document.getElementById('fecha_desde');
+    if (fechaDesdeInput) {
+        fechaDesdeInput.setAttribute('max', today);
+    }
+    
+    const fechaHastaInput = document.getElementById('fecha_hasta');
+    if (fechaHastaInput) {
+        fechaHastaInput.setAttribute('max', today);
+    }
+});
+</script>
+
+<!-- CSRF Token para las peticiones AJAX -->
+{% csrf_token %}
+{% endblock %} 

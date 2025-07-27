@@ -231,7 +231,7 @@ class PacienteForm(forms.ModelForm):
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'Ej: 502 1234-5678',
-            'pattern': '[0-9+\-\s\(\)]+',
+            'pattern': '[0-9+\\-\\s\\(\\)]+',
             'title': 'Ingresa un número de teléfono válido'
         }),
         help_text="Formato: 502 1234-5678 o (502) 1234-5678"
@@ -336,7 +336,15 @@ class PacienteForm(forms.ModelForm):
 
     class Meta:
         model = Paciente
-        fields = '__all__'
+        fields = [
+            'primer_nombre', 'otros_nombres', 'primer_apellido', 'segundo_apellido',
+            'fecha_nacimiento', 'genero', 'tipo_documento', 'documento_identificacion',
+            'telefono', 'telefono_secundario', 'correo', 'contacto_emergencia',
+            'telefono_emergencia', 'parentesco_emergencia', 'direccion', 'ciudad',
+            'zona', 'codigo_postal', 'pais', 'estado', 'estado_civil', 'grupo_sanguineo',
+            'factor_rh', 'alergias', 'antecedentes_medicos', 'medicamentos_actuales',
+            'es_donador', 'notificar_whatsapp', 'notificar_correo', 'notificar_sms'
+        ]
         widgets = {
             'otros_nombres': forms.TextInput(attrs={
                 'class': 'form-control',

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Prueba de Exportaciones - HealthLife{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="bi bi-gear me-2"></i>Prueba de Exportaciones</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Estado del Sistema:</strong> {{ mensaje }}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>📊 Pruebas de Estadísticas</h5>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <strong>Total de Consultas:</strong> {{ total_consultas }}
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Fecha de Prueba:</strong> {{ fecha }}
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5>📁 Enlaces de Prueba</h5>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'test_export' %}" class="btn btn-success">
+                                    <i class="bi bi-file-earmark-excel me-2"></i>Probar Exportación Excel
+                                </a>
+                                <a href="{% url 'estadisticas_consultas' %}" class="btn btn-info">
+                                    <i class="bi bi-graph-up me-2"></i>Ir a Estadísticas
+                                </a>
+                                <a href="{% url 'listar_consultas' %}" class="btn btn-primary">
+                                    <i class="bi bi-list me-2"></i>Ir a Consultas
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Nota:</strong> Si alguna exportación no funciona, verifica que:
+                        <ul class="mb-0 mt-2">
+                            <li>El servidor esté funcionando correctamente</li>
+                            <li>No haya errores en la consola del navegador</li>
+                            <li>Los archivos de template existan</li>
+                            <li>Las librerías estén instaladas (openpyxl, xhtml2pdf)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

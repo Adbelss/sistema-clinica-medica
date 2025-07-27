@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ documento.titulo }}</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            color: #000;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 24pt;
+            margin: 0;
+            color: #2c3e50;
+        }
+        
+        .header p {
+            font-size: 10pt;
+            margin: 5px 0;
+            color: #555;
+        }
+        
+        .document-title {
+            text-align: center;
+            font-size: 18pt;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #2c3e50;
+        }
+        
+        .document-number {
+            text-align: center;
+            font-size: 12pt;
+            margin-bottom: 30px;
+            color: #666;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+        }
+        
+        .section h3 {
+            font-size: 14pt;
+            color: #2c3e50;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        
+        .info-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .info-table td:first-child {
+            font-weight: bold;
+            background-color: #f8f9fa;
+            width: 30%;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 10pt;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        
+        .signature-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 200px;
+            margin: 10px auto;
+        }
+        
+        .qr-code {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+        }
+    </style>
+</head>
+<body>
+    {% if config.incluir_watermark %}
+    <div class="watermark" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 48pt; color: rgba(200, 200, 200, 0.3); font-weight: bold; z-index: -1;">
+        {{ config.texto_watermark|default:"DOCUMENTO OFICIAL" }}
+    </div>
+    {% endif %}
+    
+    <!-- Encabezado -->
+    <div class="header">
+        {% if config.logo_clinica %}
+        <img src="{{ config.logo_clinica.url }}" alt="Logo" style="max-height: 60px; margin-bottom: 10px;">
+        {% endif %}
+        
+        <h1>{{ config.nombre_clinica|default:"CLÍNICA MÉDICA" }}</h1>
+        <p>{{ config.direccion_clinica|default:"Dirección de la Clínica" }}</p>
+        <p>Tel: {{ config.telefono_clinica|default:"Teléfono" }} | Email: {{ config.email_clinica|default:"email@clinica.com" }}</p>
+        
+        {% if config.incluir_codigo_qr and qr_code %}
+        <div class="qr-code">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR" style="width: 100%; height: 100%;">
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Título del documento -->
+    <div class="document-title">
+        {% if documento.tipo_documento == 'consulta' %}
+            CONSULTA MÉDICA
+        {% elif documento.tipo_documento == 'receta' %}
+            RECETA MÉDICA
+        {% elif documento.tipo_documento == 'gestion' %}
+            GESTIÓN DE PACIENTE
+        {% else %}
+            DOCUMENTO MÉDICO
+        {% endif %}
+    </div>
+    
+    <div class="document-number">
+        Número: {{ documento.numero_documento }}
+    </div>
+    
+    <!-- Contenido del documento -->
+    {{ documento.contenido_html|safe }}
+    
+    <!-- Pie de página -->
+    <div class="footer">
+        <p>{{ config.pie_pagina_default|default:"Documento generado electrónicamente" }}</p>
+        {% if config.incluir_fecha_generacion %}
+        <p>Generado el: {{ documento.fecha_creacion|date:"d/m/Y H:i" }}</p>
+        {% endif %}
+    </div>
+    
+    <!-- Sección de firma -->
+    <div class="signature-section">
+        <div class="signature-line"></div>
+        <p>{{ documento.doctor.get_full_name }}</p>
+        <p style="font-size: 9pt; color: #666;">Médico Tratante</p>
+    </div>
+</body>
+</html> 

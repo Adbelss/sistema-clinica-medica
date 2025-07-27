@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Reporte Estadístico - HealthLife</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.4;
+            color: #333;
+            margin: 2cm;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #1e3c72;
+            padding-bottom: 20px;
+        }
+        
+        .title {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 14pt;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .meta {
+            font-size: 10pt;
+            color: #888;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+        }
+        
+        .section-title {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 15px;
+            border-left: 4px solid #1e3c72;
+            padding-left: 10px;
+        }
+        
+        .stats-grid {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .stats-row {
+            display: table-row;
+        }
+        
+        .stats-cell {
+            display: table-cell;
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+            width: 25%;
+        }
+        
+        .stats-number {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+        
+        .stats-label {
+            font-size: 10pt;
+            color: #666;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .table th {
+            background-color: #1e3c72;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .progress-bar {
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            height: 20px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #1e3c72;
+            border-radius: 10px;
+        }
+        
+        .chart-container {
+            margin: 20px 0;
+            page-break-inside: avoid;
+        }
+        
+        .chart-title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .bar-chart {
+            margin: 15px 0;
+        }
+        
+        .bar-row {
+            margin: 5px 0;
+            font-size: 10pt;
+        }
+        
+        .bar-label {
+            width: 120px;
+            text-align: right;
+            margin-right: 10px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .bar-container {
+            background-color: #f0f0f0;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            display: inline-block;
+            width: 300px;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            background-color: #1e3c72;
+            border-radius: 10px;
+        }
+        
+        .bar-value {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-weight: bold;
+            font-size: 9pt;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 10pt;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">REPORTE ESTADÍSTICO DEL SISTEMA MÉDICO</div>
+        <div class="subtitle">Análisis Integral de Consultas Médicas - HealthLife</div>
+        <div class="meta">
+            Generado: {{ fecha_actual|default:"Hoy" }} | Usuario: {{ request.user.get_full_name }} | Clínica: HealthLife
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">1. ESTADÍSTICAS GENERALES</div>
+        
+        <div class="stats-grid">
+            <div class="stats-row">
+                <div class="stats-cell">
+                    <div class="stats-number">{{ total_consultas }}</div>
+                    <div class="stats-label">Total Consultas</div>
+                </div>
+                <div class="stats-cell">
+                    <div class="stats-number">{{ consultas_mes }}</div>
+                    <div class="stats-label">Consultas del Mes</div>
+                </div>
+                <div class="stats-cell">
+                    <div class="stats-number">{{ consultas_hoy }}</div>
+                    <div class="stats-label">Consultas Hoy</div>
+                </div>
+                <div class="stats-cell">
+                    <div class="stats-number">{{ consultas_semana }}</div>
+                    <div class="stats-label">Consultas Semana</div>
+                </div>
+            </div>
+            <div class="stats-row">
+                <div class="stats-cell">
+                    <div class="stats-number">{{ duracion_promedio }} min</div>
+                    <div class="stats-label">Duración Promedio</div>
+                </div>
+                <div class="stats-cell">
+                    <div class="stats-number">Q{{ costo_promedio }}</div>
+                    <div class="stats-label">Costo Promedio</div>
+                </div>
+                <div class="stats-cell">
+                    <div class="stats-number">Q{{ ingresos_totales }}</div>
+                    <div class="stats-label">Ingresos Totales</div>
+                </div>
+                <div class="stats-cell">
+                    <div class="stats-number">{{ doctores_activos }}</div>
+                    <div class="stats-label">Doctores Activos</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+    
+    <div class="section">
+        <div class="section-title">2. GRÁFICAS DE BARRAS - CONSULTAS POR MES</div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Distribución Mensual de Consultas (Últimos 6 Meses)</div>
+            
+            <div class="bar-chart">
+                {% for dato in datos_grafica_mensual %}
+                <div class="bar-row">
+                    <div class="bar-label">{{ dato.mes }}</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: {% widthratio dato.total max_value 100 %}%;"></div>
+                        <div class="bar-value">{{ dato.total }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. GRÁFICAS DE BARRAS - CONSULTAS POR DÍA</div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Distribución por Día de la Semana</div>
+            
+            <div class="bar-chart">
+                {% for dato in datos_grafica_dias %}
+                <div class="bar-row">
+                    <div class="bar-label">{{ dato.dia }}</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: {% widthratio dato.total max_value_dias 100 %}%;"></div>
+                        <div class="bar-value">{{ dato.total }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+    
+    <div class="section">
+        <div class="section-title">4. DISTRIBUCIÓN POR TIPO DE CONSULTA</div>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Tipo de Consulta</th>
+                    <th>Cantidad</th>
+                    <th>Porcentaje</th>
+                    <th>Distribución</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tipo in consultas_por_tipo %}
+                <tr>
+                    <td>{{ tipo.tipo_consulta }}</td>
+                    <td>{{ tipo.total }}</td>
+                    <td>{% widthratio tipo.total total_consultas 100 %}%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {% widthratio tipo.total total_consultas 100 %}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. DISTRIBUCIÓN POR ESTADO</div>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Estado</th>
+                    <th>Cantidad</th>
+                    <th>Porcentaje</th>
+                    <th>Distribución</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for estado in consultas_por_estado %}
+                <tr>
+                    <td>{{ estado.estado }}</td>
+                    <td>{{ estado.total }}</td>
+                    <td>{% widthratio estado.total total_consultas 100 %}%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {% widthratio estado.total total_consultas 100 %}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="page-break"></div>
+    
+    <div class="section">
+        <div class="section-title">6. RENDIMIENTO DE DOCTORES</div>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Doctor</th>
+                    <th>Consultas</th>
+                    <th>Porcentaje</th>
+                    <th>Rendimiento</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doctor in doctores_top %}
+                <tr>
+                    <td>{{ doctor.doctor__first_name }} {{ doctor.doctor__last_name }}</td>
+                    <td>{{ doctor.total }}</td>
+                    <td>{% widthratio doctor.total total_consultas 100 %}%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {% widthratio doctor.total total_consultas 100 %}%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. ANÁLISIS Y CONCLUSIONES</div>
+        
+        <div style="margin-bottom: 15px;">
+            <strong>Resumen Ejecutivo:</strong>
+            <p>El análisis de las consultas médicas muestra una distribución {{ distribucion_tendencia }} con un total de {{ total_consultas }} consultas registradas. 
+            El día más ocupado es {{ dia_mas_ocupado }} con {{ max_consultas_dia }} consultas, mientras que el tipo de consulta más común es {{ tipo_mas_comun }}.</p>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <strong>Recomendaciones:</strong>
+            <ul>
+                <li>Optimizar la distribución de recursos en los días de mayor demanda</li>
+                <li>Considerar ampliar la capacidad para el tipo de consulta más solicitado</li>
+                <li>Analizar el rendimiento de los doctores para mejorar la eficiencia</li>
+                <li>Implementar estrategias para reducir la duración promedio de consultas</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Este reporte fue generado automáticamente por el Sistema Médico HealthLife</p>
+        <p>Para consultas técnicas, contacte al administrador del sistema</p>
+    </div>
+</body>
+</html> 

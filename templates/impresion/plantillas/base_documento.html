@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ documento.titulo }}</title>
+    <style>
+        /* Reset y configuración base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Times New Roman', 'Georgia', serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #1a1a1a;
+            background: white;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Configuración de página profesional */
+        @page {
+            size: A4 portrait;
+            margin: 1in;
+        }
+        
+        /* Marca de agua profesional */
+        {% if config.incluir_watermark %}
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 48pt;
+            color: rgba(200, 200, 200, 0.3);
+            font-weight: bold;
+            z-index: -1;
+            pointer-events: none;
+        }
+        {% endif %}
+        
+        /* Encabezado del documento profesional */
+        .encabezado {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #2c3e50;
+            padding-bottom: 20px;
+            page-break-after: avoid;
+        }
+        
+        .logo-clinica {
+            flex: 0 0 120px;
+            text-align: left;
+        }
+        
+        .logo-clinica img {
+            max-width: 100px;
+            max-height: 80px;
+            object-fit: contain;
+            border: 1px solid #ddd;
+            padding: 5px;
+        }
+        
+        .info-clinica {
+            flex: 1;
+            text-align: center;
+            padding: 0 20px;
+        }
+        
+        .info-clinica h1 {
+            font-size: 20pt;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .info-clinica p {
+            font-size: 10pt;
+            color: #555;
+            margin: 3px 0;
+            line-height: 1.3;
+        }
+        
+        .codigo-qr {
+            flex: 0 0 80px;
+            text-align: right;
+        }
+        
+        .codigo-qr img {
+            width: 60px;
+            height: 60px;
+            border: 1px solid #ccc;
+        }
+        
+        /* Título del documento */
+        .titulo-documento {
+            text-align: center;
+            margin: 20px 0 30px 0;
+            border: 2px solid #3498db;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .titulo-documento h2 {
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .numero-documento {
+            font-size: 11pt;
+            font-weight: bold;
+        }
+        
+        /* Secciones del documento */
+        .seccion {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+        }
+        
+        .seccion h3 {
+            font-size: 13pt;
+            font-weight: bold;
+            color: #2c3e50;
+            background: #ecf0f1;
+            padding: 8px 12px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        
+        /* Tablas */
+        .tabla-info {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        
+        .tabla-info td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+        
+        .tabla-info td:first-child {
+            background: #f8f9fa;
+            font-weight: bold;
+            width: 25%;
+        }
+        
+        .tabla-signos {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        
+        .tabla-signos th,
+        .tabla-signos td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        
+        .tabla-signos th {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 10pt;
+        }
+        
+        .tabla-signos td {
+            background: #f8f9fa;
+        }
+        
+        .tabla-consultas {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        
+        .tabla-consultas th,
+        .tabla-consultas td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        
+        .tabla-consultas th {
+            background: #2c3e50;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 10pt;
+        }
+        
+        .tabla-consultas tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        /* Contenido de texto */
+        .contenido-texto {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            border-radius: 0 5px 5px 0;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        /* Pie de página */
+        .pie-pagina {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .firma {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .linea-firma {
+            width: 200px;
+            height: 1px;
+            background: #000;
+            margin: 0 auto 10px auto;
+        }
+        
+        .firma p {
+            margin: 5px 0;
+            font-size: 11pt;
+        }
+        
+        .firma p:first-of-type {
+            font-weight: bold;
+            font-size: 12pt;
+        }
+        
+        .sello {
+            flex: 0 0 100px;
+            text-align: center;
+        }
+        
+        .sello img {
+            max-width: 80px;
+            max-height: 80px;
+        }
+        
+        /* Información del sistema */
+        .info-sistema {
+            margin-top: 30px;
+            padding: 10px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 9pt;
+            color: #7f8c8d;
+        }
+        
+        .info-sistema p {
+            margin: 2px 0;
+        }
+        
+        /* Watermark */
+        {% if config.incluir_watermark %}
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 48pt;
+            color: rgba(0, 0, 0, 0.1);
+            z-index: -1;
+            pointer-events: none;
+            font-weight: bold;
+        }
+        {% endif %}
+        
+        /* Estilos específicos para recetas */
+        .receta .contenido-texto {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        
+        /* Estilos específicos para gestiones */
+        .gestion .tabla-consultas th {
+            background: #27ae60;
+        }
+        
+        /* Números de página */
+        {% if config.incluir_numero_pagina %}
+        .numero-pagina {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 10pt;
+            color: #7f8c8d;
+        }
+        {% endif %}
+        
+        /* Alertas médicas */
+        .alerta-medica {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        /* Responsive para impresión */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            
+            .seccion {
+                page-break-inside: avoid;
+            }
+            
+            .pie-pagina {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% if config.incluir_watermark %}
+    <div class="watermark">{{ config.texto_watermark|default:"DOCUMENTO OFICIAL" }}</div>
+    {% endif %}
+    
+    {{ documento.contenido_html|safe }}
+    
+    {% if config.incluir_numero_pagina %}
+    <div class="numero-pagina">Página 1</div>
+    {% endif %}
+</body>
+</html> 

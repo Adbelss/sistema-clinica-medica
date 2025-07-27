@@ -333,6 +333,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Funciones para el submenu del Historial Médico
+function showHistorialSubmenu() {
+    const navItem = document.querySelector('.nav-link[onclick="showHistorialSubmenu()"]').parentElement;
+    const submenu = document.getElementById('historialSubmenu');
+    
+    // Toggle del submenu
+    if (navItem.classList.contains('open')) {
+        navItem.classList.remove('open');
+        submenu.style.maxHeight = '0';
+    } else {
+        // Cerrar otros submenus si están abiertos
+        const openItems = document.querySelectorAll('.nav-item.open');
+        openItems.forEach(item => {
+            item.classList.remove('open');
+            const otherSubmenu = item.querySelector('.submenu');
+            if (otherSubmenu) {
+                otherSubmenu.style.maxHeight = '0';
+            }
+        });
+        
+        // Abrir este submenu
+        navItem.classList.add('open');
+        submenu.style.maxHeight = submenu.scrollHeight + 'px';
+    }
+}
+
+function showRecentPatients() {
+    // Redirigir a la página de pacientes recientes
+    window.location.href = '/pacientes/recientes/';
+}
+
 // Exportar para uso en otros módulos
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = SidebarManager;

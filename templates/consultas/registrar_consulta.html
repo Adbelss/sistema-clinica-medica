@@ -214,6 +214,9 @@
                                         <button type="button" class="btn btn-outline-primary btn-sm" onclick="buscarPacienteRapido()">
                                             <i class="bi bi-search"></i> Búsqueda Rápida
                                         </button>
+                                        <button type="button" class="btn btn-outline-info btn-sm ms-2" id="btnHistorialMedico" onclick="verHistorialMedico()" style="display: none;">
+                                            <i class="bi bi-file-medical"></i> Ver Historial
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -717,9 +720,40 @@ function buscarPacienteRapido() {
     }
 }
 
+// Función para ver historial médico del paciente seleccionado
+function verHistorialMedico() {
+    const pacienteSelect = document.getElementById('id_paciente');
+    const pacienteId = pacienteSelect.value;
+    
+    if (pacienteId) {
+        // Abrir en nueva pestaña
+        window.open(`/pacientes/historial/${pacienteId}/`, '_blank');
+    } else {
+        alert('Por favor selecciona un paciente primero.');
+    }
+}
+
+// Función para mostrar/ocultar botón de historial según selección de paciente
+function toggleHistorialButton() {
+    const pacienteSelect = document.getElementById('id_paciente');
+    const btnHistorial = document.getElementById('btnHistorialMedico');
+    
+    if (pacienteSelect.value) {
+        btnHistorial.style.display = 'inline-block';
+    } else {
+        btnHistorial.style.display = 'none';
+    }
+}
+
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
     new AdvancedConsultationForm();
+    
+    // Agregar event listener para el select de paciente
+    const pacienteSelect = document.getElementById('id_paciente');
+    if (pacienteSelect) {
+        pacienteSelect.addEventListener('change', toggleHistorialButton);
+    }
 });
 </script>
 {% endblock %}

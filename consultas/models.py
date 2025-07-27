@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings  # para AUTH_USER_MODEL
 from pacientes.models import Paciente
+from django.utils import timezone
 
 class Consulta(models.Model):
     # Relación con paciente real (nullable temporalmente para migración)
@@ -203,3 +204,124 @@ class Consulta(models.Model):
                 alertas.append(f"⚠️ Frecuencia cardíaca baja: {self.frecuencia_cardiaca} lpm")
         
         return alertas
+
+class NotificacionWhatsApp(models.Model):
+    """Modelo para gestionar notificaciones enviadas por WhatsApp"""
+    
+    TIPO_CHOICES = [
+        ('receta', 'Receta Médica'),
+        ('consulta', 'Resumen de Consulta'),
+        ('recordatorio', 'Recordatorio de Cita'),
+        ('resultado', 'Resultado de Examen'),
+        ('emergencia', 'Alerta de Emergencia'),
+    ]
+    
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('enviado', 'Enviado'),
+        ('entregado', 'Entregado'),
+        ('leido', 'Leído'),
+        ('error', 'Error'),
+        ('cancelado', 'Cancelado'),
+    ]
+    
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='notificaciones_whatsapp')
+    consulta = models.ForeignKey(Consulta, on_delete=models.CASCADE, related_name='notificaciones_whatsapp', null=True, blank=True)
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    telefono = models.CharField(max_length=20, help_text="Número de teléfono del paciente")
+    mensaje = models.TextField(help_text="Mensaje enviado por WhatsApp")
+    plantilla_usada = models.CharField(max_length=100, blank=True, null=True, help_text="Plantilla de WhatsApp utilizada")
+    
+    # Estado y seguimiento
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
+    fecha_envio = models.DateTimeField(auto_now_add=True)
+    fecha_entrega = models.DateTimeField(null=True, blank=True)
+    fecha_lectura = models.DateTimeField(null=True, blank=True)
+    
+    # Información de la API
+    whatsapp_message_id = models.CharField(max_length=100, blank=True, null=True, help_text="ID del mensaje en WhatsApp")
+    error_mensaje = models.TextField(blank=True, null=True, help_text="Mensaje de error si falló el envío")
+    intentos_envio = models.IntegerField(default=0, help_text="Número de intentos de envío")
+    
+    # Archivos adjuntos
+    archivo_adjunto = models.FileField(upload_to='whatsapp_archivos/', blank=True, null=True, help_text="PDF o imagen adjunta")
+    nombre_archivo = models.CharField(max_length=255, blank=True, null=True)
+    
+    # Sistema
+    enviado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='notificaciones_enviadas')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Notificación WhatsApp"
+        verbose_name_plural = "Notificaciones WhatsApp"
+        ordering = ['-fecha_envio']
+        indexes = [
+            models.Index(fields=['paciente', 'tipo']),
+            models.Index(fields=['estado', 'fecha_envio']),
+            models.Index(fields=['whatsapp_message_id']),
+        ]
+    
+    def __str__(self):
+        return f"{self.get_tipo_display()} - {self.paciente.nombre_completo()} - {self.fecha_envio.strftime('%d/%m/%Y %H:%M')}"
+    
+    def obtener_estado_display(self):
+        """Retorna el estado con iconos"""
+        iconos = {
+            'pendiente': '⏳',
+            'enviado': '📤',
+            'entregado': '✅',
+            'leido': '👁️',
+            'error': '❌',
+            'cancelado': '🚫',
+        }
+        return f"{iconos.get(self.estado, '')} {self.get_estado_display()}"
+    
+    def es_exitosa(self):
+        """Verifica si la notificación fue exitosa"""
+        return self.estado in ['entregado', 'leido']
+    
+    def puede_reintentar(self):
+        """Verifica si se puede reintentar el envío"""
+        return self.estado in ['error', 'pendiente'] and self.intentos_envio < 3
+    
+    def marcar_como_enviado(self, message_id=None):
+        """Marca la notificación como enviada"""
+        self.estado = 'enviado'
+        self.fecha_entrega = timezone.now()
+        if message_id:
+            self.whatsapp_message_id = message_id
+        self.save()
+    
+    def marcar_como_entregado(self):
+        """Marca la notificación como entregada"""
+        self.estado = 'entregado'
+        self.save()
+    
+    def marcar_como_leido(self):
+        """Marca la notificación como leída"""
+        self.estado = 'leido'
+        self.fecha_lectura = timezone.now()
+        self.save()
+    
+    def marcar_error(self, error_msg):
+        """Marca la notificación como error"""
+        self.estado = 'error'
+        self.error_mensaje = error_msg
+        self.intentos_envio += 1
+        self.save()
+    
+    def obtener_tiempo_respuesta(self):
+        """Calcula el tiempo de respuesta si fue leída"""
+        if self.fecha_lectura and self.fecha_envio:
+            return self.fecha_lectura - self.fecha_envio
+        return None
+    
+    def obtener_estadisticas(self):
+        """Obtiene estadísticas de la notificación"""
+        return {
+            'tiempo_envio': self.fecha_entrega - self.fecha_envio if self.fecha_entrega else None,
+            'tiempo_respuesta': self.obtener_tiempo_respuesta(),
+            'intentos': self.intentos_envio,
+            'exitoso': self.es_exitosa(),
+        }

@@ -1,0 +1,446 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Nuevo Paciente | HealthLife{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+    
+    .form-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background-color: #f9fafb;
+    }
+    
+    .form-section h5 {
+        color: #374151;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .form-label {
+        color: #6b7280;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+    
+    .form-control, .form-select {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+    }
+    
+    .btn-secondary {
+        background: #6b7280;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: #4b5563;
+        transform: translateY(-2px);
+    }
+    
+    .notification-section {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #0ea5e9;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .notification-section h6 {
+        color: #0c4a6e;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+    
+    .form-check-input:checked {
+        background-color: #2563eb;
+        border-color: #2563eb;
+    }
+    
+    .whatsapp-icon {
+        color: #25D366;
+    }
+    
+    .email-icon {
+        color: #ea4335;
+    }
+    
+    .sms-icon {
+        color: #34a853;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="bi bi-person-plus me-2"></i>
+                        Nuevo Paciente
+                    </h1>
+                    <p class="text-muted">Registra la información completa del nuevo paciente</p>
+                </div>
+                <div>
+                    <a href="{% url 'listar_pacientes' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Volver a Pacientes
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mensajes de error -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        <i class="bi {% if message.tags == 'success' %}bi-check-circle{% elif message.tags == 'error' %}bi-exclamation-triangle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" class="form-container">
+                {% csrf_token %}
+                
+                <!-- Información General -->
+                <div class="form-section">
+                    <h5><i class="bi bi-person me-2"></i>Información General</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.primer_nombre.id_for_label }}" class="form-label">
+                                Primer Nombre *
+                            </label>
+                            {{ form.primer_nombre }}
+                            {% if form.primer_nombre.errors %}
+                                <div class="text-danger small mt-1">{{ form.primer_nombre.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.otros_nombres.id_for_label }}" class="form-label">
+                                Otros Nombres
+                            </label>
+                            {{ form.otros_nombres }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.primer_apellido.id_for_label }}" class="form-label">
+                                Primer Apellido *
+                            </label>
+                            {{ form.primer_apellido }}
+                            {% if form.primer_apellido.errors %}
+                                <div class="text-danger small mt-1">{{ form.primer_apellido.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.segundo_apellido.id_for_label }}" class="form-label">
+                                Segundo Apellido
+                            </label>
+                            {{ form.segundo_apellido }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_nacimiento.id_for_label }}" class="form-label">
+                                Fecha de Nacimiento *
+                            </label>
+                            {{ form.fecha_nacimiento }}
+                            {% if form.fecha_nacimiento.errors %}
+                                <div class="text-danger small mt-1">{{ form.fecha_nacimiento.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.genero.id_for_label }}" class="form-label">
+                                Género *
+                            </label>
+                            {{ form.genero }}
+                            {% if form.genero.errors %}
+                                <div class="text-danger small mt-1">{{ form.genero.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.tipo_documento.id_for_label }}" class="form-label">
+                                Tipo de Documento *
+                            </label>
+                            {{ form.tipo_documento }}
+                            {% if form.tipo_documento.errors %}
+                                <div class="text-danger small mt-1">{{ form.tipo_documento.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.documento_identificacion.id_for_label }}" class="form-label">
+                                Número de Documento *
+                            </label>
+                            {{ form.documento_identificacion }}
+                            {% if form.documento_identificacion.errors %}
+                                <div class="text-danger small mt-1">{{ form.documento_identificacion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de Contacto -->
+                <div class="form-section">
+                    <h5><i class="bi bi-telephone me-2"></i>Información de Contacto</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.telefono.id_for_label }}" class="form-label">
+                                Teléfono Principal *
+                            </label>
+                            {{ form.telefono }}
+                            {% if form.telefono.errors %}
+                                <div class="text-danger small mt-1">{{ form.telefono.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.telefono_secundario.id_for_label }}" class="form-label">
+                                Teléfono Secundario
+                            </label>
+                            {{ form.telefono_secundario }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.correo.id_for_label }}" class="form-label">
+                                Correo Electrónico
+                            </label>
+                            {{ form.correo }}
+                            {% if form.correo.errors %}
+                                <div class="text-danger small mt-1">{{ form.correo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.contacto_emergencia.id_for_label }}" class="form-label">
+                                Contacto de Emergencia
+                            </label>
+                            {{ form.contacto_emergencia }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.telefono_emergencia.id_for_label }}" class="form-label">
+                                Teléfono de Emergencia
+                            </label>
+                            {{ form.telefono_emergencia }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.parentesco_emergencia.id_for_label }}" class="form-label">
+                                Parentesco
+                            </label>
+                            {{ form.parentesco_emergencia }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dirección -->
+                <div class="form-section">
+                    <h5><i class="bi bi-geo-alt me-2"></i>Dirección</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.direccion.id_for_label }}" class="form-label">
+                                Dirección *
+                            </label>
+                            {{ form.direccion }}
+                            {% if form.direccion.errors %}
+                                <div class="text-danger small mt-1">{{ form.direccion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.ciudad.id_for_label }}" class="form-label">
+                                Ciudad *
+                            </label>
+                            {{ form.ciudad }}
+                            {% if form.ciudad.errors %}
+                                <div class="text-danger small mt-1">{{ form.ciudad.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.zona.id_for_label }}" class="form-label">
+                                Zona
+                            </label>
+                            {{ form.zona }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.codigo_postal.id_for_label }}" class="form-label">
+                                Código Postal
+                            </label>
+                            {{ form.codigo_postal }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferencias de Notificación -->
+                <div class="notification-section">
+                    <h6><i class="bi bi-bell me-2"></i>Preferencias de Notificación</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="notificar_correo" name="notificar_correo">
+                                <label class="form-check-label" for="notificar_correo">
+                                    <i class="bi bi-envelope email-icon me-2"></i>Notificar por Correo
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="notificar_whatsapp" name="notificar_whatsapp">
+                                <label class="form-check-label" for="notificar_whatsapp">
+                                    <i class="bi bi-whatsapp whatsapp-icon me-2"></i>Notificar por WhatsApp
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="notificar_sms" name="notificar_sms">
+                                <label class="form-check-label" for="notificar_sms">
+                                    <i class="bi bi-chat-text sms-icon me-2"></i>Notificar por SMS
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Administrativa -->
+                <div class="form-section">
+                    <h5><i class="bi bi-gear me-2"></i>Información Administrativa</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.estado.id_for_label }}" class="form-label">
+                                Estado *
+                            </label>
+                            {{ form.estado }}
+                            {% if form.estado.errors %}
+                                <div class="text-danger small mt-1">{{ form.estado.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.estado_civil.id_for_label }}" class="form-label">
+                                Estado Civil
+                            </label>
+                            {{ form.estado_civil }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Médica -->
+                <div class="form-section">
+                    <h5><i class="bi bi-heart-pulse me-2"></i>Información Médica</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.grupo_sanguineo.id_for_label }}" class="form-label">
+                                Grupo Sanguíneo
+                            </label>
+                            {{ form.grupo_sanguineo }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.factor_rh.id_for_label }}" class="form-label">
+                                Factor RH
+                            </label>
+                            {{ form.factor_rh }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.alergias.id_for_label }}" class="form-label">
+                                Alergias
+                            </label>
+                            {{ form.alergias }}
+                            <div class="form-text">Separar múltiples alergias con comas</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.antecedentes_medicos.id_for_label }}" class="form-label">
+                                Antecedentes Médicos
+                            </label>
+                            {{ form.antecedentes_medicos }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.medicamentos_actuales.id_for_label }}" class="form-label">
+                                Medicamentos Actuales
+                            </label>
+                            {{ form.medicamentos_actuales }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.es_donador.id_for_label }}" class="form-label">
+                                ¿Es Donador de Órganos?
+                            </label>
+                            {{ form.es_donador }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <a href="{% url 'listar_pacientes' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-2"></i>Guardar Paciente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Calcular edad automáticamente
+    const fechaNacimiento = document.getElementById('{{ form.fecha_nacimiento.id_for_label }}');
+    if (fechaNacimiento) {
+        fechaNacimiento.addEventListener('change', function() {
+            const fecha = new Date(this.value);
+            const hoy = new Date();
+            const edad = hoy.getFullYear() - fecha.getFullYear();
+            const mes = hoy.getMonth() - fecha.getMonth();
+            
+            if (mes < 0 || (mes === 0 && hoy.getDate() < fecha.getDate())) {
+                edad--;
+            }
+            
+            // Mostrar la edad calculada
+            let edadDisplay = this.parentNode.querySelector('.edad-display');
+            if (!edadDisplay) {
+                edadDisplay = document.createElement('div');
+                edadDisplay.className = 'text-success small mt-1 edad-display';
+                this.parentNode.appendChild(edadDisplay);
+            }
+            edadDisplay.innerHTML = `<i class="bi bi-info-circle me-1"></i>Edad: ${edad} años`;
+        });
+    }
+});
+</script>
+{% endblock %} 

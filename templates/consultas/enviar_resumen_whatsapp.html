@@ -1,0 +1,435 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Enviar Resumen por WhatsApp{% endblock %}
+
+{% block extra_css %}
+<style>
+    .whatsapp-preview {
+        background: #25D366;
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .whatsapp-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .whatsapp-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #128C7E;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+    }
+    
+    .whatsapp-status {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        opacity: 0.8;
+    }
+    
+    .whatsapp-message {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        white-space: pre-line;
+    }
+    
+    .status-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    .status-enabled {
+        background: #28a745;
+        color: white;
+    }
+    
+    .status-disabled {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn-whatsapp {
+        background: #25D366;
+        border-color: #25D366;
+        color: white;
+    }
+    
+    .btn-whatsapp:hover {
+        background: #128C7E;
+        border-color: #128C7E;
+        color: white;
+    }
+    
+    .patient-info {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .consultation-details {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .vital-signs {
+        background: #e3f2fd;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="bi bi-whatsapp text-success me-2"></i>
+                        Enviar Resumen por WhatsApp
+                    </h1>
+                    <p class="text-muted">Envíe el resumen de la consulta directamente al paciente</p>
+                </div>
+                <div>
+                    <a href="{% url 'detalle_consulta' consulta.id %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Volver a Consulta
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alertas -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="row">
+                <!-- Información del Paciente -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-person-circle me-2"></i>Información del Paciente
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="patient-info">
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <strong>Nombre:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        {{ paciente.nombre_completo }}
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <strong>Documento:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        {{ paciente.documento_identificacion }}
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <strong>Teléfono:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        {{ paciente.telefono }}
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <strong>WhatsApp:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        {% if whatsapp_enabled %}
+                                            <span class="status-badge status-enabled">
+                                                <i class="bi bi-check-circle me-1"></i>Habilitado
+                                            </span>
+                                        {% else %}
+                                            <span class="status-badge status-disabled">
+                                                <i class="bi bi-x-circle me-1"></i>Deshabilitado
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de la Consulta -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-file-medical me-2"></i>Detalles de la Consulta
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="consultation-details">
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <strong>Fecha:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        {{ consulta.fecha|date:"d/m/Y H:i" }}
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <strong>Doctor:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        {{ consulta.doctor.get_full_name }}
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <strong>Tipo:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        {{ consulta.get_tipo_consulta_display }}
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <strong>Estado:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        {{ consulta.get_estado_display }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Signos Vitales -->
+                    {% if consulta.presion_arterial or consulta.temperatura or consulta.peso or consulta.altura or consulta.frecuencia_cardiaca %}
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-heart-pulse me-2"></i>Signos Vitales
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="vital-signs">
+                                {% if consulta.presion_arterial %}
+                                <div class="row mb-2">
+                                    <div class="col-6"><strong>Presión Arterial:</strong></div>
+                                    <div class="col-6">{{ consulta.presion_arterial }}</div>
+                                </div>
+                                {% endif %}
+                                {% if consulta.temperatura %}
+                                <div class="row mb-2">
+                                    <div class="col-6"><strong>Temperatura:</strong></div>
+                                    <div class="col-6">{{ consulta.temperatura }}°C</div>
+                                </div>
+                                {% endif %}
+                                {% if consulta.peso %}
+                                <div class="row mb-2">
+                                    <div class="col-6"><strong>Peso:</strong></div>
+                                    <div class="col-6">{{ consulta.peso }} kg</div>
+                                </div>
+                                {% endif %}
+                                {% if consulta.altura %}
+                                <div class="row mb-2">
+                                    <div class="col-6"><strong>Altura:</strong></div>
+                                    <div class="col-6">{{ consulta.altura }} m</div>
+                                </div>
+                                {% endif %}
+                                {% if consulta.frecuencia_cardiaca %}
+                                <div class="row mb-2">
+                                    <div class="col-6"><strong>Frecuencia Cardíaca:</strong></div>
+                                    <div class="col-6">{{ consulta.frecuencia_cardiaca }} lpm</div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Vista Previa del Mensaje -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-eye me-2"></i>Vista Previa del Mensaje
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="whatsapp-preview">
+                                <div class="whatsapp-header">
+                                    <div class="whatsapp-avatar">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+                                    <div>
+                                        <div><strong>{{ paciente.primer_nombre }} {{ paciente.primer_apellido }}</strong></div>
+                                        <div class="whatsapp-status">
+                                            <i class="bi bi-circle-fill me-1" style="color: #4CAF50;"></i>
+                                            en línea
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="whatsapp-message">
+🏥 <strong>RESUMEN DE CONSULTA</strong>
+
+👤 <strong>Paciente:</strong> {{ paciente.nombre_completo }}
+👨‍⚕️ <strong>Doctor:</strong> {{ consulta.doctor.get_full_name }}
+📅 <strong>Fecha:</strong> {{ consulta.fecha|date:"d/m/Y" }}
+
+🔍 <strong>Motivo de Consulta:</strong>
+{{ consulta.motivo }}
+
+📋 <strong>Diagnóstico:</strong>
+{{ consulta.diagnostico }}
+
+💊 <strong>Tratamiento:</strong>
+{{ consulta.tratamiento }}
+
+📊 <strong>Signos Vitales:</strong>
+{% if consulta.presion_arterial %}• Presión Arterial: {{ consulta.presion_arterial }}{% endif %}
+{% if consulta.temperatura %}• Temperatura: {{ consulta.temperatura }}°C{% endif %}
+{% if consulta.peso %}• Peso: {{ consulta.peso }} kg{% endif %}
+{% if consulta.altura %}• Altura: {{ consulta.altura }} m{% endif %}
+{% if consulta.frecuencia_cardiaca %}• Frecuencia Cardíaca: {{ consulta.frecuencia_cardiaca }} lpm{% endif %}
+{% if not consulta.presion_arterial and not consulta.temperatura and not consulta.peso and not consulta.altura and not consulta.frecuencia_cardiaca %}No registrados{% endif %}
+
+📅 <strong>Próxima Cita:</strong>
+{% if consulta.proxima_cita %}
+{{ consulta.proxima_cita|date:"d/m/Y H:i" }}
+{% else %}
+No programada
+{% endif %}
+
+💡 <strong>Observaciones:</strong>
+{% if consulta.observaciones_cita %}
+{{ consulta.observaciones_cita }}
+{% else %}
+Ninguna
+{% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Botón de Envío -->
+                            <div class="text-center mt-4">
+                                {% if whatsapp_enabled %}
+                                    <form method="post" id="sendWhatsAppForm">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-whatsapp btn-lg">
+                                            <i class="bi bi-whatsapp me-2"></i>
+                                            Enviar Resumen por WhatsApp
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        <strong>WhatsApp no habilitado:</strong> 
+                                        El paciente no tiene habilitadas las notificaciones por WhatsApp. 
+                                        Puede habilitarlas en la ficha del paciente.
+                                    </div>
+                                    <a href="{% url 'editar_paciente' paciente.id %}" class="btn btn-outline-primary">
+                                        <i class="bi bi-gear me-2"></i>Configurar Notificaciones
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('sendWhatsAppForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const button = form.querySelector('button[type="submit"]');
+            const originalText = button.innerHTML;
+            
+            // Cambiar el botón a estado de carga
+            button.disabled = true;
+            button.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Enviando...';
+            
+            // Enviar formulario
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar mensaje de éxito
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Enviado!',
+                        text: data.message,
+                        confirmButtonColor: '#25D366'
+                    }).then(() => {
+                        window.location.href = "{% url 'detalle_consulta' consulta.id %}";
+                    });
+                } else {
+                    // Mostrar mensaje de error
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ocurrió un error al enviar el mensaje',
+                    confirmButtonColor: '#dc3545'
+                });
+            })
+            .finally(() => {
+                // Restaurar el botón
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
+        });
+    }
+});
+</script>
+{% endblock %} 

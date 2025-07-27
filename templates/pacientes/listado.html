@@ -46,6 +46,10 @@
                 </td>
                 <td>{{ p.fecha_creacion|date:"d/m/Y" }}</td>
                 <td class="text-center">
+                    <!-- Botón de historial médico -->
+                    <a href="{% url 'historial_medico' p.id %}" class="btn btn-sm btn-info me-1" title="Historial Médico">
+                        <i class="bi bi-file-medical"></i>
+                    </a>
                     <!-- Botón de edición AJAX -->
                     <a href="{% url 'editar_paciente' p.id %}" class="btn btn-sm btn-warning btn-editar-paciente">
                         <i class="bi bi-pencil-square"></i>

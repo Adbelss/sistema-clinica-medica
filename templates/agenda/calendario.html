@@ -1,0 +1,501 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendario | HealthLife{% endblock %}
+
+{% block content %}
+<style>
+/* Variables CSS para el sistema médico */
+:root {
+    --primary-blue: #2563eb;
+    --secondary-blue: #1e40af;
+    --accent-blue: #3b82f6;
+    --medical-green: #10b981;
+    --medical-yellow: #f59e0b;
+    --medical-red: #ef4444;
+    --medical-gray: #6b7280;
+    --light-gray: #f3f4f6;
+    --white: #ffffff;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --border-radius: 12px;
+    --border-radius-small: 8px;
+    --transition: all 0.3s ease;
+}
+
+.calendar-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--light-gray);
+}
+
+.calendar-nav {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.calendar-nav button {
+    background: var(--primary-blue);
+    border: none;
+    border-radius: var(--border-radius-small);
+    padding: 0.5rem 1rem;
+    color: var(--white);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.calendar-nav button:hover {
+    background: var(--secondary-blue);
+}
+
+.calendar-nav button:disabled {
+    background: var(--medical-gray);
+    cursor: not-allowed;
+}
+
+.current-month {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-blue);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--light-gray);
+    border-radius: var(--border-radius-small);
+    overflow: hidden;
+}
+
+.calendar-day-header {
+    background: var(--primary-blue);
+    color: var(--white);
+    padding: 1rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.calendar-day {
+    background: var(--white);
+    min-height: 120px;
+    padding: 0.5rem;
+    border: 1px solid var(--light-gray);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.calendar-day:hover {
+    background: var(--light-gray);
+}
+
+.calendar-day.other-month {
+    background: #f9fafb;
+    color: var(--medical-gray);
+}
+
+.calendar-day.today {
+    background: #dbeafe;
+    border-color: var(--primary-blue);
+}
+
+.calendar-day.has-appointments {
+    background: #fef3c7;
+    border-color: var(--medical-yellow);
+}
+
+.day-number {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.appointment-item {
+    background: var(--primary-blue);
+    color: var(--white);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.appointment-item:hover {
+    background: var(--secondary-blue);
+}
+
+.appointment-item.confirmed {
+    background: var(--medical-green);
+}
+
+.appointment-item.pending {
+    background: var(--medical-yellow);
+    color: #000;
+}
+
+.appointment-item.cancelled {
+    background: var(--medical-red);
+}
+
+.appointment-details {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-medium);
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    z-index: 1000;
+    display: none;
+}
+
+.appointment-details.show {
+    display: block;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+}
+
+.overlay.show {
+    display: block;
+}
+
+.filters {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.filter-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: var(--medical-gray);
+}
+
+.filter-group select {
+    border: 2px solid var(--light-gray);
+    border-radius: var(--border-radius-small);
+    padding: 0.5rem;
+    transition: var(--transition);
+}
+
+.filter-group select:focus {
+    border-color: var(--primary-blue);
+    outline: none;
+}
+
+.btn {
+    border-radius: var(--border-radius-small);
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: var(--white);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: var(--secondary-blue);
+    color: var(--white);
+}
+
+.btn-success {
+    background: var(--medical-green);
+    color: var(--white);
+    border: none;
+}
+
+.btn-warning {
+    background: var(--medical-yellow);
+    color: #000;
+    border: none;
+}
+
+.btn-danger {
+    background: var(--medical-red);
+    color: var(--white);
+    border: none;
+}
+
+.btn-secondary {
+    background: var(--medical-gray);
+    color: var(--white);
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+</style>
+
+<div class="container-fluid">
+    <!-- Header de la página -->
+    <div class="page-header">
+        <h2><i class="bi bi-calendar3 me-3"></i>Calendario de Citas</h2>
+        <p>Visualiza y gestiona todas las citas programadas en el calendario.</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters">
+        <div class="filter-group">
+            <label for="doctor-filter">Doctor:</label>
+            <select id="doctor-filter">
+                <option value="">Todos los doctores</option>
+                {% for doctor in doctores %}
+                    <option value="{{ doctor.id }}">{{ doctor.nombre_completo }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="estado-filter">Estado:</label>
+            <select id="estado-filter">
+                <option value="">Todos los estados</option>
+                <option value="CONFIRMADA">Confirmada</option>
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="CANCELADA">Cancelada</option>
+                <option value="COMPLETADA">Completada</option>
+            </select>
+
+            <a href="{% url 'nueva_cita' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i>Nueva Cita
+            </a>
+        </div>
+    </div>
+
+    <!-- Calendario -->
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <div class="calendar-nav">
+                <button onclick="previousMonth()" id="prev-btn">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <span class="current-month" id="current-month">{{ current_month }}</span>
+                <button onclick="nextMonth()" id="next-btn">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+            <div>
+                <button onclick="goToToday()" class="btn btn-secondary">
+                    <i class="bi bi-calendar-check"></i>Hoy
+                </button>
+            </div>
+        </div>
+
+        <div class="calendar-grid">
+            <!-- Días de la semana -->
+            <div class="calendar-day-header">Dom</div>
+            <div class="calendar-day-header">Lun</div>
+            <div class="calendar-day-header">Mar</div>
+            <div class="calendar-day-header">Mié</div>
+            <div class="calendar-day-header">Jue</div>
+            <div class="calendar-day-header">Vie</div>
+            <div class="calendar-day-header">Sáb</div>
+
+            <!-- Días del calendario -->
+            {% for week in calendar_data %}
+                {% for day in week %}
+                    <div class="calendar-day {% if day.is_other_month %}other-month{% endif %} {% if day.is_today %}today{% endif %} {% if day.appointments %}has-appointments{% endif %}" 
+                         data-date="{{ day.date|date:'Y-m-d' }}">
+                        <div class="day-number">{{ day.day }}</div>
+                        {% for appointment in day.appointments %}
+                            <div class="appointment-item {{ appointment.estado|lower }}" 
+                                 onclick="showAppointmentDetails({{ appointment.id }})"
+                                 title="{{ appointment.paciente.primer_nombre }} {{ appointment.paciente.primer_apellido }} - {{ appointment.hora_inicio|time:'H:i' }}">
+                                {{ appointment.hora_inicio|time:'H:i' }} - {{ appointment.paciente.primer_nombre }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal de detalles de cita -->
+<div class="overlay" id="overlay"></div>
+<div class="appointment-details" id="appointment-details">
+    <h4 id="appointment-title">Detalles de la Cita</h4>
+    <div id="appointment-content">
+        <!-- Contenido dinámico -->
+    </div>
+    <div class="d-flex justify-content-between mt-3">
+        <button onclick="closeAppointmentDetails()" class="btn btn-secondary">Cerrar</button>
+        <div>
+            <button onclick="editAppointment()" class="btn btn-primary me-2">Editar</button>
+            <button onclick="deleteAppointment()" class="btn btn-danger">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentDate = new Date('{{ current_date }}');
+let selectedAppointmentId = null;
+
+function previousMonth() {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    loadCalendar();
+}
+
+function nextMonth() {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    loadCalendar();
+}
+
+function goToToday() {
+    currentDate = new Date();
+    loadCalendar();
+}
+
+function loadCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1;
+    
+    // Actualizar la URL sin recargar la página
+    const url = `{% url 'calendario' %}?year=${year}&month=${month}`;
+    
+    // Hacer petición AJAX para obtener los datos del calendario
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            // Extraer solo la parte del calendario
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newCalendar = doc.querySelector('.calendar-grid');
+            const currentCalendar = document.querySelector('.calendar-grid');
+            currentCalendar.innerHTML = newCalendar.innerHTML;
+            
+            // Actualizar el mes mostrado
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                               'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            document.getElementById('current-month').textContent = 
+                `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+        });
+}
+
+function showAppointmentDetails(appointmentId) {
+    selectedAppointmentId = appointmentId;
+    
+    // Hacer petición AJAX para obtener los detalles de la cita
+    fetch(`/agenda/citas/${appointmentId}/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('appointment-title').textContent = 
+                `Cita - ${data.paciente_nombre}`;
+            
+            document.getElementById('appointment-content').innerHTML = `
+                <div class="mb-3">
+                    <strong>Paciente:</strong> ${data.paciente_nombre}
+                </div>
+                <div class="mb-3">
+                    <strong>Doctor:</strong> ${data.doctor_nombre}
+                </div>
+                <div class="mb-3">
+                    <strong>Fecha:</strong> ${data.fecha}
+                </div>
+                <div class="mb-3">
+                    <strong>Hora:</strong> ${data.hora_inicio} - ${data.hora_fin}
+                </div>
+                <div class="mb-3">
+                    <strong>Tipo:</strong> ${data.tipo_cita}
+                </div>
+                <div class="mb-3">
+                    <strong>Estado:</strong> 
+                    <span class="badge bg-${data.estado_color}">${data.estado}</span>
+                </div>
+                ${data.notas ? `<div class="mb-3"><strong>Notas:</strong> ${data.notas}</div>` : ''}
+            `;
+            
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('appointment-details').classList.add('show');
+        });
+}
+
+function closeAppointmentDetails() {
+    document.getElementById('overlay').classList.remove('show');
+    document.getElementById('appointment-details').classList.remove('show');
+    selectedAppointmentId = null;
+}
+
+function editAppointment() {
+    if (selectedAppointmentId) {
+        window.location.href = `/agenda/citas/${selectedAppointmentId}/editar/`;
+    }
+}
+
+function deleteAppointment() {
+    if (selectedAppointmentId && confirm('¿Estás seguro de que quieres eliminar esta cita?')) {
+        fetch(`/agenda/citas/${selectedAppointmentId}/eliminar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeAppointmentDetails();
+                loadCalendar();
+                alert('Cita eliminada exitosamente');
+            } else {
+                alert('Error al eliminar la cita');
+            }
+        });
+    }
+}
+
+// Cerrar modal al hacer clic en el overlay
+document.getElementById('overlay').addEventListener('click', closeAppointmentDetails);
+
+// Filtros
+document.getElementById('doctor-filter').addEventListener('change', function() {
+    // Implementar filtrado por doctor
+    console.log('Filtrar por doctor:', this.value);
+});
+
+document.getElementById('estado-filter').addEventListener('change', function() {
+    // Implementar filtrado por estado
+    console.log('Filtrar por estado:', this.value);
+});
+</script>
+
+<!-- CSRF Token para las peticiones AJAX -->
+{% csrf_token %}
+{% endblock %} 

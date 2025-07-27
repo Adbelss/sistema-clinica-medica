@@ -1,58 +1,233 @@
 {% extends 'base.html' %}
 
-{% block title %}Estadísticas de Consultas | HealthLife{% endblock %}
+{% block title %}Reporte Estadístico - Sistema Médico HealthLife{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js para gráficas -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 
 {% block content %}
 <style>
+/* Estilos profesionales para tesis */
+.thesis-header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.thesis-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.thesis-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.thesis-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
 .stats-card {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    border-radius: 15px;
-    padding: 25px;
-    margin-bottom: 20px;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
     text-align: center;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .stats-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 .stats-number {
-    font-size: 3rem;
-    font-weight: bold;
-    margin-bottom: 10px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .stats-label {
-    font-size: 1.1rem;
+    font-size: 1rem;
     opacity: 0.9;
+    font-weight: 500;
 }
 
 .chart-container {
     background: white;
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    height: 300px; /* Altura fija para gráficas pequeñas */
+}
+
+.chart-title {
+    color: #1e3c72;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
 }
 
 .progress-custom {
-    height: 25px;
-    border-radius: 12px;
-    background-color: #e9ecef;
+    height: 20px;
+    border-radius: 10px;
+    background-color: #f8f9fa;
     overflow: hidden;
+    border: 1px solid #e9ecef;
 }
 
 .progress-bar-custom {
     height: 100%;
-    border-radius: 12px;
-    transition: width 0.6s ease;
+    border-radius: 10px;
+    transition: width 0.8s ease;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.filters-section {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.filters-title {
+    color: #1e3c72;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.export-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border: 1px solid #dee2e6;
+}
+
+.export-title {
+    color: #1e3c72;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.btn-thesis {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.btn-thesis:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.alert-thesis {
+    border-radius: 8px;
+    border-left: 4px solid #1e3c72;
+    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+}
+
+.table-thesis {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.table-thesis th {
+    background: #1e3c72;
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 1rem;
+}
+
+.table-thesis td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.table-thesis tr:hover {
+    background-color: #f8f9fa;
 }
 </style>
 
-<div class="container mt-5">
-    <h2 class="mb-4 text-primary"><i class="bi bi-graph-up me-2"></i>Estadísticas de Consultas</h2>
+<div class="container-fluid mt-4">
+    <!-- Encabezado Profesional -->
+    <div class="thesis-header">
+        <h1 class="thesis-title">
+            <i class="bi bi-graph-up me-3"></i>
+            Reporte Estadístico del Sistema Médico
+        </h1>
+        <p class="thesis-subtitle">
+            Análisis Integral de Consultas Médicas - HealthLife
+        </p>
+        <div class="thesis-meta">
+            <span><i class="bi bi-calendar3 me-1"></i>Generado: {{ fecha_actual|default:"Hoy" }}</span>
+            <span><i class="bi bi-person-circle me-1"></i>Usuario: {{ request.user.get_full_name }}</span>
+            <span><i class="bi bi-building me-1"></i>Clínica: HealthLife</span>
+        </div>
+        
+        {% if limit_warning %}
+        <div class="alert alert-warning alert-dismissible fade show mt-3" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Optimización de Rendimiento:</strong> {{ limit_warning }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Filtros de Fecha -->
+    <div class="filters-section">
+        <h5 class="filters-title">
+            <i class="bi bi-funnel me-2"></i>Filtros de Análisis
+        </h5>
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="fecha_inicio" class="form-label fw-bold">Fecha de Inicio</label>
+                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                       value="{{ fecha_inicio|default:'' }}">
+            </div>
+            <div class="col-md-4">
+                <label for="fecha_fin" class="form-label fw-bold">Fecha de Fin</label>
+                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                       value="{{ fecha_fin|default:'' }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary btn-thesis me-2">
+                    <i class="bi bi-search me-1"></i>Aplicar Filtros
+                </button>
+                <a href="{% url 'estadisticas_consultas' %}" class="btn btn-outline-secondary btn-thesis">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
 
     <!-- Estadísticas Generales -->
     <div class="row mb-4">
@@ -81,6 +256,49 @@
             </div>
         </div>
     </div>
+
+    <!-- Estadísticas Adicionales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <div class="stats-number">{{ consultas_hoy }}</div>
+                <div class="stats-label">Consultas Hoy</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                <div class="stats-number">{{ consultas_semana }}</div>
+                <div class="stats-label">Esta Semana</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                <div class="stats-number">Q{{ ingresos_totales }}</div>
+                <div class="stats-label">Ingresos Totales</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
+                <div class="stats-number">{{ doctores_top|length }}</div>
+                <div class="stats-label">Doctores Activos</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información de Filtros Aplicados -->
+    {% if fecha_inicio or fecha_fin %}
+    <div class="alert alert-thesis mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-info-circle-fill me-3" style="font-size: 1.5rem; color: #1e3c72;"></i>
+            <div>
+                <strong>Filtros de Análisis Aplicados:</strong><br>
+                {% if fecha_inicio %}<span class="badge bg-primary me-2">Desde: {{ fecha_inicio }}</span>{% endif %}
+                {% if fecha_fin %}<span class="badge bg-primary me-2">Hasta: {{ fecha_fin }}</span>{% endif %}
+                <span class="badge bg-success ms-2">{{ total_consultas }} consultas analizadas</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="row">
         <!-- Consultas por Tipo -->
@@ -155,14 +373,97 @@
         </div>
     </div>
 
-    <!-- Botones de Acción -->
-    <div class="text-center mt-4">
-        <a href="{% url 'listar_consultas' %}" class="btn btn-primary btn-lg">
-            <i class="bi bi-arrow-left me-2"></i>Volver a Consultas
-        </a>
-        <a href="{% url 'exportar_consultas_excel' %}" class="btn btn-success btn-lg ms-3">
-            <i class="bi bi-file-earmark-excel me-2"></i>Exportar Datos
-        </a>
+    <!-- Gráficas de Barras Profesionales -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="chart-title text-center mb-4">
+                <i class="bi bi-graph-up me-2"></i>Análisis Gráfico de Datos
+            </h4>
+        </div>
+    </div>
+
+    <!-- Gráfica 1: Consultas por Mes -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="chart-title">
+                    <i class="bi bi-calendar-month me-2"></i>Consultas por Mes (Últimos 6 Meses)
+                </h5>
+                <canvas id="chartMensual" width="400" height="200"></canvas>
+            </div>
+        </div>
+        
+        <!-- Gráfica 2: Consultas por Día de la Semana -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="chart-title">
+                    <i class="bi bi-calendar-week me-2"></i>Consultas por Día de la Semana
+                </h5>
+                <canvas id="chartDias" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfica 3: Tipos de Consulta -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="chart-title">
+                    <i class="bi bi-pie-chart me-2"></i>Distribución por Tipo de Consulta
+                </h5>
+                <canvas id="chartTipos" width="400" height="200"></canvas>
+            </div>
+        </div>
+        
+        <!-- Gráfica 4: Estados de Consulta -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="chart-title">
+                    <i class="bi bi-check-circle me-2"></i>Distribución por Estado
+                </h5>
+                <canvas id="chartEstados" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Exportación Profesional -->
+    <div class="export-section">
+        <h4 class="export-title">
+            <i class="bi bi-download me-2"></i>Exportación de Datos para Análisis
+        </h4>
+        <div class="row justify-content-center">
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'listar_consultas' %}" class="btn btn-outline-primary btn-thesis w-100">
+                    <i class="bi bi-arrow-left me-2"></i>Volver a Consultas
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'exportar_consultas_excel' %}" class="btn btn-success btn-thesis w-100">
+                    <i class="bi bi-file-earmark-excel me-2"></i>Exportar Consultas
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'exportar_estadisticas_excel' %}{% if fecha_inicio or fecha_fin %}?fecha_inicio={{ fecha_inicio|default:'' }}&fecha_fin={{ fecha_fin|default:'' }}{% endif %}" class="btn btn-info btn-thesis w-100">
+                    <i class="bi bi-graph-up me-2"></i>Reporte Estadístico
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'exportar_consultas_pdf' %}" class="btn btn-danger btn-thesis w-100">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Consultas PDF
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'exportar_estadisticas_pdf' %}{% if fecha_inicio or fecha_fin %}?fecha_inicio={{ fecha_inicio|default:'' }}&fecha_fin={{ fecha_fin|default:'' }}{% endif %}" class="btn btn-warning btn-thesis w-100">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Reporte PDF
+                </a>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <small class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                Los archivos exportados incluyen metadatos y filtros aplicados para análisis académico
+            </small>
+        </div>
     </div>
 </div>
 
@@ -190,6 +491,168 @@ function animateNumbers() {
         }, 50);
     });
 }
+
+// Configuración de gráficas
+const chartColors = {
+    primary: '#1e3c72',
+    secondary: '#2a5298',
+    success: '#43e97b',
+    warning: '#fa709a',
+    info: '#4facfe',
+    light: '#f8f9fa'
+};
+
+// Gráfica 1: Consultas por Mes (Optimizada)
+const ctxMensual = document.getElementById('chartMensual').getContext('2d');
+new Chart(ctxMensual, {
+    type: 'bar',
+    data: {
+        labels: [{% for dato in datos_grafica_mensual %}'{{ dato.mes }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Consultas',
+            data: [{% for dato in datos_grafica_mensual %}{{ dato.total }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: 'rgba(30, 60, 114, 0.8)',
+            borderColor: 'rgba(30, 60, 114, 1)',
+            borderWidth: 1,
+            borderRadius: 3
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0,0,0,0.1)'
+                },
+                ticks: {
+                    maxTicksLimit: 5,
+                    font: { size: 10 }
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    maxRotation: 45,
+                    font: { size: 9 }
+                }
+            }
+        }
+    }
+});
+
+// Gráfica 2: Consultas por Día de la Semana (Optimizada)
+const ctxDias = document.getElementById('chartDias').getContext('2d');
+new Chart(ctxDias, {
+    type: 'bar',
+    data: {
+        labels: [{% for dato in datos_grafica_dias %}'{{ dato.dia }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Consultas',
+            data: [{% for dato in datos_grafica_dias %}{{ dato.total }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: 'rgba(42, 82, 152, 0.8)',
+            borderColor: 'rgba(42, 82, 152, 1)',
+            borderWidth: 1,
+            borderRadius: 3
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0,0,0,0.1)'
+                },
+                ticks: {
+                    maxTicksLimit: 5,
+                    font: { size: 10 }
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    font: { size: 9 }
+                }
+            }
+        }
+    }
+});
+
+// Gráfica 3: Tipos de Consulta
+const ctxTipos = document.getElementById('chartTipos').getContext('2d');
+new Chart(ctxTipos, {
+    type: 'doughnut',
+    data: {
+        labels: [{% for dato in datos_grafica_tipos %}'{{ dato.tipo }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            data: [{% for dato in datos_grafica_tipos %}{{ dato.total }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: [
+                'rgba(30, 60, 114, 0.8)',
+                'rgba(42, 82, 152, 0.8)',
+                'rgba(67, 126, 234, 0.8)',
+                'rgba(118, 75, 162, 0.8)',
+                'rgba(250, 112, 154, 0.8)'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Gráfica 4: Estados de Consulta
+const ctxEstados = document.getElementById('chartEstados').getContext('2d');
+new Chart(ctxEstados, {
+    type: 'doughnut',
+    data: {
+        labels: [{% for dato in datos_grafica_estados %}'{{ dato.estado }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            data: [{% for dato in datos_grafica_estados %}{{ dato.total }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: [
+                'rgba(67, 233, 123, 0.8)',
+                'rgba(250, 112, 154, 0.8)',
+                'rgba(79, 172, 254, 0.8)',
+                'rgba(255, 154, 158, 0.8)'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
 
 // Inicializar animaciones cuando la página cargue
 document.addEventListener('DOMContentLoaded', function() {

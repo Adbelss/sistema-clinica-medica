@@ -1,79 +1,239 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Listado de Consultas</title>
+    <meta charset="utf-8">
+    <title>Listado de Consultas - HealthLife</title>
     <style>
         @page {
-            margin: 1.5cm;
+            size: A4;
+            margin: 2cm;
+            @top-center {
+                content: "Sistema Médico HealthLife - Listado de Consultas";
+                font-size: 10pt;
+                color: #666;
+            }
+            @bottom-center {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 10pt;
+                color: #666;
+            }
         }
-
+        
         body {
-            font-family: Arial, sans-serif;
-            font-size: 11.5px;
+            font-family: 'Times New Roman', serif;
+            font-size: 11pt;
+            line-height: 1.3;
             color: #333;
         }
-
-        h2 {
+        
+        .header {
             text-align: center;
-            margin-bottom: 20px;
-            color: #11998e;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #1e3c72;
+            padding-bottom: 20px;
         }
-
-        table {
+        
+        .title {
+            font-size: 20pt;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 12pt;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .meta {
+            font-size: 9pt;
+            color: #888;
+        }
+        
+        .table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-bottom: 20px;
+            font-size: 9pt;
         }
-
-        th, td {
-            border: 1px solid #ccc;
-            padding: 6px 8px;
-            text-align: left;
-        }
-
-        th {
-            background: linear-gradient(to right, #38ef7d, #11998e);
+        
+        .table th {
+            background-color: #1e3c72;
             color: white;
+            padding: 8px;
+            text-align: left;
             font-weight: bold;
+            border: 1px solid #1e3c72;
         }
-
-        tbody tr:nth-child(even) {
+        
+        .table td {
+            padding: 6px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+        
+        .table tr:nth-child(even) {
             background-color: #f9f9f9;
         }
-
-        tbody tr:hover {
-            background-color: #e0f7ec;
+        
+        .table tr:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .status-completada {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-pendiente {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        
+        .status-cancelada {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 9pt;
+            color: #666;
+            text-align: center;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        .summary {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .summary h3 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 14pt;
+        }
+        
+        .summary-grid {
+            display: table;
+            width: 100%;
+        }
+        
+        .summary-row {
+            display: table-row;
+        }
+        
+        .summary-cell {
+            display: table-cell;
+            padding: 5px;
+            width: 25%;
+            font-size: 9pt;
+        }
+        
+        .summary-label {
+            font-weight: bold;
+            color: #1e3c72;
         }
     </style>
 </head>
 <body>
-    <h2>Listado de Consultas Médicas</h2>
-    <table>
+    <div class="header">
+        <div class="title">LISTADO DE CONSULTAS MÉDICAS</div>
+        <div class="subtitle">Sistema Médico HealthLife</div>
+        <div class="meta">
+            Generado: {{ fecha_actual|default:"Hoy" }} | Total de consultas: {{ consultas|length }}
+        </div>
+    </div>
+
+    <div class="summary">
+        <h3>📊 Resumen de Consultas</h3>
+        <div class="summary-grid">
+            <div class="summary-row">
+                <div class="summary-cell">
+                    <span class="summary-label">Total Consultas:</span><br>
+                    {{ consultas|length }}
+                </div>
+                <div class="summary-cell">
+                    <span class="summary-label">Completadas:</span><br>
+                    {% for c in consultas %}{% if c.estado == 'Completada' %}{{ forloop.counter }}{% endif %}{% endfor %}
+                </div>
+                <div class="summary-cell">
+                    <span class="summary-label">Pendientes:</span><br>
+                    {% for c in consultas %}{% if c.estado == 'Pendiente' %}{{ forloop.counter }}{% endif %}{% endfor %}
+                </div>
+                <div class="summary-cell">
+                    <span class="summary-label">Canceladas:</span><br>
+                    {% for c in consultas %}{% if c.estado == 'Cancelada' %}{{ forloop.counter }}{% endif %}{% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table">
         <thead>
             <tr>
                 <th>#</th>
                 <th>Paciente</th>
+                <th>Documento</th>
+                <th>Edad</th>
                 <th>Motivo</th>
                 <th>Diagnóstico</th>
                 <th>Tratamiento</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Signos Vitales</th>
+                <th>IMC</th>
                 <th>Fecha</th>
                 <th>Doctor</th>
+                <th>Duración</th>
+                <th>Costo</th>
             </tr>
         </thead>
         <tbody>
             {% for consulta in consultas %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ consulta.paciente_nombre }}</td>
-                <td>{{ consulta.motivo }}</td>
-                <td>{{ consulta.diagnostico }}</td>
-                <td>{{ consulta.tratamiento }}</td>
+                <td>{{ consulta.paciente.nombre_completo }}</td>
+                <td>{{ consulta.paciente.documento_identificacion|default:"N/A" }}</td>
+                <td>{{ consulta.paciente.edad }} años</td>
+                <td>{{ consulta.motivo|truncatechars:30 }}</td>
+                <td>{{ consulta.diagnostico|truncatechars:30 }}</td>
+                <td>{{ consulta.tratamiento|truncatechars:30 }}</td>
+                <td>{{ consulta.tipo_consulta }}</td>
+                <td class="status-{{ consulta.estado|lower }}">
+                    {{ consulta.estado }}
+                </td>
+                <td>
+                    {% if consulta.presion_arterial %}PA: {{ consulta.presion_arterial }}<br>{% endif %}
+                    {% if consulta.temperatura %}Temp: {{ consulta.temperatura }}°C<br>{% endif %}
+                    {% if consulta.frecuencia_cardiaca %}FC: {{ consulta.frecuencia_cardiaca }} lpm{% endif %}
+                    {% if not consulta.presion_arterial and not consulta.temperatura and not consulta.frecuencia_cardiaca %}
+                        No registrados
+                    {% endif %}
+                </td>
+                <td>{{ consulta.calcular_imc|default:"N/A" }}</td>
                 <td>{{ consulta.fecha|date:"d/m/Y H:i" }}</td>
                 <td>{{ consulta.doctor.get_full_name|default:consulta.doctor.username }}</td>
+                <td>{{ consulta.duracion_consulta|default:"N/A" }} min</td>
+                <td>Q{{ consulta.costo_consulta|default:"0.00" }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <div class="footer">
+        <p>Este reporte fue generado automáticamente por el Sistema Médico HealthLife</p>
+        <p>Para consultas técnicas, contacte al administrador del sistema</p>
+        <p><strong>Confidencial - Uso interno únicamente</strong></p>
+    </div>
 </body>
 </html>

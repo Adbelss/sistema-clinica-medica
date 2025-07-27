@@ -8,3 +8,15 @@ __pycache__/
 .vscode/
 *.log
 .env
+
+# Railway
+.railway/
+
+# Static files
+staticfiles/
+
+# Media files
+media/
+
+# Database
+db.sqlite3

@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+
+{% block title %}Horarios de {{ doctor.nombre_completo }} | HealthLife{% endblock %}
+
+{% block content %}
+<style>
+/* Variables CSS para el sistema médico */
+:root {
+    --primary-blue: #2563eb;
+    --secondary-blue: #1e40af;
+    --accent-blue: #3b82f6;
+    --medical-green: #10b981;
+    --medical-yellow: #f59e0b;
+    --medical-red: #ef4444;
+    --medical-gray: #6b7280;
+    --light-gray: #f3f4f6;
+    --white: #ffffff;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --border-radius: 12px;
+    --border-radius-small: 8px;
+    --transition: all 0.3s ease;
+}
+
+.doctor-info {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.doctor-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.doctor-avatar {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.doctor-details h4 {
+    margin: 0;
+    color: var(--primary-blue);
+}
+
+.doctor-details p {
+    margin: 0;
+    color: var(--medical-gray);
+}
+
+.schedule-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--light-gray);
+}
+
+.schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1rem;
+}
+
+.day-schedule {
+    border: 2px solid var(--light-gray);
+    border-radius: var(--border-radius-small);
+    padding: 1rem;
+    min-height: 150px;
+}
+
+.day-schedule.available {
+    border-color: var(--medical-green);
+    background: #f0fdf4;
+}
+
+.day-schedule.unavailable {
+    border-color: var(--medical-red);
+    background: #fef2f2;
+}
+
+.day-header {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.day-name {
+    color: var(--primary-blue);
+    font-size: 0.875rem;
+}
+
+.day-number {
+    color: var(--medical-gray);
+    font-size: 0.75rem;
+}
+
+.time-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.time-slot {
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.time-slot.available {
+    background: var(--medical-green);
+    color: var(--white);
+}
+
+.time-slot.unavailable {
+    background: var(--medical-red);
+    color: var(--white);
+}
+
+.time-slot:hover {
+    opacity: 0.8;
+}
+
+.add-schedule-form {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--medical-gray);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control {
+    border: 2px solid var(--light-gray);
+    border-radius: var(--border-radius-small);
+    padding: 0.75rem;
+    transition: var(--transition);
+    width: 100%;
+}
+
+.form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    outline: none;
+}
+
+.btn {
+    border-radius: var(--border-radius-small);
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: var(--white);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: var(--secondary-blue);
+    color: var(--white);
+}
+
+.btn-success {
+    background: var(--medical-green);
+    color: var(--white);
+    border: none;
+}
+
+.btn-danger {
+    background: var(--medical-red);
+    color: var(--white);
+    border: none;
+}
+
+.btn-secondary {
+    background: var(--medical-gray);
+    color: var(--white);
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.alert {
+    border-radius: var(--border-radius-small);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background: #d1fae5;
+    border: 1px solid var(--medical-green);
+    color: #065f46;
+}
+
+.alert-danger {
+    background: #fee2e2;
+    border: 1px solid var(--medical-red);
+    color: #991b1b;
+}
+
+.quick-actions {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.quick-actions h5 {
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+}
+
+.quick-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.quick-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--light-gray);
+    border-radius: var(--border-radius-small);
+    background: var(--white);
+    color: var(--medical-gray);
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 0.875rem;
+}
+
+.quick-btn:hover {
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+    background: var(--light-gray);
+}
+</style>
+
+<div class="container-fluid">
+    <!-- Header de la página -->
+    <div class="page-header">
+        <h2><i class="bi bi-clock me-3"></i>Horarios del Doctor</h2>
+        <p>Gestiona los horarios de atención de {{ doctor.nombre_completo }}.</p>
+    </div>
+
+    <!-- Información del doctor -->
+    <div class="doctor-info">
+        <div class="doctor-header">
+            <div class="doctor-avatar">
+                {{ doctor.nombre_completo|first|upper }}
+            </div>
+            <div class="doctor-details">
+                <h4>{{ doctor.nombre_completo }}</h4>
+                <p>{{ doctor.especialidad }} - {{ doctor.numero_colegio }}</p>
+                <p><i class="bi bi-telephone me-1"></i>{{ doctor.telefono }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes de alerta -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Acciones rápidas -->
+    <div class="quick-actions">
+        <h5><i class="bi bi-lightning me-2"></i>Acciones Rápidas</h5>
+        <div class="quick-buttons">
+            <a href="#" onclick="setStandardSchedule()" class="quick-btn">
+                <i class="bi bi-calendar-check me-1"></i>Horario Estándar
+            </a>
+            <a href="#" onclick="clearAllSchedules()" class="quick-btn">
+                <i class="bi bi-calendar-x me-1"></i>Limpiar Todo
+            </a>
+            <a href="#" onclick="copyFromWeek()" class="quick-btn">
+                <i class="bi bi-calendar-plus me-1"></i>Copiar de Semana
+            </a>
+            <a href="{% url 'nueva_cita' %}?doctor={{ doctor.id }}" class="quick-btn">
+                <i class="bi bi-plus-circle me-1"></i>Nueva Cita
+            </a>
+        </div>
+    </div>
+
+    <!-- Formulario para agregar horario -->
+    <div class="add-schedule-form">
+        <h5><i class="bi bi-plus-circle me-2"></i>Agregar Horario</h5>
+        <form method="post" id="scheduleForm">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="{{ form.dia_semana.id_for_label }}" class="form-label">Día de la Semana</label>
+                        {{ form.dia_semana }}
+                        {% if form.dia_semana.errors %}
+                            <div class="text-danger small">{{ form.dia_semana.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="{{ form.hora_inicio.id_for_label }}" class="form-label">Hora de Inicio</label>
+                        {{ form.hora_inicio }}
+                        {% if form.hora_inicio.errors %}
+                            <div class="text-danger small">{{ form.hora_inicio.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="{{ form.hora_fin.id_for_label }}" class="form-label">Hora de Fin</label>
+                        {{ form.hora_fin }}
+                        {% if form.hora_fin.errors %}
+                            <div class="text-danger small">{{ form.hora_fin.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-plus-circle me-2"></i>Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Horarios actuales -->
+    <div class="schedule-container">
+        <div class="schedule-header">
+            <h5><i class="bi bi-calendar-week me-2"></i>Horarios Actuales</h5>
+            <div>
+                <a href="{% url 'gestion_usuarios' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Volver
+                </a>
+            </div>
+        </div>
+
+        <div class="schedule-grid">
+            {% for day in dias_semana %}
+            <div class="day-schedule {% if day.horarios %}available{% else %}unavailable{% endif %}">
+                <div class="day-header">
+                    <div class="day-name">{{ day.nombre }}</div>
+                    <div class="day-number">{{ day.numero }}</div>
+                </div>
+                
+                <div class="time-slots">
+                    {% for horario in day.horarios %}
+                    <div class="time-slot available" 
+                         onclick="deleteSchedule({{ horario.id }})"
+                         title="Hacer clic para eliminar">
+                        {{ horario.hora_inicio|time:'H:i' }} - {{ horario.hora_fin|time:'H:i' }}
+                    </div>
+                    {% empty %}
+                    <div class="text-muted text-center small">
+                        <i class="bi bi-calendar-x"></i>
+                        <br>Sin horarios
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Estilizar los campos del formulario
+    const formControls = document.querySelectorAll('.form-control, select');
+    formControls.forEach(control => {
+        control.classList.add('form-control');
+    });
+});
+
+function deleteSchedule(scheduleId) {
+    if (confirm('¿Estás seguro de que quieres eliminar este horario?')) {
+        fetch(`/agenda/horarios/${scheduleId}/eliminar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error al eliminar el horario');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar el horario');
+        });
+    }
+}
+
+function setStandardSchedule() {
+    if (confirm('¿Quieres establecer el horario estándar (Lunes a Viernes, 8:00-17:00)?')) {
+        // Implementar lógica para establecer horario estándar
+        alert('Función en desarrollo');
+    }
+}
+
+function clearAllSchedules() {
+    if (confirm('¿Estás seguro de que quieres eliminar todos los horarios?')) {
+        // Implementar lógica para limpiar todos los horarios
+        alert('Función en desarrollo');
+    }
+}
+
+function copyFromWeek() {
+    // Implementar lógica para copiar horarios de una semana a otra
+    alert('Función en desarrollo');
+}
+</script>
+
+<!-- CSRF Token para las peticiones AJAX -->
+{% csrf_token %}
+{% endblock %} 

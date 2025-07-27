@@ -1,0 +1,549 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Exámenes Médicos - {{ paciente.nombre_completo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .examenes-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+    
+    .examenes-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .examenes-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .examenes-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 300;
+    }
+    
+    .examenes-content {
+        padding: 30px;
+    }
+    
+    .form-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    .form-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-title i {
+        color: #667eea;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .examenes-list {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    .examen-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .examen-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+    
+    .examen-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+    
+    .examen-title {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+    }
+    
+    .examen-tipo {
+        color: #666;
+        font-size: 0.9rem;
+        font-style: italic;
+    }
+    
+    .examen-status {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-solicitado { background: #fff3cd; color: #856404; }
+    .status-en_proceso { background: #d1ecf1; color: #0c5460; }
+    .status-completado { background: #d4edda; color: #155724; }
+    .status-cancelado { background: #f8d7da; color: #721c24; }
+    .status-pendiente { background: #e2e3e5; color: #383d41; }
+    
+    .examen-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .detail-label {
+        font-size: 0.8rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 5px;
+    }
+    
+    .detail-value {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .examen-dates {
+        display: flex;
+        gap: 20px;
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .examen-resultado {
+        background: #fff;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        border-left: 3px solid #667eea;
+    }
+    
+    .resultado-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .resultado-content {
+        color: #555;
+        line-height: 1.6;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 15px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        padding: 10px 20px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-primary-action {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+    
+    .btn-secondary-action {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row, .examen-details {
+            grid-template-columns: 1fr;
+        }
+        
+        .examenes-header h1 {
+            font-size: 2rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="examenes-container">
+    <div class="examenes-card">
+        <!-- Header -->
+        <div class="examenes-header">
+            <h1><i class="fas fa-flask"></i> Exámenes Médicos</h1>
+            <p>{{ paciente.nombre_completo }} | {{ paciente.edad }} años</p>
+        </div>
+        
+        <div class="examenes-content">
+            <!-- Estadísticas -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ examenes.count }}</div>
+                    <div class="stat-label">Total Exámenes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ examenes|dictsort:"estado"|length }}</div>
+                    <div class="stat-label">Solicitados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ examenes|dictsort:"estado"|length }}</div>
+                    <div class="stat-label">Completados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ examenes|dictsort:"estado"|length }}</div>
+                    <div class="stat-label">Pendientes</div>
+                </div>
+            </div>
+            
+            <!-- Formulario para solicitar examen -->
+            <div class="form-section">
+                <div class="form-title">
+                    <i class="fas fa-plus-circle"></i>
+                    Solicitar Nuevo Examen
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tipo_examen">Tipo de Examen *</label>
+                            <select name="tipo_examen" id="tipo_examen" class="form-control" required>
+                                <option value="">Selecciona el tipo</option>
+                                <option value="laboratorio">Laboratorio</option>
+                                <option value="imagen">Imagenología</option>
+                                <option value="cardiovascular">Cardiovascular</option>
+                                <option value="neurologico">Neurológico</option>
+                                <option value="respiratorio">Respiratorio</option>
+                                <option value="gastrointestinal">Gastrointestinal</option>
+                                <option value="endocrino">Endocrino</option>
+                                <option value="ginecologico">Ginecológico</option>
+                                <option value="urologico">Urológico</option>
+                                <option value="dermatologico">Dermatológico</option>
+                                <option value="oftalmologico">Oftalmológico</option>
+                                <option value="otorrino">Otorrinolaringológico</option>
+                                <option value="ortopedico">Ortopédico</option>
+                                <option value="psicologico">Psicológico</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="nombre_examen">Nombre del Examen *</label>
+                            <input type="text" name="nombre_examen" id="nombre_examen" 
+                                   class="form-control" placeholder="Ej: Hemograma completo, Rayos X..." required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <textarea name="descripcion" id="descripcion" class="form-control" rows="3" 
+                                  placeholder="Describe el examen, indicaciones específicas..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="laboratorio">Laboratorio/Centro</label>
+                            <input type="text" name="laboratorio" id="laboratorio" 
+                                   class="form-control" placeholder="Nombre del laboratorio o centro médico">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="costo">Costo Estimado</label>
+                            <input type="number" name="costo" id="costo" 
+                                   class="form-control" placeholder="0.00" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-save"></i> Solicitar Examen
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Lista de exámenes -->
+            <div class="examenes-list">
+                <div class="form-title">
+                    <i class="fas fa-list"></i>
+                    Exámenes Registrados ({{ examenes.count }})
+                </div>
+                
+                {% if examenes %}
+                    {% for examen in examenes %}
+                    <div class="examen-item">
+                        <div class="examen-header">
+                            <div>
+                                <div class="examen-title">{{ examen.nombre_examen }}</div>
+                                <div class="examen-tipo">{{ examen.get_tipo_examen_display }}</div>
+                            </div>
+                            <div class="examen-status">
+                                <span class="status-badge status-{{ examen.estado }}">
+                                    {{ examen.get_estado_display }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="examen-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Solicitado</div>
+                                <div class="detail-value">{{ examen.fecha_solicitud|date:"d/m/Y" }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Laboratorio</div>
+                                <div class="detail-value">{{ examen.laboratorio|default:"No especificado" }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="examen-dates">
+                            {% if examen.fecha_realizacion %}
+                            <div><strong>Realizado:</strong> {{ examen.fecha_realizacion|date:"d/m/Y" }}</div>
+                            {% endif %}
+                            {% if examen.fecha_resultado %}
+                            <div><strong>Resultado:</strong> {{ examen.fecha_resultado|date:"d/m/Y" }}</div>
+                            {% endif %}
+                            {% if examen.costo %}
+                            <div><strong>Costo:</strong> Q{{ examen.costo }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if examen.descripcion %}
+                        <div class="examen-resultado">
+                            <div class="resultado-title">Descripción:</div>
+                            <div class="resultado-content">{{ examen.descripcion }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if examen.resultado %}
+                        <div class="examen-resultado">
+                            <div class="resultado-title">Resultado:</div>
+                            <div class="resultado-content">{{ examen.resultado }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if examen.interpretacion %}
+                        <div class="examen-resultado">
+                            <div class="resultado-title">Interpretación:</div>
+                            <div class="resultado-content">{{ examen.interpretacion }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if examen.archivo_resultado %}
+                        <div class="examen-resultado">
+                            <div class="resultado-title">Archivo:</div>
+                            <div class="resultado-content">
+                                <a href="{{ examen.archivo_resultado.url }}" target="_blank" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-download"></i> Descargar Resultado
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-flask"></i>
+                        <p>No hay exámenes médicos registrados</p>
+                        <p>Solicita el primer examen usando el formulario de arriba</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="action-buttons">
+                <a href="{% url 'historial_medico' paciente.id %}" class="btn-action btn-secondary-action">
+                    <i class="fas fa-arrow-left"></i> Volver al Historial
+                </a>
+                <a href="{% url 'listar_pacientes' %}" class="btn-action btn-primary-action">
+                    <i class="fas fa-users"></i> Ver Todos los Pacientes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validación del formulario
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const tipoSelect = document.getElementById('tipo_examen');
+        const nombreInput = document.getElementById('nombre_examen');
+        
+        form.addEventListener('submit', function(e) {
+            if (!tipoSelect.value) {
+                e.preventDefault();
+                alert('Por favor selecciona el tipo de examen');
+                tipoSelect.focus();
+                return;
+            }
+            
+            if (!nombreInput.value.trim()) {
+                e.preventDefault();
+                alert('Por favor ingresa el nombre del examen');
+                nombreInput.focus();
+                return;
+            }
+        });
+        
+        // Animaciones suaves
+        const items = document.querySelectorAll('.examen-item');
+        items.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                item.style.transition = 'all 0.5s ease';
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %} 

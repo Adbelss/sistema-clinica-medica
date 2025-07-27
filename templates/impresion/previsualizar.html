@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Previsualizar Documento - {{ documento.titulo }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0">
+                                <i class="fas fa-eye me-2"></i>
+                                Previsualizar Documento
+                            </h2>
+                            <p class="mb-0">{{ documento.titulo }} - {{ documento.numero_documento }}</p>
+                        </div>
+                        <div class="text-end">
+                            <h5 class="mb-0">{{ documento.get_tipo_documento_display }}</h5>
+                            <small>{{ documento.get_estado_display }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones del documento -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-cog me-2"></i>Acciones del Documento
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'impresion:descargar_documento_pdf' documento.id %}" 
+                               class="btn btn-success btn-block">
+                                <i class="fas fa-download me-2"></i>
+                                Descargar PDF
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'impresion:imprimir_documento' documento.id %}" 
+                               class="btn btn-info btn-block" target="_blank">
+                                <i class="fas fa-print me-2"></i>
+                                Imprimir PDF
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'impresion:listar_documentos' %}" 
+                               class="btn btn-secondary btn-block">
+                                <i class="fas fa-list me-2"></i>
+                                Ver Todos
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'impresion:dashboard' %}" 
+                               class="btn btn-warning btn-block">
+                                <i class="fas fa-home me-2"></i>
+                                Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del documento -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle me-2"></i>Información del Documento
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Número:</strong></td>
+                            <td>{{ documento.numero_documento }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tipo:</strong></td>
+                            <td>{{ documento.get_tipo_documento_display }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Estado:</strong></td>
+                            <td>
+                                {% if documento.estado == 'finalizado' %}
+                                    <span class="badge badge-success">Finalizado</span>
+                                {% elif documento.estado == 'borrador' %}
+                                    <span class="badge badge-warning">Borrador</span>
+                                {% elif documento.estado == 'impreso' %}
+                                    <span class="badge badge-info">Impreso</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Archivado</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Paciente:</strong></td>
+                            <td>{{ documento.paciente.nombre_completo }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Doctor:</strong></td>
+                            <td>{{ documento.doctor.get_full_name }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Creado:</strong></td>
+                            <td>{{ documento.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        {% if documento.fecha_modificacion %}
+                        <tr>
+                            <td><strong>Modificado:</strong></td>
+                            <td>{{ documento.fecha_modificacion|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Previsualización del documento -->
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-file-medical me-2"></i>Previsualización del Documento
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="documento-preview" style="border: 1px solid #ddd; padding: 20px; background: white; min-height: 600px;">
+                        {{ documento.contenido_html|safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuración de impresión -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-cog me-2"></i>Configuración de Impresión
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>Tamaño de Papel:</strong>
+                            <p>{{ config.tamano_papel_default|default:"A4" }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Orientación:</strong>
+                            <p>{{ config.orientacion_default|default:"Vertical" }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Márgenes:</strong>
+                            <p>{{ config.margenes_default|default:"Normal" }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Código QR:</strong>
+                            <p>{{ config.incluir_codigo_qr|yesno:"Sí,No" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.documento-preview {
+    font-family: 'Times New Roman', serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #1a1a1a;
+}
+
+.documento-preview h1, .documento-preview h2, .documento-preview h3 {
+    color: #2c3e50;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.documento-preview table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+
+.documento-preview table, .documento-preview th, .documento-preview td {
+    border: 1px solid #ddd;
+}
+
+.documento-preview th, .documento-preview td {
+    padding: 8px;
+    text-align: left;
+}
+
+.documento-preview th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Animaciones suaves
+    $('.card').hover(
+        function() { $(this).addClass('shadow-lg'); },
+        function() { $(this).removeClass('shadow-lg'); }
+    );
+    
+    // Tooltips
+    $('[title]').tooltip();
+    
+    // Confirmación para descarga
+    $('a[href*="descargar"]').click(function() {
+        return confirm('¿Desea descargar el documento PDF?');
+    });
+});
+</script>
+{% endblock %} 

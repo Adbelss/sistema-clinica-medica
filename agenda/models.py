@@ -5,66 +5,6 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 import datetime
 
-class Doctor(models.Model):
-    """Modelo para los doctores del sistema"""
-    ESPECIALIDADES = [
-        ('medicina_general', 'Medicina General'),
-        ('cardiologia', 'Cardiología'),
-        ('dermatologia', 'Dermatología'),
-        ('ginecologia', 'Ginecología'),
-        ('pediatria', 'Pediatría'),
-        ('ortopedia', 'Ortopedia'),
-        ('neurologia', 'Neurología'),
-        ('psiquiatria', 'Psiquiatría'),
-        ('oftalmologia', 'Oftalmología'),
-        ('otorrinolaringologia', 'Otorrinolaringología'),
-        ('urologia', 'Urología'),
-        ('gastroenterologia', 'Gastroenterología'),
-        ('endocrinologia', 'Endocrinología'),
-        ('nefrologia', 'Nefrología'),
-        ('hematologia', 'Hematología'),
-        ('oncologia', 'Oncología'),
-        ('reumatologia', 'Reumatología'),
-        ('neumologia', 'Neumología'),
-        ('traumatologia', 'Traumatología'),
-        ('cirugia_general', 'Cirugía General'),
-        ('otro', 'Otra'),
-    ]
-    
-    ESTADOS = [
-        ('activo', 'Activo'),
-        ('inactivo', 'Inactivo'),
-        ('vacaciones', 'Vacaciones'),
-        ('licencia', 'Licencia'),
-    ]
-    
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='doctor_profile')
-    especialidad = models.CharField(max_length=50, choices=ESPECIALIDADES, default='medicina_general')
-    numero_colegio = models.CharField(max_length=20, unique=True, verbose_name="Número de Colegio Médico")
-    telefono = models.CharField(max_length=15, blank=True, null=True)
-    direccion_consultorio = models.TextField(blank=True, null=True)
-    estado = models.CharField(max_length=20, choices=ESTADOS, default='activo')
-    foto = models.ImageField(upload_to='doctores/', blank=True, null=True)
-    biografia = models.TextField(blank=True, null=True)
-    fecha_registro = models.DateTimeField(auto_now_add=True)
-    actualizado = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        verbose_name = "Doctor"
-        verbose_name_plural = "Doctores"
-        ordering = ['user__first_name', 'user__last_name']
-    
-    def __str__(self):
-        return f"Dr. {self.user.get_full_name()} - {self.get_especialidad_display()}"
-    
-    @property
-    def nombre_completo(self):
-        return self.user.get_full_name()
-    
-    @property
-    def email(self):
-        return self.user.email
-
 class HorarioDoctor(models.Model):
     """Horarios de trabajo de cada doctor"""
     DIAS_SEMANA = [
@@ -77,7 +17,7 @@ class HorarioDoctor(models.Model):
         (6, 'Domingo'),
     ]
     
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='horarios')
+    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='horarios')
     dia_semana = models.IntegerField(choices=DIAS_SEMANA)
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
@@ -121,7 +61,7 @@ class Cita(models.Model):
     ]
     
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='citas')
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='citas')
+    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='citas')
     fecha = models.DateField()
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
@@ -189,7 +129,7 @@ class Disponibilidad(models.Model):
         ('otro', 'Otro'),
     ]
     
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='disponibilidades')
+    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='disponibilidades')
     tipo = models.CharField(max_length=20, choices=TIPOS)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()

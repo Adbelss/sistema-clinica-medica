@@ -1,13 +1,14 @@
 from pathlib import Path
 from decouple import config  # Agregado para manejar variables de entorno
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = config('SECRET_KEY', default='django-insecure--guqrkq$ml1od6iiedk(ro_nrh*x7l=)2x=sbz!ge59w=n&lqf')
-DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = []
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', '.railway.app', '.up.railway.app']
 
 # Application definition
 INSTALLED_APPS = [
@@ -21,11 +22,13 @@ INSTALLED_APPS = [
     'consultas',
     'pacientes',
     'agenda',  # nueva app de agenda
+    'impresion',  # módulo de impresión médica
     
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Para servir archivos estáticos
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -53,9 +56,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sistem.wsgi.application'
 
-# Base de datos: SQLite
+# Base de datos: PostgreSQL para producción, SQLite para desarrollo
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME', default='railway'),
+        'USER': config('DB_USER', default='postgres'),
+        'PASSWORD': config('DB_PASSWORD', default=''),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='5432'),
+    } if config('DATABASE_URL', default='') else {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
@@ -86,6 +96,10 @@ USE_TZ = True
 # Archivos estáticos
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [ BASE_DIR / "static" ]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Configuración de WhiteNoise para archivos estáticos
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Clave primaria por defecto

@@ -40,4 +40,7 @@ urlpatterns = [
     
     # Agenda
     path('agenda/', include('agenda.urls')),
+    
+    # Impresión médica
+    path('impresion/', include('impresion.urls')),
 ]

@@ -197,6 +197,69 @@ body {
     text-align: center;
 }
 
+/* Submenu para Historial Médico */
+.submenu-arrow {
+    margin-left: auto;
+    transition: var(--transition);
+    font-size: 0.8rem;
+}
+
+.nav-item.open .submenu-arrow {
+    transform: rotate(180deg);
+}
+
+.submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius-small);
+    margin: 0 10px;
+}
+
+.nav-item.open .submenu {
+    max-height: 200px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.submenu li {
+    list-style: none;
+}
+
+.submenu-link {
+    display: flex;
+    align-items: center;
+    padding: 8px 15px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    border-radius: var(--border-radius-small);
+    margin: 2px 5px;
+}
+
+.submenu-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    text-decoration: none;
+}
+
+.submenu-link i {
+    font-size: 0.9rem;
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+.sidebar.collapsed .submenu {
+    display: none;
+}
+
+.sidebar.collapsed .submenu-arrow {
+    display: none;
+}
+
 .sidebar.collapsed .nav-link span {
     display: none;
 }

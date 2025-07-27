@@ -1,41 +1,18 @@
 from django.contrib import admin
-from .models import Doctor, HorarioDoctor, Cita, Disponibilidad, Recordatorio
-
-@admin.register(Doctor)
-class DoctorAdmin(admin.ModelAdmin):
-    list_display = ['nombre_completo', 'especialidad', 'numero_colegio', 'estado', 'telefono']
-    list_filter = ['especialidad', 'estado', 'fecha_registro']
-    search_fields = ['user__first_name', 'user__last_name', 'user__email', 'numero_colegio']
-    readonly_fields = ['fecha_registro', 'actualizado']
-    
-    fieldsets = (
-        ('Información Personal', {
-            'fields': ('user', 'especialidad', 'numero_colegio', 'telefono')
-        }),
-        ('Información Profesional', {
-            'fields': ('direccion_consultorio', 'estado', 'biografia')
-        }),
-        ('Archivos', {
-            'fields': ('foto',)
-        }),
-        ('Fechas', {
-            'fields': ('fecha_registro', 'actualizado'),
-            'classes': ('collapse',)
-        }),
-    )
+from .models import HorarioDoctor, Cita, Disponibilidad, Recordatorio
 
 @admin.register(HorarioDoctor)
 class HorarioDoctorAdmin(admin.ModelAdmin):
     list_display = ['doctor', 'dia_semana', 'hora_inicio', 'hora_fin', 'duracion_cita', 'activo']
     list_filter = ['dia_semana', 'activo', 'doctor__especialidad']
-    search_fields = ['doctor__user__first_name', 'doctor__user__last_name']
+    search_fields = ['doctor__first_name', 'doctor__last_name']
     ordering = ['doctor', 'dia_semana', 'hora_inicio']
 
 @admin.register(Cita)
 class CitaAdmin(admin.ModelAdmin):
     list_display = ['paciente', 'doctor', 'fecha', 'hora_inicio', 'hora_fin', 'tipo_cita', 'estado']
     list_filter = ['estado', 'tipo_cita', 'fecha', 'doctor__especialidad']
-    search_fields = ['paciente__primer_nombre', 'paciente__primer_apellido', 'doctor__user__first_name']
+    search_fields = ['paciente__primer_nombre', 'paciente__primer_apellido', 'doctor__first_name']
     readonly_fields = ['fecha_creacion', 'fecha_actualizacion', 'duracion', 'es_hoy', 'es_pasada']
     date_hierarchy = 'fecha'
     
@@ -63,13 +40,13 @@ class CitaAdmin(admin.ModelAdmin):
 class DisponibilidadAdmin(admin.ModelAdmin):
     list_display = ['doctor', 'tipo', 'fecha_inicio', 'fecha_fin', 'activo']
     list_filter = ['tipo', 'activo', 'fecha_inicio', 'doctor__especialidad']
-    search_fields = ['doctor__user__first_name', 'doctor__user__last_name', 'motivo']
+    search_fields = ['doctor__first_name', 'doctor__last_name', 'motivo']
     date_hierarchy = 'fecha_inicio'
 
 @admin.register(Recordatorio)
 class RecordatorioAdmin(admin.ModelAdmin):
     list_display = ['cita', 'tipo', 'enviado', 'fecha_envio', 'fecha_creacion']
     list_filter = ['tipo', 'enviado', 'fecha_creacion']
-    search_fields = ['cita__paciente__primer_nombre', 'cita__doctor__user__first_name']
+    search_fields = ['cita__paciente__primer_nombre', 'cita__doctor__first_name']
     readonly_fields = ['fecha_creacion']
     date_hierarchy = 'fecha_creacion'

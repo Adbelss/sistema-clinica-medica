@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Usuario | HealthLife{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="alert alert-warning">
+                        <h5><i class="bi bi-exclamation-triangle"></i> ¡Atención!</h5>
+                        <p>Estás a punto de eliminar al usuario:</p>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">Información del Usuario</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Usuario:</strong> {{ usuario.username }}</li>
+                                <li><strong>Nombre:</strong> {{ usuario.nombre_completo }}</li>
+                                <li><strong>Email:</strong> {{ usuario.email }}</li>
+                                <li><strong>Rol:</strong> {{ usuario.get_rol_display }}</li>
+                                {% if usuario.es_doctor %}
+                                    <li><strong>Especialidad:</strong> {{ usuario.especialidad|default:"No especificada" }}</li>
+                                    <li><strong>Estado:</strong> {{ usuario.get_estado_display }}</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-danger">
+                        <h6><i class="bi bi-info-circle"></i> Consecuencias de la eliminación:</h6>
+                        <ul class="mb-0">
+                            <li>Se eliminarán todos los datos asociados al usuario</li>
+                            {% if usuario.es_doctor %}
+                                <li>Se eliminarán todas las citas asociadas al doctor</li>
+                                <li>Se eliminarán todos los horarios del doctor</li>
+                                <li>Se eliminarán todas las disponibilidades del doctor</li>
+                            {% endif %}
+                            <li>Esta acción no se puede deshacer</li>
+                        </ul>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'gestion_usuarios' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Confirmar Eliminación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

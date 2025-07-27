@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pacientes Recientes - HealthLife{% endblock %}
+
+{% block extra_css %}
+<style>
+    .recientes-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+    
+    .recientes-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .recientes-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .recientes-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 300;
+    }
+    
+    .recientes-content {
+        padding: 30px;
+    }
+    
+    .section-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid #4facfe;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .section-title i {
+        color: #4facfe;
+        font-size: 1.5rem;
+    }
+    
+    .paciente-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-left: 3px solid #4facfe;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .paciente-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+    
+    .paciente-info {
+        flex: 1;
+    }
+    
+    .paciente-nombre {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+    
+    .paciente-meta {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+    
+    .paciente-stats {
+        display: flex;
+        gap: 15px;
+        font-size: 0.85rem;
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #666;
+    }
+    
+    .stat-badge {
+        background: #4facfe;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .paciente-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .btn-primary-action {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+    
+    .btn-secondary-action {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-success-action {
+        background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+        color: white;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 15px;
+    }
+    
+    .stats-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #4facfe;
+        margin-bottom: 10px;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+    
+    @media (max-width: 768px) {
+        .paciente-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .paciente-actions {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .recientes-header h1 {
+            font-size: 2rem;
+        }
+        
+        .stats-summary {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="recientes-container">
+    <div class="recientes-card">
+        <!-- Header -->
+        <div class="recientes-header">
+            <h1><i class="fas fa-clock-history"></i> Pacientes Recientes</h1>
+            <p>Actividad de los últimos 30 días</p>
+        </div>
+        
+        <div class="recientes-content">
+            <!-- Estadísticas Resumen -->
+            <div class="stats-summary">
+                <div class="stat-card">
+                    <div class="stat-number">{{ pacientes_recientes.count }}</div>
+                    <div class="stat-label">Con Consultas Recientes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ pacientes_con_examenes.count }}</div>
+                    <div class="stat-label">Con Exámenes Recientes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ pacientes_con_medicamentos.count }}</div>
+                    <div class="stat-label">Con Medicamentos Activos</div>
+                </div>
+            </div>
+            
+            <!-- Pacientes con Consultas Recientes -->
+            <div class="section-card">
+                <div class="section-title">
+                    <i class="fas fa-stethoscope"></i>
+                    Pacientes con Consultas Recientes
+                </div>
+                
+                {% if pacientes_recientes %}
+                    {% for paciente in pacientes_recientes %}
+                    <div class="paciente-item">
+                        <div class="paciente-info">
+                            <div class="paciente-nombre">{{ paciente.nombre_completo }}</div>
+                            <div class="paciente-meta">
+                                {{ paciente.edad }} años | {{ paciente.get_genero_display }} | 
+                                Última consulta: {{ paciente.ultima_consulta|date:"d/m/Y" }}
+                            </div>
+                            <div class="paciente-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <span>{{ paciente.consultas_recientes }} consultas recientes</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>{{ paciente.total_consultas }} total</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="paciente-actions">
+                            <a href="{% url 'historial_medico' paciente.id %}" class="btn-action btn-primary-action">
+                                <i class="fas fa-user-md"></i> Historial
+                            </a>
+                            <a href="{% url 'listar_pacientes' %}" class="btn-action btn-secondary-action">
+                                <i class="fas fa-eye"></i> Ver
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-stethoscope"></i>
+                        <p>No hay pacientes con consultas recientes</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Pacientes con Exámenes Recientes -->
+            <div class="section-card">
+                <div class="section-title">
+                    <i class="fas fa-flask"></i>
+                    Pacientes con Exámenes Recientes
+                </div>
+                
+                {% if pacientes_con_examenes %}
+                    {% for paciente in pacientes_con_examenes %}
+                    <div class="paciente-item">
+                        <div class="paciente-info">
+                            <div class="paciente-nombre">{{ paciente.nombre_completo }}</div>
+                            <div class="paciente-meta">
+                                {{ paciente.edad }} años | {{ paciente.get_genero_display }} | 
+                                Último examen: {{ paciente.ultimo_examen|date:"d/m/Y" }}
+                            </div>
+                            <div class="paciente-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-flask"></i>
+                                    <span>{{ paciente.examenes_recientes }} exámenes recientes</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>{{ paciente.total_examenes }} total</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="paciente-actions">
+                            <a href="{% url 'examenes_paciente' paciente.id %}" class="btn-action btn-success-action">
+                                <i class="fas fa-flask"></i> Exámenes
+                            </a>
+                            <a href="{% url 'historial_medico' paciente.id %}" class="btn-action btn-primary-action">
+                                <i class="fas fa-user-md"></i> Historial
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-flask"></i>
+                        <p>No hay pacientes con exámenes recientes</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Pacientes con Medicamentos Activos -->
+            <div class="section-card">
+                <div class="section-title">
+                    <i class="fas fa-pills"></i>
+                    Pacientes con Medicamentos Activos
+                </div>
+                
+                {% if pacientes_con_medicamentos %}
+                    {% for paciente in pacientes_con_medicamentos %}
+                    <div class="paciente-item">
+                        <div class="paciente-info">
+                            <div class="paciente-nombre">{{ paciente.nombre_completo }}</div>
+                            <div class="paciente-meta">
+                                {{ paciente.edad }} años | {{ paciente.get_genero_display }}
+                            </div>
+                            <div class="paciente-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-pills"></i>
+                                    <span>{{ paciente.medicamentos_activos }} medicamentos activos</span>
+                                </div>
+                                {% if paciente.tiene_alergias %}
+                                <div class="stat-item">
+                                    <span class="stat-badge">Alergias</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="paciente-actions">
+                            <a href="{% url 'medicamentos_paciente' paciente.id %}" class="btn-action btn-success-action">
+                                <i class="fas fa-pills"></i> Medicamentos
+                            </a>
+                            <a href="{% url 'historial_medico' paciente.id %}" class="btn-action btn-primary-action">
+                                <i class="fas fa-user-md"></i> Historial
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-pills"></i>
+                        <p>No hay pacientes con medicamentos activos</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="action-buttons">
+                <a href="{% url 'listar_pacientes' %}" class="btn-action btn-secondary-action">
+                    <i class="fas fa-arrow-left"></i> Volver a Pacientes
+                </a>
+                <a href="{% url 'dashboard' %}" class="btn-action btn-primary-action">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animaciones suaves al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        const items = document.querySelectorAll('.paciente-item, .stat-card');
+        items.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                item.style.transition = 'all 0.5s ease';
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %} 

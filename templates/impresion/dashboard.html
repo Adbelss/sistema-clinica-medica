@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard de Impresión - Sistema Médico{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Encabezado del dashboard -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0">
+                                <i class="fas fa-print me-2"></i>
+                                Sistema de Impresión Médica
+                            </h2>
+                            <p class="mb-0">Gestión profesional de documentos médicos</p>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="mb-0">{{ fecha_actual }}</h4>
+                            <small>Bienvenido, {{ request.user.get_full_name }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas principales -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Documentos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_documentos }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-file-medical fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Documentos Hoy
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ documentos_hoy }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pendientes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ documentos_pendientes }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Configuración
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-cogs fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bolt me-2"></i>Acciones Rápidas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'listar_consultas' %}" class="btn btn-primary btn-block">
+                                <i class="fas fa-stethoscope me-2"></i>
+                                Generar Consulta
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'listar_consultas' %}" class="btn btn-success btn-block">
+                                <i class="fas fa-prescription me-2"></i>
+                                Generar Receta
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'listar_pacientes' %}" class="btn btn-info btn-block">
+                                <i class="fas fa-user-md me-2"></i>
+                                Gestión Paciente
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'impresion:configuracion_impresion' %}" class="btn btn-warning btn-block">
+                                <i class="fas fa-cog me-2"></i>
+                                Configuración
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documentos recientes y estadísticas -->
+    <div class="row">
+        <!-- Documentos recientes -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-history me-2"></i>Documentos Recientes
+                    </h6>
+                    <a href="{% url 'impresion:listar_documentos' %}" class="btn btn-sm btn-primary">
+                        Ver Todos
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if documentos_recientes %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Documento</th>
+                                    <th>Paciente</th>
+                                    <th>Tipo</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for documento in documentos_recientes %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ documento.numero_documento }}</strong>
+                                    </td>
+                                    <td>{{ documento.paciente.nombre_completo }}</td>
+                                    <td>
+                                        <span class="badge badge-primary">
+                                            {{ documento.get_tipo_documento_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if documento.estado == 'finalizado' %}
+                                            <span class="badge badge-success">Finalizado</span>
+                                        {% elif documento.estado == 'borrador' %}
+                                            <span class="badge badge-warning">Borrador</span>
+                                        {% elif documento.estado == 'impreso' %}
+                                            <span class="badge badge-info">Impreso</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Archivado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ documento.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'impresion:previsualizar_documento' documento.id %}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'impresion:imprimir_documento' documento.id %}" 
+                                           class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-file-medical fa-3x text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">No hay documentos recientes</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas por tipo -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-pie me-2"></i>Documentos por Tipo
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if documentos_por_tipo %}
+                    <div class="chart-pie">
+                        {% for tipo in documentos_por_tipo %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <span class="badge badge-primary me-2">{{ tipo.total }}</span>
+                                {{ tipo.tipo_documento|title }}
+                            </div>
+                            <small class="text-muted">
+                                {{ tipo.total|floatformat:0 }}%
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-pie fa-3x text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">No hay estadísticas disponibles</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Información de la clínica -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-hospital me-2"></i>Información de la Clínica
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h6 class="font-weight-bold">{{ config.nombre_clinica }}</h6>
+                    <p class="small text-muted mb-2">{{ config.direccion_clinica }}</p>
+                    {% if config.telefono_clinica %}
+                    <p class="small mb-1">
+                        <i class="fas fa-phone me-1"></i>{{ config.telefono_clinica }}
+                    </p>
+                    {% endif %}
+                    {% if config.email_clinica %}
+                    <p class="small mb-1">
+                        <i class="fas fa-envelope me-1"></i>{{ config.email_clinica }}
+                    </p>
+                    {% endif %}
+                    {% if config.sitio_web_clinica %}
+                    <p class="small mb-0">
+                        <i class="fas fa-globe me-1"></i>{{ config.sitio_web_clinica }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de ayuda -->
+<div class="modal fade" id="ayudaModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-question-circle me-2"></i>Ayuda - Sistema de Impresión
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="font-weight-bold text-primary">Tipos de Documentos</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-stethoscope text-primary me-2"></i>Consulta Médica</li>
+                            <li><i class="fas fa-prescription text-success me-2"></i>Receta Médica</li>
+                            <li><i class="fas fa-user-md text-info me-2"></i>Gestión de Paciente</li>
+                            <li><i class="fas fa-certificate text-warning me-2"></i>Certificado Médico</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="font-weight-bold text-primary">Funciones Principales</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-eye text-info me-2"></i>Previsualizar</li>
+                            <li><i class="fas fa-print text-success me-2"></i>Imprimir PDF</li>
+                            <li><i class="fas fa-download text-primary me-2"></i>Descargar</li>
+                            <li><i class="fas fa-cog text-warning me-2"></i>Configurar</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Animaciones suaves
+    $('.card').hover(
+        function() { $(this).addClass('shadow-lg'); },
+        function() { $(this).removeClass('shadow-lg'); }
+    );
+    
+    // Tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+{% endblock %} 

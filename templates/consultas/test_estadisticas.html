@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Prueba de Estadísticas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Prueba de Estadísticas</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <h5>{{ mensaje }}</h5>
+                        <p><strong>Total de Consultas:</strong> {{ total_consultas }}</p>
+                        <p><strong>Fecha de Prueba:</strong> {{ fecha }}</p>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <a href="{% url 'estadisticas_consultas' %}" class="btn btn-primary">
+                            Ir a Estadísticas Completas
+                        </a>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            Volver al Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

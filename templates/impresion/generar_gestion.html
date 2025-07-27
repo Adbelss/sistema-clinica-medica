@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Generar Gestión de Paciente - {{ paciente.nombre_completo }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0">
+                                <i class="fas fa-user-md me-2"></i>
+                                Generar Gestión de Paciente
+                            </h2>
+                            <p class="mb-0">{{ paciente.nombre_completo }} - {{ paciente.documento_identificacion }}</p>
+                        </div>
+                        <div class="text-end">
+                            <h5 class="mb-0">{{ paciente.edad }} años</h5>
+                            <small>{{ paciente.get_genero_display }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del paciente -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-info-circle me-2"></i>Información del Paciente
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Nombre completo:</strong></td>
+                                    <td>{{ paciente.nombre_completo }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Documento:</strong></td>
+                                    <td>{{ paciente.documento_identificacion }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fecha de nacimiento:</strong></td>
+                                    <td>{{ paciente.fecha_nacimiento|date:"d/m/Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Edad:</strong></td>
+                                    <td>{{ paciente.edad }} años</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Género:</strong></td>
+                                    <td>{{ paciente.get_genero_display }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Teléfono:</strong></td>
+                                    <td>{{ paciente.telefono }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email:</strong></td>
+                                    <td>{{ paciente.correo|default:"No registrado" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Estado:</strong></td>
+                                    <td>{{ paciente.get_estado_display }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Grupo sanguíneo:</strong></td>
+                                    <td>{{ paciente.grupo_sanguineo|default:"No registrado" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Alergias:</strong></td>
+                                    <td>{{ paciente.alergias|default:"No registradas" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Dirección:</strong></td>
+                                    <td>{{ paciente.direccion }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ciudad:</strong></td>
+                                    <td>{{ paciente.ciudad }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial de consultas -->
+            <div class="card shadow mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-history me-2"></i>Historial de Consultas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if consultas %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Diagnóstico</th>
+                                    <th>Médico</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for consulta in consultas|slice:":10" %}
+                                <tr>
+                                    <td>{{ consulta.fecha|date:"d/m/Y" }}</td>
+                                    <td>{{ consulta.get_tipo_consulta_display }}</td>
+                                    <td>{{ consulta.diagnostico|truncatechars:50 }}</td>
+                                    <td>{{ consulta.doctor.get_full_name }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No hay consultas registradas para este paciente.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-md-4">
+            <!-- Acciones -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-cog me-2"></i>Acciones
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-info btn-block mb-3">
+                            <i class="fas fa-user-md me-2"></i>
+                            Generar Gestión de Paciente
+                        </button>
+                    </form>
+                    
+                    <a href="{% url 'listar_pacientes' %}" class="btn btn-secondary btn-block mb-3">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Volver al Listado
+                    </a>
+                </div>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-chart-bar me-2"></i>Estadísticas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <h4 class="text-primary">{{ consultas.count }}</h4>
+                            <small class="text-muted">Total Consultas</small>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h4 class="text-success">{{ consultas|slice:":1"|first.fecha|date:"d/m/Y"|default:"N/A" }}</h4>
+                            <small class="text-muted">Última Consulta</small>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h4 class="text-warning">{{ consultas|slice:":1"|first.get_tipo_consulta_display|default:"N/A" }}</h4>
+                            <small class="text-muted">Tipo Última</small>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h4 class="text-info">{{ paciente.edad }}</h4>
+                            <small class="text-muted">Edad</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información médica -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-heartbeat me-2"></i>Información Médica
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Alergias:</strong>
+                        <p class="small">{{ paciente.alergias|default:"No registradas" }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Grupo Sanguíneo:</strong>
+                        <p class="small">{{ paciente.grupo_sanguineo|default:"No registrado" }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Es Donador:</strong>
+                        <p class="small">{{ paciente.es_donador|yesno:"Sí,No" }}</p>
+                    </div>
+                    
+                    {% if paciente.contacto_emergencia %}
+                    <div class="mb-3">
+                        <strong>Contacto Emergencia:</strong>
+                        <p class="small">{{ paciente.contacto_emergencia }} ({{ paciente.telefono_emergencia }})</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,83 +1,27 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from .models import Doctor, HorarioDoctor, Cita, Disponibilidad
+from .models import HorarioDoctor, Cita, Disponibilidad
 from pacientes.models import Paciente
 from django.utils import timezone
 import datetime
 
 User = get_user_model()
 
-class DoctorForm(forms.ModelForm):
-    """Formulario para crear/editar doctores"""
-    first_name = forms.CharField(max_length=30, label="Nombre")
-    last_name = forms.CharField(max_length=30, label="Apellido")
-    email = forms.EmailField(label="Correo Electrónico")
-    username = forms.CharField(max_length=150, label="Nombre de Usuario")
-    password = forms.CharField(widget=forms.PasswordInput(), label="Contraseña", required=False)
-    
-    class Meta:
-        model = Doctor
-        fields = [
-            'first_name', 'last_name', 'email', 'username', 'password',
-            'especialidad', 'numero_colegio', 'telefono', 'direccion_consultorio',
-            'estado', 'foto', 'biografia'
-        ]
-        widgets = {
-            'biografia': forms.Textarea(attrs={'rows': 4}),
-            'direccion_consultorio': forms.Textarea(attrs={'rows': 3}),
-        }
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            # Si es una edición, cargar datos del usuario
-            self.fields['first_name'].initial = self.instance.user.first_name
-            self.fields['last_name'].initial = self.instance.user.last_name
-            self.fields['email'].initial = self.instance.user.email
-            self.fields['username'].initial = self.instance.user.username
-            self.fields['password'].required = False
-            self.fields['password'].help_text = "Dejar vacío para mantener la contraseña actual"
-    
-    def save(self, commit=True):
-        doctor = super().save(commit=False)
-        
-        if self.instance.pk:
-            # Actualizar usuario existente
-            user = self.instance.user
-            user.first_name = self.cleaned_data['first_name']
-            user.last_name = self.cleaned_data['last_name']
-            user.email = self.cleaned_data['email']
-            user.username = self.cleaned_data['username']
-            
-            if self.cleaned_data['password']:
-                user.set_password(self.cleaned_data['password'])
-            
-            user.save()
-        else:
-            # Crear nuevo usuario
-            user = User.objects.create_user(
-                username=self.cleaned_data['username'],
-                email=self.cleaned_data['email'],
-                password=self.cleaned_data['password'],
-                first_name=self.cleaned_data['first_name'],
-                last_name=self.cleaned_data['last_name']
-            )
-            doctor.user = user
-        
-        if commit:
-            doctor.save()
-        return doctor
-
 class HorarioDoctorForm(forms.ModelForm):
     """Formulario para horarios de doctores"""
     
     class Meta:
         model = HorarioDoctor
-        fields = ['dia_semana', 'hora_inicio', 'hora_fin', 'duracion_cita', 'activo']
+        fields = ['doctor', 'dia_semana', 'hora_inicio', 'hora_fin', 'duracion_cita', 'activo']
         widgets = {
             'hora_inicio': forms.TimeInput(attrs={'type': 'time'}),
             'hora_fin': forms.TimeInput(attrs={'type': 'time'}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtrar solo usuarios con rol de doctor
+        self.fields['doctor'].queryset = User.objects.filter(rol='doctor', estado='activo')
     
     def clean(self):
         cleaned_data = super().clean()
@@ -118,11 +62,11 @@ class CitaForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Filtrar doctores activos
-        self.fields['doctor'].queryset = Doctor.objects.filter(estado='activo')
+        # Filtrar solo usuarios con rol de doctor
+        self.fields['doctor'].queryset = User.objects.filter(rol='doctor', estado='activo')
         
         if self.instance.pk:
-            # Si es edición, calcular duración
+            # Si es una edición, calcular duración
             if self.instance.hora_inicio and self.instance.hora_fin:
                 inicio = datetime.datetime.combine(datetime.date.today(), self.instance.hora_inicio)
                 fin = datetime.datetime.combine(datetime.date.today(), self.instance.hora_fin)
@@ -134,48 +78,29 @@ class CitaForm(forms.ModelForm):
         fecha = cleaned_data.get('fecha')
         hora_inicio = cleaned_data.get('hora_inicio')
         duracion = cleaned_data.get('duracion')
-        doctor = cleaned_data.get('doctor')
         
         if fecha and hora_inicio and duracion:
             # Calcular hora de fin
-            inicio_dt = datetime.datetime.combine(fecha, hora_inicio)
-            fin_dt = inicio_dt + datetime.timedelta(minutes=duracion)
-            hora_fin = fin_dt.time()
+            inicio = datetime.datetime.combine(fecha, hora_inicio)
+            fin = inicio + datetime.timedelta(minutes=duracion)
+            cleaned_data['hora_fin'] = fin.time()
             
             # Verificar que no sea en el pasado
             ahora = timezone.now()
-            if fecha < ahora.date() or (fecha == ahora.date() and hora_inicio < ahora.time()):
-                raise forms.ValidationError("No se pueden programar citas en el pasado")
-            
-            # Verificar conflictos de horario
-            if doctor:
-                conflictos = Cita.objects.filter(
-                    doctor=doctor,
-                    fecha=fecha,
-                    estado__in=['programada', 'confirmada', 'en_proceso']
-                )
-                if self.instance.pk:
-                    conflictos = conflictos.exclude(pk=self.instance.pk)
-                
-                for conflicto in conflictos:
-                    if (hora_inicio < conflicto.hora_fin and hora_fin > conflicto.hora_inicio):
-                        raise forms.ValidationError(
-                            f"Conflicto de horario con cita existente: {conflicto.paciente.nombre_completo} "
-                            f"({conflicto.hora_inicio} - {conflicto.hora_fin})"
-                        )
-            
-            cleaned_data['hora_fin'] = hora_fin
+            fecha_hora_cita = datetime.datetime.combine(fecha, hora_inicio)
+            if fecha_hora_cita < ahora:
+                raise forms.ValidationError("No se pueden crear citas en el pasado")
         
         return cleaned_data
     
     def save(self, commit=True):
         cita = super().save(commit=False)
         
-        # Calcular hora de fin
-        if self.cleaned_data.get('duracion'):
-            inicio_dt = datetime.datetime.combine(cita.fecha, cita.hora_inicio)
-            fin_dt = inicio_dt + datetime.timedelta(minutes=self.cleaned_data['duracion'])
-            cita.hora_fin = fin_dt.time()
+        # Calcular hora de fin basada en la duración
+        if cita.fecha and cita.hora_inicio and self.cleaned_data.get('duracion'):
+            inicio = datetime.datetime.combine(cita.fecha, cita.hora_inicio)
+            fin = inicio + datetime.timedelta(minutes=self.cleaned_data['duracion'])
+            cita.hora_fin = fin.time()
         
         if commit:
             cita.save()
@@ -198,6 +123,11 @@ class DisponibilidadForm(forms.ModelForm):
         widgets = {
             'motivo': forms.Textarea(attrs={'rows': 3}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtrar solo usuarios con rol de doctor
+        self.fields['doctor'].queryset = User.objects.filter(rol='doctor', estado='activo')
     
     def clean(self):
         cleaned_data = super().clean()
@@ -222,7 +152,7 @@ class BusquedaCitaForm(forms.Form):
         label="Fecha hasta"
     )
     doctor = forms.ModelChoiceField(
-        queryset=Doctor.objects.filter(estado='activo'),
+        queryset=User.objects.filter(rol='doctor', estado='activo'),
         required=False,
         empty_label="Todos los doctores"
     )
