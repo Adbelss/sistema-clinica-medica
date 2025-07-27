@@ -1,125 +1,124 @@
-# 🚀 Guía de Despliegue - Sistema de Clínica Médica
+# Guía de Deployment - Sistema Clínico HealthLife
 
-## Despliegue Gratuito en Railway
+## Plataforma: Railway (Gratis)
 
-### 📋 Requisitos Previos
-1. Cuenta en GitHub (gratuita)
-2. Cuenta en Railway (gratuita)
-3. Git instalado en tu computadora
+### 1. Preparación del Proyecto
 
-### 🔧 Pasos para el Despliegue
-
-#### 1. Preparar el Repositorio
+#### Configuración de Git
 ```bash
-# Asegúrate de estar en el directorio del proyecto
-cd sistem
-
-# Inicializar git si no está inicializado
 git init
-
-# Agregar todos los archivos
 git add .
-
-# Hacer commit inicial
-git commit -m "Preparación para despliegue en Railway"
-
-# Crear repositorio en GitHub y conectar
-git remote add origin https://github.com/TU_USUARIO/TU_REPO.git
+git commit -m "Initial commit"
 git branch -M main
+git remote add origin https://github.com/TU_USUARIO/TU_REPO.git
 git push -u origin main
 ```
 
-#### 2. Configurar Railway
+### 2. Configuración en Railway
 
-1. **Ir a Railway.app**
-   - Ve a https://railway.app
-   - Inicia sesión con tu cuenta de GitHub
+#### Crear Proyecto
+1. Ve a [railway.app](https://railway.app)
+2. Inicia sesión con GitHub
+3. Click en "New Project"
+4. Selecciona "Deploy from GitHub repo"
+5. Selecciona tu repositorio
 
-2. **Crear Nuevo Proyecto**
-   - Haz clic en "New Project"
-   - Selecciona "Deploy from GitHub repo"
-   - Conecta tu repositorio de GitHub
+#### Agregar Base de Datos MySQL
+1. En tu proyecto de Railway, click en "New"
+2. Selecciona "Database" → "MySQL"
+3. Railway te dará las credenciales automáticamente
 
-3. **Configurar Variables de Entorno**
-   En Railway, ve a la pestaña "Variables" y agrega:
-   ```
-   DEBUG=False
-   SECRET_KEY=tu_clave_secreta_muy_larga_y_segura
-   DATABASE_URL=postgresql://... (Railway lo genera automáticamente)
-   ```
+#### Configurar Variables de Entorno
+En Railway, ve a tu proyecto → Variables y agrega:
 
-4. **Configurar Base de Datos**
-   - En Railway, ve a "New Service" → "Database" → "PostgreSQL"
-   - Railway generará automáticamente la DATABASE_URL
-
-#### 3. Desplegar
-
-1. **Railway detectará automáticamente que es un proyecto Django**
-2. **El despliegue comenzará automáticamente**
-3. **Espera unos minutos para que termine**
-
-#### 4. Configurar Dominio
-
-1. **En Railway, ve a la pestaña "Settings"**
-2. **En "Domains", Railway te dará una URL como:**
-   `https://tu-proyecto-production.up.railway.app`
-3. **Puedes personalizar el dominio si quieres**
-
-### 🔐 Crear Superusuario
-
-Una vez desplegado, necesitas crear un superusuario:
-
-1. **En Railway, ve a la pestaña "Deployments"**
-2. **Haz clic en el último deployment**
-3. **Ve a "Logs" y ejecuta:**
-   ```bash
-   python manage.py createsuperuser
-   ```
-
-### 📱 Acceder a tu Aplicación
-
-Tu aplicación estará disponible en:
-`https://tu-proyecto-production.up.railway.app`
-
-### 🔄 Actualizaciones Futuras
-
-Para actualizar tu aplicación:
-```bash
-git add .
-git commit -m "Nueva actualización"
-git push origin main
+```
+SECRET_KEY=tu_clave_secreta_muy_larga_y_compleja
+DEBUG=False
+RAILWAY_ENVIRONMENT=True
+DATABASE_URL=mysql://usuario:contraseña@host:puerto/nombre_db
 ```
 
-Railway detectará automáticamente los cambios y desplegará la nueva versión.
+**Nota:** Railway te proporciona la DATABASE_URL automáticamente cuando agregas MySQL.
 
-### 💰 Costos
+### 3. Configuración de la Aplicación
+
+#### Archivos Necesarios
+- `requirements.txt` ✅ (ya configurado)
+- `Procfile` ✅ (ya configurado)
+- `runtime.txt` ✅ (ya configurado)
+- `railway.json` ✅ (ya configurado)
+
+### 4. Deployment
+
+#### Proceso Automático
+1. Railway detectará automáticamente que es un proyecto Django
+2. Instalará las dependencias de `requirements.txt`
+3. Ejecutará los comandos del `Procfile`
+4. Desplegará la aplicación
+
+#### Verificar Deployment
+1. Ve a la pestaña "Deployments" en Railway
+2. Espera a que termine el build
+3. Click en el dominio generado para acceder
+
+### 5. Configuración Post-Deployment
+
+#### Crear Superusuario
+```bash
+# En Railway CLI o terminal local conectado a Railway
+railway login
+railway link
+railway run python manage.py createsuperuser
+```
+
+#### Ejecutar Migraciones
+```bash
+railway run python manage.py migrate
+```
+
+### 6. Configuración de Archivos Estáticos
+
+El proyecto ya está configurado con:
+- WhiteNoise para servir archivos estáticos
+- Configuración automática de collectstatic
+- Middleware optimizado para Railway
+
+### 7. Troubleshooting
+
+#### Problemas Comunes
+1. **Error de módulos**: Verificar `requirements.txt`
+2. **Error de base de datos**: Verificar `DATABASE_URL`
+3. **Archivos estáticos no cargan**: Verificar WhiteNoise
+4. **Error CSRF**: Verificar configuración de cookies
+
+#### Logs
+- Ve a Railway → Deployments → Click en deployment → Logs
+- Revisa los logs para identificar errores
+
+### 8. URLs Importantes
+
+- **Aplicación**: https://tu-app.railway.app
+- **Admin**: https://tu-app.railway.app/admin
+- **Dashboard**: https://tu-app.railway.app/consultas/dashboard/
+
+### 9. Mantenimiento
+
+#### Actualizaciones
+1. Haz cambios en tu código local
+2. `git add . && git commit -m "descripción"`
+3. `git push origin main`
+4. Railway se actualizará automáticamente
+
+#### Backups
+- Railway hace backups automáticos de MySQL
+- También puedes usar el módulo de respaldo del sistema
+
+### 10. Costos
 
 - **Railway**: Gratis hasta 500 horas/mes
-- **Base de datos PostgreSQL**: Incluida en el plan gratuito
-- **Dominio personalizado**: Opcional (puedes usar el dominio de Railway gratis)
+- **MySQL**: Incluido en el plan gratuito
+- **Dominio**: Incluido (.railway.app)
 
-### 🛠️ Solución de Problemas
+---
 
-#### Error de migraciones:
-Si hay errores de migración, en Railway ejecuta:
-```bash
-python manage.py migrate --run-syncdb
-```
-
-#### Error de archivos estáticos:
-Si los archivos estáticos no se cargan:
-```bash
-python manage.py collectstatic --noinput
-```
-
-#### Error de base de datos:
-Verifica que la DATABASE_URL esté correctamente configurada en las variables de entorno.
-
-### 📞 Soporte
-
-Si tienes problemas:
-1. Revisa los logs en Railway
-2. Verifica que todas las variables de entorno estén configuradas
-3. Asegúrate de que el repositorio esté sincronizado con GitHub
-
-¡Tu sistema de clínica médica estará funcionando en la web de forma gratuita! 🎉 
+**Nota**: Esta configuración está optimizada para Railway y MySQL, proporcionando una solución robusta y gratuita para tu sistema clínico. 
